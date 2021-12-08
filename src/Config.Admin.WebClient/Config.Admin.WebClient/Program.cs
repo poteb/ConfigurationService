@@ -1,8 +1,8 @@
 global using MudBlazor.Services;
-using Config.Admin.WebClient;
-using Config.Admin.WebClient.Services;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using pote.Config.Admin.WebClient;
+using pote.Config.Admin.WebClient.Services;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");

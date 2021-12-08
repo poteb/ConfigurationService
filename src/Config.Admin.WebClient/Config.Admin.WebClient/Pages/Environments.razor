@@ -1,4 +1,32 @@
 ﻿@page "/environments"
 
-<h3>Environments</h3>
-
+<MudTable Items="@List" CanCancelEdit="true" @bind-SelectedItem="selectedItem" Style="Width:400px">
+    <ToolBarContent>
+        <MudGrid>
+            <MudItem xs="6">
+                <MudText Typo="Typo.h6" Style="line-height: 48px">Environments</MudText>
+            </MudItem>
+            <MudItem xs="6">
+                <MudGrid Justify="Justify.FlexEnd" Style="text-align:right">
+                    <MudItem xs="12">
+                        <MudIconButton Icon="@Icons.Filled.Save" OnClick="Save">Save</MudIconButton>
+                    </MudItem>
+                </MudGrid>
+            </MudItem>
+        </MudGrid>
+    </ToolBarContent>
+    <ColGroup>
+        <col style="width:400px;" />
+    </ColGroup>
+    <HeaderContent>
+        <MudTh>Name</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Name">@context.Name</MudTd>
+    </RowTemplate>
+    <RowEditingTemplate>
+        <MudTd DataLabel="Name">
+            <MudTextField @bind-Value="@context.Name"></MudTextField>
+        </MudTd>
+    </RowEditingTemplate>
+</MudTable>

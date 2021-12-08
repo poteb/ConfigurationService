@@ -1,4 +1,4 @@
-﻿namespace Config.Admin.WebClient.Model;
+﻿namespace pote.Config.Admin.WebClient.Model;
 
 public class Environment
 {
