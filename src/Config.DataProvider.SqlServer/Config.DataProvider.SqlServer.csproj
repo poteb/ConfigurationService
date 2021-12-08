@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<RootNamespace>pote.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+		<AssemblyName>pote.$(MSBuildProjectName)</AssemblyName>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>warnings</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="dapper" Version="2.0.123" />
+	  <PackageReference Include="Dapper.Contrib" Version="2.0.78" />
+	  <PackageReference Include="microsoft.data.sqlclient" Version="4.0.0" />
+	  <PackageReference Include="newtonsoft.json" Version="13.0.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Config.Shared\Config.Shared.csproj" />
+	</ItemGroup>
+
+</Project>

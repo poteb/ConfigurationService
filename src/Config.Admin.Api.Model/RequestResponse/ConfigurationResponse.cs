@@ -1,0 +1,7 @@
+﻿namespace pote.Config.Admin.Api.Model.RequestResponse;
+
+public class ConfigurationResponse
+{
+    public Configuration Configuration { get; set; } = new();
+    public List<Configuration> History { get; set; } = new();
+}

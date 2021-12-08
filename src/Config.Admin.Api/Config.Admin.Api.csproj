@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>pote.$(MSBuildProjectName)</AssemblyName>
+    <RootNamespace>pote.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="newtonsoft.json" Version="13.0.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Config.Admin.Api.Model\Config.Admin.Api.Model.csproj" />
+    <ProjectReference Include="..\Config.DataProvider.File\Config.DataProvider.File.csproj" />
+    <ProjectReference Include="..\Config.DataProvider.SqlServer\Config.DataProvider.SqlServer.csproj" />
+    <ProjectReference Include="..\Config.Shared\Config.Shared.csproj" />
+  </ItemGroup>
+
+</Project>

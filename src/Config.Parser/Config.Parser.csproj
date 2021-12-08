@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<RootNamespace>pote.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+		<AssemblyName>pote.$(MSBuildProjectName)</AssemblyName>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>warnings</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="newtonsoft.json" Version="13.0.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Config.Shared\Config.Shared.csproj" />
+	</ItemGroup>
+
+
+</Project>
