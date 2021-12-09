@@ -15,8 +15,9 @@ public interface IAdminDataProvider
 
     Task<List<DbModel.Environment>> GetEnvironments(CancellationToken cancellationToken);
     Task UpsertEnvironment(DbModel.Environment environment, CancellationToken cancellationToken);
+    Task DeleteEnvironment(string id, CancellationToken cancellationToken);
 
     Task<List<DbModel.System>> GetSystems(CancellationToken cancellationToken);
     Task UpsertSystem(DbModel.System system, CancellationToken cancellationToken);
-
+    Task DeleteSystem(string id, CancellationToken cancellationToken);
 }

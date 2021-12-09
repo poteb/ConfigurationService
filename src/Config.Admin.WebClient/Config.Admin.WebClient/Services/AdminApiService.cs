@@ -1,6 +1,5 @@
 ﻿using System.Net.Http.Json;
 using pote.Config.Admin.Api.Model.RequestResponse;
-using Environment = pote.Config.Admin.Api.Model.Environment;
 
 namespace pote.Config.Admin.WebClient.Services
 {
@@ -8,7 +7,8 @@ namespace pote.Config.Admin.WebClient.Services
     {
         Task<EnvironmentsResponse> GetEnvironments();
         Task<SystemsResponse> GetSystems();
-        Task SaveEnvironments(List<Environment> toApi);
+        Task SaveEnvironments(List<Api.Model.Environment> toApi, List<string> deleted);
+        Task SaveSystems(List<Api.Model.System> toApi, List<string> deleted);
     }
 
     public class AdminApiService : IAdminApiService
@@ -42,11 +42,29 @@ namespace pote.Config.Admin.WebClient.Services
             return new SystemsResponse();
         }
 
-        public async Task SaveEnvironments(List<Environment> environments)
+        public async Task SaveEnvironments(List<Api.Model.Environment> environments, List<string> deleted)
         {
             foreach (var environment in environments)
             {
                 await _client.PostAsJsonAsync("Environments", environment);
+            }
+
+            foreach (var id in deleted)
+            {
+                await _client.DeleteAsync($"Environments?id={id}");
+            }
+        }
+
+        public async Task SaveSystems(List<Api.Model.System> systems, List<string> deleted)
+        {
+            foreach (var system in systems)
+            {
+                await _client.PostAsJsonAsync("Systems", system);
+            }
+
+            foreach (var id in deleted)
+            {
+                await _client.DeleteAsync($"Systems?id={id}");
             }
         }
     }

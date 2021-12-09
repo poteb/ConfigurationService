@@ -56,12 +56,22 @@ public class AdminDataProvider : IAdminDataProvider
         throw new NotImplementedException();
     }
 
+    public Task DeleteEnvironment(string id, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
     public Task<List<DbModel.System>> GetSystems(CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 
     public Task UpsertSystem(DbModel.System system, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task DeleteSystem(string id, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }

@@ -48,4 +48,18 @@ public class EnvironmentsController : ControllerBase
             return Problem(ex.Message);
         }
     }
+
+    [HttpDelete]
+    public async Task<ActionResult> Delete(string id, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await _dataProvider.DeleteEnvironment(id, cancellationToken);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return Problem(ex.Message);
+        }
+    }
 }

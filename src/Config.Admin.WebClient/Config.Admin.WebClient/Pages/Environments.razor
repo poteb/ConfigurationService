@@ -1,6 +1,6 @@
 ﻿@page "/environments"
 
-<MudTable Items="@List" CanCancelEdit="true" @bind-SelectedItem="selectedItem" Style="Width:400px">
+<MudTable Items="@List" Dense="true" CanCancelEdit="true" Style="Width:400px">
     <ToolBarContent>
         <MudGrid>
             <MudItem xs="6">
@@ -9,7 +9,7 @@
             <MudItem xs="6">
                 <MudGrid Justify="Justify.FlexEnd" Style="text-align:right">
                     <MudItem xs="12">
-                        <MudIconButton Icon="@Icons.Filled.Save" OnClick="Save">Save</MudIconButton>
+                        <MudIconButton Icon="@Icons.Filled.Save" Color="Color.Info" OnClick="Save" Title="Save changes">Save</MudIconButton>
                     </MudItem>
                 </MudGrid>
             </MudItem>
@@ -17,16 +17,20 @@
     </ToolBarContent>
     <ColGroup>
         <col style="width:400px;" />
+        <col style="width:30px;" />
     </ColGroup>
-    <HeaderContent>
-        <MudTh>Name</MudTh>
-    </HeaderContent>
     <RowTemplate>
         <MudTd DataLabel="Name">@context.Name</MudTd>
+        <MudTd DataLabel="Delete" Style="padding-right: 0"><MudIconButton Icon="@Icons.Filled.Delete" Title="Delete item" OnClick="() => RemoveItem(context.Id)"></MudIconButton></MudTd>
     </RowTemplate>
     <RowEditingTemplate>
         <MudTd DataLabel="Name">
             <MudTextField @bind-Value="@context.Name"></MudTextField>
         </MudTd>
     </RowEditingTemplate>
+    <FooterContent>
+        <MudIconButton Icon="@Icons.Filled.Add" Title="Add item" OnClick="AddItem" Color="Color.Success"></MudIconButton>
+    </FooterContent>
 </MudTable>
+
+

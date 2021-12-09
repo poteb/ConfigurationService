@@ -110,6 +110,14 @@ public class AdminDataProvider : IAdminDataProvider
         await System.IO.File.WriteAllTextAsync(file, JsonConvert.SerializeObject(environment), cancellationToken);
     }
 
+    public Task DeleteEnvironment(string id, CancellationToken cancellationToken)
+    {
+        var file = Path.ChangeExtension(Path.Combine(_environmentsDir, id), ".txt");
+        if (!System.IO.File.Exists(file)) return Task.CompletedTask;
+        System.IO.File.Delete(file);
+        return Task.CompletedTask;
+    }
+
     public async Task<List<DbModel.System>> GetSystems(CancellationToken cancellationToken)
     {
         var files = Directory.GetFiles(_systemsDir);
@@ -132,5 +140,13 @@ public class AdminDataProvider : IAdminDataProvider
     {
         var file = Path.ChangeExtension(Path.Combine(_systemsDir, system.Id), ".txt");
         await System.IO.File.WriteAllTextAsync(file, JsonConvert.SerializeObject(system), cancellationToken);
+    }
+
+    public Task DeleteSystem(string id, CancellationToken cancellationToken)
+    {
+        var file = Path.ChangeExtension(Path.Combine(_systemsDir, id), ".txt");
+        if (!System.IO.File.Exists(file)) return Task.CompletedTask;
+        System.IO.File.Delete(file);
+        return Task.CompletedTask;
     }
 }
