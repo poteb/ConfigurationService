@@ -1,7 +1,7 @@
 ﻿namespace pote.Config.Admin.WebClient.Model;
 
-public class System
+public class ConfigEnvironment
 {
-    public string  Id { get; set; } = Guid.NewGuid().ToString();
+    public string Id { get; set; } = Guid.NewGuid().ToString();
     public string Name { get; set; } = string.Empty;
 }

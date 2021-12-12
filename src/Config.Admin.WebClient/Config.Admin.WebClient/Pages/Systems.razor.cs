@@ -6,7 +6,7 @@ namespace pote.Config.Admin.WebClient.Pages;
 public partial class Systems
 {
     private readonly List<string> _deletedList = new();
-    public List<Model.System> List { get; set; } = new();
+    public List<Model.ConfigSystem> List { get; set; } = new();
     [Inject] public IAdminApiService AdminApiService { get; set; }
 
     protected override async Task OnInitializedAsync()
@@ -22,7 +22,7 @@ public partial class Systems
 
     private void AddItem()
     {
-        List.Add(new Model.System { Name = "[new item]" });
+        List.Add(new Model.ConfigSystem { Name = "[new item]" });
     }
 
     private void RemoveItem(string id)

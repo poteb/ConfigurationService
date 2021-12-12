@@ -1,11 +1,12 @@
 ﻿using System.Net.Http.Json;
 using pote.Config.Admin.Api.Model.RequestResponse;
+using pote.Config.Admin.WebClient.Model;
 
 namespace pote.Config.Admin.WebClient.Services
 {
     public interface IAdminApiService
     {
-        Task<EnvironmentsResponse> GetEnvironments();
+        Task<ApiCallResponse<EnvironmentsResponse>> GetEnvironments();
         Task<SystemsResponse> GetSystems();
         Task SaveEnvironments(List<Api.Model.Environment> toApi, List<string> deleted);
         Task SaveSystems(List<Api.Model.System> toApi, List<string> deleted);
@@ -20,15 +21,36 @@ namespace pote.Config.Admin.WebClient.Services
             _client = client;
         }
 
-        public async Task<EnvironmentsResponse> GetEnvironments()
+        public async Task<ApiCallResponse<EnvironmentsResponse>> GetEnvironments()
         {
-            var response = await _client.GetAsync("Environments");
-            if (response.IsSuccessStatusCode)
+            try
             {
-                return await response.Content.ReadFromJsonAsync<EnvironmentsResponse>() ?? new EnvironmentsResponse();
-            }
+                var response = await _client.GetAsync("Environments");
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadFromJsonAsync<EnvironmentsResponse>() ?? new EnvironmentsResponse();
+                    return new ApiCallResponse<EnvironmentsResponse>
+                    {
+                        IsSuccess = true,
+                        Response = content
+                    };
+                }
 
-            return new EnvironmentsResponse();
+                return new ApiCallResponse<EnvironmentsResponse>
+                {
+                    Response = new EnvironmentsResponse(),
+                    ErrorMessage = $"Call was unsuccessfull, error code: {response.StatusCode}"
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ApiCallResponse<EnvironmentsResponse>
+                {
+                    Response = new EnvironmentsResponse(),
+                    ErrorMessage = "Error getting data from API",
+                    Exception = ex
+                };
+            }
         }
 
         public async Task<SystemsResponse> GetSystems()

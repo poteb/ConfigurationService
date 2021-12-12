@@ -1,6 +1,8 @@
-﻿@inherits LayoutComponentBase
+﻿@using pote.Config.Admin.WebClient.Model
 
-<MudThemeProvider/>
+@inherits LayoutComponentBase
+
+<MudThemeProvider />
 
 <MudLayout>
     <MudAppBar Elevation="1">
@@ -15,12 +17,35 @@
         <NavMenu />
     </MudDrawer>
     <MudMainContent>
-        @Body
+        <CascadingValue Value="@OnError">
+            @if (!_pageError.IsError)
+            {
+                @Body
+            }
+            else
+            {
+                <MudText>@_pageError.ErrorMessage</MudText>
+            }
+        </CascadingValue>
     </MudMainContent>
 </MudLayout>
 
 @code {
     bool _drawerOpen = true;
+
+    private readonly PageError _pageError = new();
+
+    protected override void OnParametersSet()
+    {
+        _pageError.IsError = false;
+    }
+
+    void OnError(string errorMessage, Exception ex)
+    {
+        _pageError.IsError = true;
+        _pageError.ErrorMessage = errorMessage;
+        this.StateHasChanged(); 
+    }
 
     void DrawerToggle()
     {
