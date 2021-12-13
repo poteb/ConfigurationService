@@ -7,9 +7,9 @@ namespace pote.Config.Admin.WebClient.Services
     public interface IAdminApiService
     {
         Task<ApiCallResponse<EnvironmentsResponse>> GetEnvironments();
-        Task<SystemsResponse> GetSystems();
-        Task SaveEnvironments(List<Api.Model.Environment> toApi, List<string> deleted);
-        Task SaveSystems(List<Api.Model.System> toApi, List<string> deleted);
+        Task<ApiCallResponse<SystemsResponse>> GetSystems();
+        Task<ApiCallResponse<object>> SaveEnvironments(List<ConfigEnvironment> environments);
+        Task<ApiCallResponse<object>> SaveSystems(List<ConfigSystem> systems);
     }
 
     public class AdminApiService : IAdminApiService
@@ -29,65 +29,84 @@ namespace pote.Config.Admin.WebClient.Services
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadFromJsonAsync<EnvironmentsResponse>() ?? new EnvironmentsResponse();
-                    return new ApiCallResponse<EnvironmentsResponse>
-                    {
-                        IsSuccess = true,
-                        Response = content
-                    };
+                    return new ApiCallResponse<EnvironmentsResponse> { IsSuccess = true, Response = content };
                 }
 
-                return new ApiCallResponse<EnvironmentsResponse>
-                {
-                    Response = new EnvironmentsResponse(),
-                    ErrorMessage = $"Call was unsuccessfull, error code: {response.StatusCode}"
-                };
+                return DefaultUnsuccessfullResponse(new EnvironmentsResponse(), $"Call was unsuccessfull, error code: {response.StatusCode}");
             }
             catch (Exception ex)
             {
-                return new ApiCallResponse<EnvironmentsResponse>
+                return DefaultExceptionResponse(new EnvironmentsResponse(), "Error getting data from API", ex);
+            }
+        }
+
+        public async Task<ApiCallResponse<SystemsResponse>> GetSystems()
+        {
+            try
+            {
+                var response = await _client.GetAsync("Systems");
+                if (response.IsSuccessStatusCode)
                 {
-                    Response = new EnvironmentsResponse(),
-                    ErrorMessage = "Error getting data from API",
-                    Exception = ex
-                };
+                    var content = await response.Content.ReadFromJsonAsync<SystemsResponse>() ?? new SystemsResponse();
+                    return new ApiCallResponse<SystemsResponse> { IsSuccess = true, Response = content };
+                }
+
+                return DefaultUnsuccessfullResponse(new SystemsResponse(), $"Call was unsuccessfull, error code: {response.StatusCode}");
+            }
+            catch (Exception ex)
+            {
+                return DefaultExceptionResponse(new SystemsResponse(), "Error getting data from API", ex);
             }
         }
 
-        public async Task<SystemsResponse> GetSystems()
+        public async Task<ApiCallResponse<object>> SaveEnvironments(List<ConfigEnvironment> environments)
         {
-            var response = await _client.GetAsync("Systems");
-            if (response.IsSuccessStatusCode)
+            try
             {
-                return await response.Content.ReadFromJsonAsync<SystemsResponse>() ?? new SystemsResponse();
+                foreach (var environment in environments)
+                {
+                    if (!environment.IsDeleted)
+                        await _client.PostAsJsonAsync("Environments", Mappers.EnvironmentMapper.ToApi(environment));
+                    else
+                        await _client.DeleteAsync($"Environments?id={environment.Id}");
+                }
+
+                return new ApiCallResponse<dynamic> { IsSuccess = true };
             }
-
-            return new SystemsResponse();
-        }
-
-        public async Task SaveEnvironments(List<Api.Model.Environment> environments, List<string> deleted)
-        {
-            foreach (var environment in environments)
+            catch (Exception ex)
             {
-                await _client.PostAsJsonAsync("Environments", environment);
-            }
-
-            foreach (var id in deleted)
-            {
-                await _client.DeleteAsync($"Environments?id={id}");
+                return DefaultExceptionResponse(new object(), "Error saving environments", ex);
             }
         }
 
-        public async Task SaveSystems(List<Api.Model.System> systems, List<string> deleted)
+        public async Task<ApiCallResponse<object>> SaveSystems(List<ConfigSystem> systems)
         {
-            foreach (var system in systems)
+            try
             {
-                await _client.PostAsJsonAsync("Systems", system);
-            }
+                foreach (var system in systems)
+                {
+                    if (!system.IsDeleted)
+                        await _client.PostAsJsonAsync("Systems", Mappers.SystemMapper.ToApi(system));
+                    else
+                        await _client.DeleteAsync($"Systems?id={system.Id}");
+                }
 
-            foreach (var id in deleted)
-            {
-                await _client.DeleteAsync($"Systems?id={id}");
+                return new ApiCallResponse<dynamic> { IsSuccess = true };
             }
+            catch (Exception ex)
+            {
+                return DefaultExceptionResponse(new object(), "Error saving environments", ex);
+            }
+        }
+
+        private static ApiCallResponse<T> DefaultExceptionResponse<T>(T response, string errorMessage, Exception ex)
+        {
+            return new ApiCallResponse<T> { Response = response, ErrorMessage = errorMessage, Exception = ex };
+        }
+
+        private static ApiCallResponse<T> DefaultUnsuccessfullResponse<T>(T response, string errorMessage)
+        {
+            return new ApiCallResponse<T> { Response = response, ErrorMessage = errorMessage };
         }
     }
 }

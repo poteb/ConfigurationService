@@ -17,15 +17,14 @@
         <NavMenu />
     </MudDrawer>
     <MudMainContent>
-        <CascadingValue Value="@OnError">
-            @if (!_pageError.IsError)
+        <CascadingValue Value="@PageError">
+            @if (PageError.IsError)
             {
-                @Body
+                <MudItem Class="ErrorBox">
+                    <MudText>@PageError.ErrorMessage</MudText>
+                </MudItem>
             }
-            else
-            {
-                <MudText>@_pageError.ErrorMessage</MudText>
-            }
+            @Body
         </CascadingValue>
     </MudMainContent>
 </MudLayout>
@@ -33,18 +32,17 @@
 @code {
     bool _drawerOpen = true;
 
-    private readonly PageError _pageError = new();
+    public readonly PageError PageError = new();
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        PageError.SetStateHasChangedCallback(this.StateHasChanged);
+    }
 
     protected override void OnParametersSet()
     {
-        _pageError.IsError = false;
-    }
-
-    void OnError(string errorMessage, Exception ex)
-    {
-        _pageError.IsError = true;
-        _pageError.ErrorMessage = errorMessage;
-        this.StateHasChanged(); 
+        PageError.IsError = false;
     }
 
     void DrawerToggle()
