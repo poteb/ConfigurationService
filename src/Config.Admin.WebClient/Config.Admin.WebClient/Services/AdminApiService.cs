@@ -6,10 +6,13 @@ namespace pote.Config.Admin.WebClient.Services
 {
     public interface IAdminApiService
     {
+        Task<ApiCallResponse<ConfigurationResponse>> GetConfiguration(string gid);
+        Task<ApiCallResponse<ConfigurationsResponse>> GetConfigurations();
         Task<ApiCallResponse<EnvironmentsResponse>> GetEnvironments();
         Task<ApiCallResponse<SystemsResponse>> GetSystems();
         Task<ApiCallResponse<object>> SaveEnvironments(List<ConfigEnvironment> environments);
         Task<ApiCallResponse<object>> SaveSystems(List<ConfigSystem> systems);
+        Task<ApiCallResponse<object>> SaveConfiguration(Configuration configuration);
     }
 
     public class AdminApiService : IAdminApiService
@@ -19,6 +22,44 @@ namespace pote.Config.Admin.WebClient.Services
         public AdminApiService(HttpClient client)
         {
             _client = client;
+        }
+
+        public async Task<ApiCallResponse<ConfigurationResponse>> GetConfiguration(string gid)
+        {
+            try
+            {
+                var response = await _client.GetAsync($"Configurations/{gid}");
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadFromJsonAsync<ConfigurationResponse>() ?? new ConfigurationResponse();
+                    return new ApiCallResponse<ConfigurationResponse> { IsSuccess = true, Response = content };
+                }
+
+                return DefaultUnsuccessfullResponse(new ConfigurationResponse(), $"Call was unsuccessfull, error code: {response.StatusCode}");
+            }
+            catch (Exception ex)
+            {
+                return DefaultExceptionResponse(new ConfigurationResponse(), "Error getting data from API", ex);
+            }
+        }
+
+        public async Task<ApiCallResponse<ConfigurationsResponse>> GetConfigurations()
+        {
+            try
+            {
+                var response = await _client.GetAsync("Configurations");
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadFromJsonAsync<ConfigurationsResponse>() ?? new ConfigurationsResponse();
+                    return new ApiCallResponse<ConfigurationsResponse> { IsSuccess = true, Response = content };
+                }
+                
+                return DefaultUnsuccessfullResponse(new ConfigurationsResponse(), $"Call was unsuccessfull, error code: {response.StatusCode}");
+            }
+            catch (Exception ex)
+            {
+                return DefaultExceptionResponse(new ConfigurationsResponse(), "Error getting data from API", ex);
+            }
         }
 
         public async Task<ApiCallResponse<EnvironmentsResponse>> GetEnvironments()
@@ -71,7 +112,7 @@ namespace pote.Config.Admin.WebClient.Services
                         await _client.DeleteAsync($"Environments?id={environment.Id}");
                 }
 
-                return new ApiCallResponse<dynamic> { IsSuccess = true };
+                return new ApiCallResponse<object> { IsSuccess = true };
             }
             catch (Exception ex)
             {
@@ -91,11 +132,25 @@ namespace pote.Config.Admin.WebClient.Services
                         await _client.DeleteAsync($"Systems?id={system.Id}");
                 }
 
-                return new ApiCallResponse<dynamic> { IsSuccess = true };
+                return new ApiCallResponse<object> { IsSuccess = true };
             }
             catch (Exception ex)
             {
                 return DefaultExceptionResponse(new object(), "Error saving environments", ex);
+            }
+        }
+
+        public async Task<ApiCallResponse<object>> SaveConfiguration(Configuration configuration)
+        {
+            try
+            {
+                var apiConfiguration = Mappers.ConfigurationMapper.ToApi(configuration);
+                await _client.PostAsJsonAsync("Configurations", apiConfiguration);
+                return new ApiCallResponse<object> { IsSuccess = true };
+            }
+            catch (Exception ex)
+            {
+                return DefaultExceptionResponse(new object(), "Error saving configuration", ex);
             }
         }
 

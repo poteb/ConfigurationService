@@ -5,18 +5,18 @@
 <MudThemeProvider />
 
 <MudLayout>
-    <MudAppBar Elevation="1">
+    @*<MudAppBar Elevation="1">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
         <MudSpacer />
         <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" />
-    </MudAppBar>
-    <MudDrawer @bind-Open="_drawerOpen" Elevation="2">
+        </MudAppBar>*@
+    <MudDrawer Open="true" Elevation="2">
         <MudDrawerHeader>
             <MudText Typo="Typo.h5" Class="mt-1">Configurations</MudText>
         </MudDrawerHeader>
-        <NavMenu />
+        <NavMenu/>
     </MudDrawer>
-    <MudMainContent>
+    <MudMainContent Style="padding-top: 0">
         <CascadingValue Value="@PageError">
             @if (PageError.IsError)
             {
@@ -30,7 +30,7 @@
 </MudLayout>
 
 @code {
-    bool _drawerOpen = true;
+    //bool _drawerOpen = true;
 
     public readonly PageError PageError = new();
 
@@ -45,8 +45,8 @@
         PageError.IsError = false;
     }
 
-    void DrawerToggle()
-    {
-        _drawerOpen = !_drawerOpen;
-    }
+    //void DrawerToggle()
+    //{
+    //    _drawerOpen = !_drawerOpen;
+    //}
 }

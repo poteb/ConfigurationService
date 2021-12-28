@@ -1,3 +1,31 @@
 ﻿@page "/"
+@using pote.Config.Admin.WebClient.Model
 
-asdf
+<MudTable Items="@List" Dense="true" FixedHeader="true" Striped="true">
+    <ToolBarContent>
+        <MudGrid>
+            <MudItem xs="6">
+                <MudText Typo="Typo.h6" Style="line-height: 48px">Configurations</MudText>
+            </MudItem>
+            <MudItem xs="6">
+                <MudGrid Justify="Justify.FlexEnd" Style="text-align: right">
+                    <MudItem xs="12">
+                        <MudIconButton Icon="@Icons.Filled.Add" Color="Color.Info" OnClick="AddNewConfiguration" Title="New Configuration">Save</MudIconButton>
+                        <MudIconButton Icon="@Icons.Filled.Refresh" Color="Color.Info" OnClick="Load" Title="Load from server, will undo changes">Save</MudIconButton>
+                    </MudItem>
+                </MudGrid>
+            </MudItem>
+        </MudGrid>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<Configuration, object>(x=>x.Name)">Name</MudTableSortLabel></MudTh>
+        <MudTh>Systems</MudTh>
+        <MudTh>Environments</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd>@context.Name</MudTd>
+        <MudTd Style="font-size: 7pt">@string.Join(", ", context.Systems.Select(s => s.Name))</MudTd>
+        <MudTd Style="font-size: 7pt">@string.Join(", ", context.Environments.Select(s => s.Name))</MudTd>
+        <MudTd><MudButton OnClick="() => EditConfiguration(context.Gid)">Edit</MudButton></MudTd>
+    </RowTemplate>
+</MudTable>

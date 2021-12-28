@@ -1,8 +1,6 @@
 ﻿@page "/systems"
 @using pote.Config.Admin.WebClient.Model
 
-<ErrorBoundary>
-    <ChildContent>
         <MudTable Items="@List" Dense="true" CanCancelEdit="true" Style="Width: 400px" Elevation="0">
             <ToolBarContent>
                 <MudGrid>
@@ -58,8 +56,3 @@
 
             </FooterContent>
         </MudTable>
-    </ChildContent>
-    <ErrorContent>
-        An error occurred
-    </ErrorContent>
-</ErrorBoundary>

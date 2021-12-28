@@ -38,12 +38,11 @@ public class AdminDataProvider : IAdminDataProvider
         return (config, configs);
     }
 
-    public async Task<Configuration> Insert(Configuration configuration, CancellationToken cancellationToken)
+    public async Task Insert(Configuration configuration, CancellationToken cancellationToken)
     {
         await using var conn = new SqlConnection(_connectionString);
         await conn.OpenAsync(cancellationToken);
         await conn.InsertAsync(configuration);
-        return configuration;
     }
 
     public Task<List<Environment>> GetEnvironments(CancellationToken cancellationToken)

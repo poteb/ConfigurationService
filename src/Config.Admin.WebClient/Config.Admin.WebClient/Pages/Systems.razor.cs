@@ -18,6 +18,7 @@ public partial class Systems
 
     private async Task Load()
     {
+        PageError.Reset();
         var callResponse = await AdminApiService.GetSystems();
         if (callResponse.IsSuccess && callResponse.Response != null)
             List = Mappers.SystemMapper.ToClient(callResponse.Response.Systems);

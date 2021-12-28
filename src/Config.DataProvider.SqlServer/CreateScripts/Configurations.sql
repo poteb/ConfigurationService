@@ -5,7 +5,8 @@
 	[Json] [nvarchar](max) NOT NULL,
 	[CreatedUtc] [datetime2](7) NOT NULL,
 	[IsActive] [bit] NOT NULL,
-	[Integrations] [nvarchar](1000) NOT NULL,
+	[Systems] [nvarchar](1000) NOT NULL,
+	[Environments] [nvarchar](1000) NOT NULL,
 	[Deleted] [bit] NOT NULL,
  CONSTRAINT [PK_Configurations] PRIMARY KEY CLUSTERED 
 (

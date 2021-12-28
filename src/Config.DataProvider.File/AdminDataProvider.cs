@@ -38,7 +38,7 @@ public class AdminDataProvider : IAdminDataProvider
             try
             {
                 var config = JsonConvert.DeserializeObject<Configuration>(await System.IO.File.ReadAllTextAsync(file, cancellationToken));
-                if (config == null) continue;
+                if (config == null || config.Deleted) continue;
                 result.Add(config);
             }
             catch (Exception) { /* ignore */ }
@@ -71,7 +71,7 @@ public class AdminDataProvider : IAdminDataProvider
         return (configuration, historyResult);
     }
 
-    public async Task<Configuration> Insert(Configuration configuration, CancellationToken cancellationToken)
+    public async Task Insert(Configuration configuration, CancellationToken cancellationToken)
     {
         var file = Path.ChangeExtension(Path.Combine(_configurationsDir, configuration.Gid), ".txt");
         if (System.IO.File.Exists(file))
@@ -83,7 +83,6 @@ public class AdminDataProvider : IAdminDataProvider
             System.IO.File.Move(file, historyFile);
         }
         await System.IO.File.WriteAllTextAsync(file, JsonConvert.SerializeObject(configuration), cancellationToken);
-        return configuration;
     }
 
     public async Task<List<DbModel.Environment>> GetEnvironments(CancellationToken cancellationToken)

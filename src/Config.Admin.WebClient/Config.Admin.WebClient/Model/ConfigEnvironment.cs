@@ -6,4 +6,5 @@ public class ConfigEnvironment
     public string Name { get; set; } = string.Empty;
 
     public bool IsDeleted { get; set; }
+    public bool IsSelected { get; set; }
 }

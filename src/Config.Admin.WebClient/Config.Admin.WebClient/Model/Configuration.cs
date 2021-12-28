@@ -7,6 +7,9 @@ public class Configuration
     public string Json { get; set; } = string.Empty;
     public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
     public bool IsActive { get; set; } = true;
-    public string Integrations { get; set; } = string.Empty;
     public bool Deleted { get; set; }
+
+    public List<ConfigEnvironment> Environments { get; set; } = new();
+    public List<ConfigSystem> Systems { get; set; } = new();
+    public List<Configuration> History { get; set; } = new();
 }

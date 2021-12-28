@@ -19,6 +19,7 @@ public partial class Environments
 
     private async Task Load()
     {
+        PageError.Reset();
         var callResponse = await AdminApiService.GetEnvironments();
         if (callResponse.IsSuccess && callResponse.Response != null)
             List = Mappers.EnvironmentMapper.ToClient(callResponse.Response.Environments);

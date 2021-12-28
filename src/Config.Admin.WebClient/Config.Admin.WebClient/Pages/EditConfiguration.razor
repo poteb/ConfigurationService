@@ -1,0 +1,105 @@
+﻿@page "/EditConfiguration"
+@page "/EditConfiguration/{Gid}"
+@using pote.Config.Admin.WebClient.Model
+
+@*<MudMessageBox @ref="deleteMessageBox" Title="Delete configuration" CancelText="Cancel">
+    <MessageContent>
+        Are you sure you want to <b>delete</b> the configuration?
+    </MessageContent>
+    <YesButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.DeleteForever">Delete</MudButton>
+    </YesButton>
+</MudMessageBox>*@
+@*<MudMessageBox @ref="deleteMessageBox" Title="Warning" CancelText="Cancel">
+    <MessageContent>
+        Deleting can <b><i>not</i></b> be undone!
+    </MessageContent>
+    <YesButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.DeleteForever">Delete!</MudButton>
+    </YesButton>
+</MudMessageBox>
+
+<MudPopover Open="@_isOpen" Fixed="true" Class="px-4 pt-4">
+    <div class="d-flex flex-column">
+        <MudText>Content of the popover can be anything.</MudText>
+        <MudButton OnClick="@ToggleOpen" Class="ml-auto mr-n3 mb-1" Color="Color.Error">Close</MudButton>
+    </div>
+</MudPopover>
+<MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="OnButtonClicked" >Delete</MudButton>
+<MudButton OnClick="@ToggleOpen" Class="ml-auto mr-n3 mb-1" Color="Color.Error">Close</MudButton>
+<MudIconButton Style="margin-left: 100px" Icon="@Icons.Filled.Delete" Color="Color.Error" OnClick="Delete" Title="Delete"></MudIconButton>*@
+
+<MudGrid Style="padding: 0; margin: 0; width: 99%" Spacing="2">
+    <MudItem xs="6">
+        <MudTooltip Text="Save">
+            <MudIconButton Icon="@Icons.Filled.Save" Color="Color.Info" OnClick="Save" Title="Save changes"></MudIconButton>
+        </MudTooltip>
+        <MudTooltip Text="Duplicate">
+            <MudIconButton Style="margin-left: 100px" Icon="@Icons.Filled.FileCopy" Color="Color.Warning" OnClick="Duplicate" Title="Duplicate"></MudIconButton>
+        </MudTooltip>
+        <MudTooltip Text="Delete">
+            <MudIconButton Style="margin-left: 100px" Icon="@Icons.Filled.Delete" Color="Color.Error" OnClick="Delete" Title="Delete"></MudIconButton>
+        </MudTooltip>
+    </MudItem>
+</MudGrid>
+
+<MudGrid Style="padding: 0;margin: 0;width: 99%" Spacing="2">
+    <MudItem xs="4">
+        <MudGrid Style="padding: 0; margin: 0" Spacing="2">
+            <MudItem xs="12">
+                <MudText Style="font-size: 8pt">ID: @Configuration.Gid</MudText>
+            </MudItem>
+            <MudItem xs="12">
+                <MudText Style="font-size: 8pt">Created: @Configuration.CreatedUtc</MudText>
+            </MudItem>
+            <MudItem xs="12">
+                <MudTextField Label="Name" @bind-Value="@Configuration.Name"></MudTextField>
+            </MudItem>
+            <MudItem xs="12">
+                <MudCheckBox Label="Active" @bind-checked="Configuration.IsActive" T="bool"></MudCheckBox>
+            </MudItem>
+        </MudGrid>
+    </MudItem>
+    <MudItem xs="4">
+        <MudText>Systems</MudText>
+        <MudTable Items="Systems" Dense="true" Height="350px">
+            <ColGroup>
+                <col style="width: 30px;" />
+            </ColGroup>
+            <HeaderContent>
+                <MudTh Style="display:none"><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<ConfigSystem,object>(GetSortValue)"></MudTableSortLabel></MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd Style="border:0">
+                    <MudText Style="font-size:4pt;line-height: 1px"><MudCheckBox @bind-Checked="@context.IsSelected"></MudCheckBox></MudText>
+                </MudTd>
+                <MudTd Style="border:0">
+                    <MudText Style="font-size:10pt;">@context.Name</MudText>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudItem>
+    <MudItem xs="4">
+        <MudText>Environments</MudText>
+        <MudTable Items="Environments" Dense="true" Height="350px">
+            <ColGroup>
+                <col style="width: 30px;" />
+            </ColGroup>
+            <HeaderContent>
+                <MudTh Style="display:none"><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<ConfigSystem,object>(GetSortValue)"></MudTableSortLabel></MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd Style="border:0">
+                    <MudText Style="font-size:4pt;line-height: 1px"><MudCheckBox @bind-Checked="@context.IsSelected"></MudCheckBox></MudText>
+                </MudTd>
+                <MudTd Style="border:0">
+                    <MudText Style="font-size:10pt;">@context.Name</MudText>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudItem>
+</MudGrid>
+
+<MudGrid Style="padding: 0; margin: 0; width: 99%" Spacing="2">
+    Test config
+</MudGrid>

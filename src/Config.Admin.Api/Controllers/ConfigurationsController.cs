@@ -24,15 +24,18 @@ public class ConfigurationsController : ControllerBase
     {
         try
         {
+            var systems = await _dataProvider.GetSystems(cancellationToken);
+            var environments = await _dataProvider.GetEnvironments(cancellationToken);
             var d = await _dataProvider.GetAll(cancellationToken);
             var response = new ConfigurationsResponse
             {
-                Configurations = ConfigurationMapper.ToApi(d)
+                Configurations = ConfigurationMapper.ToApi(d, systems, environments)
             };
             return Ok(response);
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error getting configurations");
             return Problem(ex.Message);
         }
     }
@@ -44,15 +47,18 @@ public class ConfigurationsController : ControllerBase
         {
             var (configuration, history) = await _dataProvider.GetConfiguration(gid, cancellationToken);
             if (configuration == null) return NotFound();
+            var systems = await _dataProvider.GetSystems(cancellationToken);
+            var environments = await _dataProvider.GetEnvironments(cancellationToken);
             var response = new ConfigurationResponse
             {
-                Configuration = Mappers.ConfigurationMapper.ToApi(configuration),
-                History = history.Select(Mappers.ConfigurationMapper.ToApi).ToList()
+                Configuration = ConfigurationMapper.ToApi(configuration, systems, environments),
+                History = history.Select(h => ConfigurationMapper.ToApi(h, systems, environments)).ToList()
             };
             return Ok(response);
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, $"Error getting configuration, gid {gid}");
             return Problem(ex.Message);
         }
     }
@@ -62,11 +68,12 @@ public class ConfigurationsController : ControllerBase
     {
         try
         {
-            await _dataProvider.Insert(Mappers.ConfigurationMapper.ToDb(configuration), cancellationToken);
+            await _dataProvider.Insert(ConfigurationMapper.ToDb(configuration), cancellationToken);
             return Ok();
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, $"Error inserting configuration, gid {configuration.Gid}");
             return Problem(ex.Message);
         }
     }
