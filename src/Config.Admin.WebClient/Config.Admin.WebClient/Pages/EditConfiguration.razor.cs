@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Components;
-using MudBlazor;
 using pote.Config.Admin.WebClient.Mappers;
 using pote.Config.Admin.WebClient.Model;
 using pote.Config.Admin.WebClient.Services;
@@ -8,9 +7,6 @@ namespace pote.Config.Admin.WebClient.Pages;
 
 public partial class EditConfiguration
 {
-    private MudMessageBox deleteMessageBox;
-    public bool _isOpen;
-
     [Parameter] public string Gid { get; set; } = string.Empty;
     public bool IsNew => string.IsNullOrWhiteSpace(Gid);
     public Configuration Configuration { get; set; } = new();
@@ -20,14 +16,6 @@ public partial class EditConfiguration
     public List<ConfigEnvironment> Environments { get; set; } = new();
     public ConfigSystem SelectedSystem { get; set; } = null!;
     [Inject] public NavigationManager NavigationManager { get; set; } = null!;
-    [Inject] private IDialogService DialogService { get; set; }
-    public void ToggleOpen()
-    {
-        if (_isOpen)
-            _isOpen = false;
-        else
-            _isOpen = true;
-    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -72,11 +60,6 @@ public partial class EditConfiguration
             PageError.OnError(callResponse.GenerateErrorMessage(), new Exception());
     }
 
-    //private bool IsSystemChecked(ConfigSystem system)
-    //{
-    //    return Configuration.Systems.Any(s => s.Name.Equals(system.Name));
-    //}
-
     public object GetSortValue(ConfigSystem system)
     {
         return $"{(system.IsSelected ? 1 : 2)} {system.Name}";
@@ -109,22 +92,9 @@ public partial class EditConfiguration
 
     private async void Delete()
     {
-        //var result = await deleteMessageBox.Show();
-        //if (result == false) return;
         Configuration.Deleted = true;
         PageError.Reset();
         if (await Save())
             NavigationManager.NavigateTo("/");
     }
-
-    //private async void OnButtonClicked()
-    //{
-    //    Console.WriteLine("Delete");
-    //    bool? result = await DialogService.ShowMessageBox(
-    //        "Warning",
-    //        "Deleting can not be undone!",
-    //        yesText: "Delete!", cancelText: "Cancel");
-    //    Console.WriteLine("Deleted");
-    //    StateHasChanged();
-    //}
 }

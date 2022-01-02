@@ -10,15 +10,19 @@
             <MudItem xs="6">
                 <MudGrid Justify="Justify.FlexEnd" Style="text-align: right">
                     <MudItem xs="12">
-                        <MudIconButton Icon="@Icons.Filled.Refresh" Color="Color.Info" OnClick="Load" Title="Load from server, will undo changes">Save</MudIconButton>
-                        <MudIconButton Icon="@Icons.Filled.Save" Color="Color.Info" OnClick="Save" Title="Save changes">Save</MudIconButton>
+                        <MudTooltip Text="Load from server, will undo changes">
+                            <MudIconButton Icon="@Icons.Filled.Refresh" Color="Color.Info" OnClick="Load" Title="Load from server, will undo changes"></MudIconButton>
+                        </MudTooltip>
+                        <MudTooltip Text="Save changes">
+                            <MudIconButton Icon="@Icons.Filled.Save" Color="Color.Info" OnClick="Save" Title="Save changes"></MudIconButton>
+                        </MudTooltip>
                     </MudItem>
                 </MudGrid>
             </MudItem>
         </MudGrid>
     </ToolBarContent>
     <ColGroup>
-        <col style="width: 400px; " />
+        <col style="width: 400px;" />
         <col style="width: 30px;" />
     </ColGroup>
     <HeaderContent>
