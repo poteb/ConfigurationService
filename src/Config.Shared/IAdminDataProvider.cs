@@ -9,7 +9,7 @@ public interface IAdminDataProvider
     /// <summary>Returns a configuration (with its history)</summary>
     Task<ConfigurationHeader> GetConfiguration(string id, CancellationToken cancellationToken, bool includeHistory = true);
 
-    Task Insert(Configuration configuration, CancellationToken cancellationToken);
+    Task Insert(ConfigurationHeader header, CancellationToken cancellationToken);
 
     //Task<Configuration> Update(Configuration configuration, CancellationToken cancellationToken);
 

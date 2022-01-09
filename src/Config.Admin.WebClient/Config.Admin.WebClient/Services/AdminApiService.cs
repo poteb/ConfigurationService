@@ -146,18 +146,18 @@ namespace pote.Config.Admin.WebClient.Services
             }
         }
 
-        public async Task<ApiCallResponse<object>> SaveConfiguration(ConfigurationHeader configuration)
+        public async Task<ApiCallResponse<object>> SaveConfiguration(ConfigurationHeader header)
         {
             try
             {
                 using var client = _clientFactory.CreateClient("AdminApi");
-                var apiConfiguration = Mappers.ConfigurationMapper.ToApi(configuration);
+                var apiConfiguration = Mappers.ConfigurationMapper.ToApi(header);
                 await client.PostAsJsonAsync("Configurations", apiConfiguration);
                 return new ApiCallResponse<object> { IsSuccess = true };
             }
             catch (Exception ex)
             {
-                return DefaultExceptionResponse(new object(), "Error saving configuration", ex);
+                return DefaultExceptionResponse(new object(), "Error saving configuration header", ex);
             }
         }
     }

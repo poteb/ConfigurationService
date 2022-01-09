@@ -45,34 +45,34 @@ public class ConfigurationsController : ControllerBase
     {
         try
         {
-            var configuration = await _dataProvider.GetConfiguration(id, cancellationToken);
-            if (configuration == null) return NotFound();
+            var header = await _dataProvider.GetConfiguration(id, cancellationToken);
+            if (header == null) return NotFound();
             var systems = await _dataProvider.GetSystems(cancellationToken);
             var environments = await _dataProvider.GetEnvironments(cancellationToken);
             var response = new ConfigurationResponse
             {
-                Configuration = ConfigurationMapper.ToApi(configuration, systems, environments),
+                Configuration = ConfigurationMapper.ToApi(header, systems, environments),
             };
             return Ok(response);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error getting configuration, gid {id}");
+            _logger.LogError(ex, $"Error getting configuration header, id {id}");
             return Problem(ex.Message);
         }
     }
 
     [HttpPost]
-    public async Task<ActionResult> Insert([FromBody] Configuration configuration, CancellationToken cancellationToken)
+    public async Task<ActionResult> Insert([FromBody] ConfigurationHeader header, CancellationToken cancellationToken)
     {
         try
         {
-            await _dataProvider.Insert(ConfigurationMapper.ToDb(configuration), cancellationToken);
+            await _dataProvider.Insert(ConfigurationMapper.ToDb(header), cancellationToken);
             return Ok();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error inserting configuration, gid {configuration.Id}");
+            _logger.LogError(ex, $"Error inserting configuration header, id {header.Id}");
             return Problem(ex.Message);
         }
     }

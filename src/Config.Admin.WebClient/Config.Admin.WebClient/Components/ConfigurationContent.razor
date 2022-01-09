@@ -3,53 +3,69 @@
 @using Newtonsoft.Json
 @using pote.Config.Admin.WebClient.Mappers
 <MudExpansionPanel>
-<TitleContent>
-    <MudGrid Style="padding: 0; margin: 0; width: 99%">
-        <MudItem xs="12" Class="d-flex" Style="padding-bottom: 0">
-            <MudText Style="min-width: 110px;">Environments:</MudText>
-            <MudText>@EnvironmentsText</MudText>
-            @*<MudIconButton Icon="@Icons.Filled.Add" OnClick="ToggleEnvironmentsPopup" Size="Size.Small" ></MudIconButton>*@
+    <TitleContent>
+        <MudGrid Style="padding: 0; margin: 0; width: 99%">
+            <MudItem xs="12" Class="d-flex" Style="padding-bottom: 0">
+                <MudText Style="min-width: 110px;">Environments:</MudText>
+                <MudText>@_environmentsText</MudText>
+                @*<MudIconButton Icon="@Icons.Filled.Add" OnClick="ToggleEnvironmentsPopup" Size="Size.Small" ></MudIconButton>
+                <MudPopover Open="@_environmentPopupOpen" Fixed="true" Class="px-4 pt-4">
+                    <MudSelect T="ConfigEnvironment" Variant="Variant.Outlined" Margin="Margin.Dense" Label="Environments" MultiSelection="true" @bind-SelectedValues="SelectedEnvironments" SelectAll="true">
+                        @foreach (var environment in AllEnvironments)
+                        {
+                            <MudSelectItem T="ConfigEnvironment" Value="environment" Style="white-space: nowrap !important">@environment.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudPopover>*@
+            </MudItem>
+            <MudItem xs="12" Class="d-flex" Style="padding-top:0">
+                <MudText Style="min-width: 110px;">Systems:</MudText>
+                <MudText>@string.Join(", ", Configuration.Systems)</MudText>
+                @*<MudIconButton Icon="@Icons.Filled.Add" Size="Size.Small" ></MudIconButton>*@
+            </MudItem>
+        </MudGrid>
+    </TitleContent>
+    <ChildContent>
+        <MudGrid Style="padding: 0; margin: 0; width: 99%" Spacing="2">
+            <MudItem xs="12" Class="d-flex align-center" Style="padding:0">
+                <MudItem xs="3" Style="padding-right:8px">
+                    <MudSelect T="ConfigEnvironment" Variant="Variant.Outlined"  Margin="Margin.Dense" Label="Environments" MultiSelection="true" @bind-SelectedValues="SelectedEnvironments" SelectAll="true">
+                        @foreach (var environment in AllEnvironments)
+                        {
+                            <MudSelectItem T="ConfigEnvironment" Value="environment" Style="white-space: nowrap !important">@environment.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="3">
+                    <MudSelect T="ConfigSystem" Variant="Variant.Outlined" Margin="Margin.Dense" Label="Systems" MultiSelection="true" @bind-SelectedValues="SelectedSystems" SelectAll="true">
+                        @foreach (var system in AllSystems)
+                        {
+                            <MudSelectItem T="ConfigSystem" Value="system" Style="white-space: nowrap !important">@system.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+            </MudItem>
+        </MudGrid>
+        <MudItem xs="12" Class="d-flex align-center" Style="padding-top:5px">
+            <MudButton Variant="Variant.Filled" OnClick="FormatJson" EndIcon="@Icons.Filled.FormatIndentIncrease">Format JSON</MudButton>
+            <MudText Style="padding-left: 10px" Color="Color.Error">@_jsonValidationError</MudText>
         </MudItem>
-        <MudItem xs="12" Class="d-flex" Style="padding-top:0">
-            <MudText Style="min-width: 110px;">Systems:</MudText>
-            <MudText>@string.Join(", ", Configuration.Systems)</MudText>
-            @*<MudIconButton Icon="@Icons.Filled.Add" Size="Size.Small" ></MudIconButton>*@
-        </MudItem>
-    </MudGrid>
-</TitleContent>
-<ChildContent>
-<MudGrid Style="padding: 0; margin: 0; width: 99%" Spacing="2">
-    <MudItem xs="12" Class="d-flex align-center" Style="padding:0">
-        <MudItem xs="3" Style="padding-right:8px">
-            <MudSelect T="ConfigEnvironment" Variant="Variant.Outlined" Margin="Margin.Dense" Label="Environments" MultiSelection="true" @bind-SelectedValues="SelectedEnvironments" SelectAll="true">
-                @foreach (var environment in AllEnvironments)
-                {
-                    <MudSelectItem T="ConfigEnvironment" Value="environment" Style="white-space: nowrap !important">@environment.Name</MudSelectItem>
-                }
-            </MudSelect>
-        </MudItem>
-        <MudItem xs="3">
-            <MudSelect T="ConfigSystem" Variant="Variant.Outlined" Margin="Margin.Dense" Label="Systems" MultiSelection="true" @bind-SelectedValues="SelectedSystems" SelectAll="true">
-                @foreach (var system in AllSystems)
-                {
-                    <MudSelectItem T="ConfigSystem" Value="system" Style="white-space: nowrap !important">@system.Name</MudSelectItem>
-                }
-            </MudSelect>
-        </MudItem>
-    </MudItem>
-</MudGrid>
-<MudItem xs="12" Class="d-flex align-center" Style="padding-top:5px">
-    <MudButton Variant="Variant.Filled" OnClick="FormatJson" EndIcon="@Icons.Filled.FormatIndentIncrease">Format JSON</MudButton>
-    <MudText Style="padding-left: 10px" Color="Color.Error">@_jsonValidationError</MudText>
-</MudItem>
-<MudTextField @bind-Text="Configuration.Json" T="string" Variant="Variant.Outlined" Lines="@_jsonLines"></MudTextField>
-</ChildContent>
+        <MudTextField @bind-Text="Configuration.Json" T="string" Variant="Variant.Outlined" Lines="@_jsonLines"></MudTextField>
+    </ChildContent>
 </MudExpansionPanel>
 
 @code {
     private int _jsonLines = 10;
     private string _jsonValidationError = string.Empty;
     private IEnumerable<ConfigEnvironment> _selectedEnvironments = new HashSet<ConfigEnvironment>();
+    private Configuration _configuration = new();
+    private Configuration _configurationOriginal = new();
+    private IEnumerable<ConfigSystem> _selectedSystems = new HashSet<ConfigSystem>();
+    private string _environmentsText = string.Empty;
+    private string _systemsText = string.Empty;
+    private List<ConfigSystem> _allSystems = new();
+    private List<ConfigEnvironment> _allEnvironments = new();
+    //public bool _environmentPopupOpen;
 
     private IEnumerable<ConfigEnvironment> SelectedEnvironments
     {
@@ -58,18 +74,35 @@
         {
             _selectedEnvironments = value;
             _configuration.Environments = new List<ConfigEnvironment>(value);
-            EnvironmentsText = string.Join(", ", value);
+            _environmentsText = string.Join(", ", value.OrderBy(x => x.Name));
         }
     }
 
-    private string EnvironmentsText { get; set; } = string.Empty;
+    private IEnumerable<ConfigSystem> SelectedSystems
+    {
+        get => _selectedSystems;
+        set
+        {
+            _selectedSystems = value;
+            _configuration.Systems = new List<ConfigSystem>(value);
+            _systemsText = string.Join(", ", value.OrderBy(x => x.Name));
+        }
+    }
 
-    private IEnumerable<ConfigSystem> SelectedSystems { get; set; } = new HashSet<ConfigSystem>();
-    private Configuration _configuration = new();
-    private Configuration _configurationOriginal = new();
 
-    [Parameter] public List<ConfigEnvironment> AllEnvironments { get; set; } = new();
-    [Parameter] public List<ConfigSystem> AllSystems { get; set; } = new();
+    [Parameter]
+    public List<ConfigEnvironment> AllEnvironments
+    {
+        get => _allEnvironments;
+        set => _allEnvironments = value.OrderBy(x => x.Name).ToList();
+    }
+
+    [Parameter]
+    public List<ConfigSystem> AllSystems
+    {
+        get => _allSystems;
+        set => _allSystems = value.OrderBy(x => x.Name).ToList();
+    }
 
     [Parameter]
     public Configuration Configuration
@@ -79,7 +112,7 @@
         {
             _configuration = value;
             _configurationOriginal = ConfigurationMapper.Copy(value);
-            EnvironmentsText = string.Join(", ", value.Environments);
+            _environmentsText = string.Join(", ", value.Environments);
         }
     }
 
@@ -96,6 +129,7 @@
         var systs = new List<ConfigSystem>();
         foreach (var system in AllSystems)
         {
+            Console.WriteLine(system.Name);
             if (Configuration.Systems.Any(s => s.Id == system.Id))
                 systs.Add(system);
         }
@@ -136,7 +170,12 @@
 
     private void EnvironmentsChanged(IEnumerable<ConfigEnvironment> obj)
     {
-        
+
     }
 
+    //private void ToggleEnvironmentsPopup()
+    //{
+    //    _environmentPopupOpen = !_environmentPopupOpen;
+    //    Console.WriteLine(_environmentPopupOpen);
+    //}
 }

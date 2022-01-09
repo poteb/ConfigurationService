@@ -88,7 +88,7 @@ public class AdminDataProvider : IAdminDataProvider
         return header;
     }
 
-    public async Task Insert(Configuration configuration, CancellationToken cancellationToken)
+    public async Task Insert(ConfigurationHeader configuration, CancellationToken cancellationToken)
     {
         //var file = Path.ChangeExtension(Path.Combine(_configurationRootDir, configuration.Id), ".txt");
         //if (System.IO.File.Exists(file))
