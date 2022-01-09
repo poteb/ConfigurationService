@@ -1,0 +1,142 @@
+﻿@using pote.Config.Admin.WebClient.Model
+@using Microsoft.AspNetCore.Components
+@using Newtonsoft.Json
+@using pote.Config.Admin.WebClient.Mappers
+<MudExpansionPanel>
+<TitleContent>
+    <MudGrid Style="padding: 0; margin: 0; width: 99%">
+        <MudItem xs="12" Class="d-flex" Style="padding-bottom: 0">
+            <MudText Style="min-width: 110px;">Environments:</MudText>
+            <MudText>@EnvironmentsText</MudText>
+            @*<MudIconButton Icon="@Icons.Filled.Add" OnClick="ToggleEnvironmentsPopup" Size="Size.Small" ></MudIconButton>*@
+        </MudItem>
+        <MudItem xs="12" Class="d-flex" Style="padding-top:0">
+            <MudText Style="min-width: 110px;">Systems:</MudText>
+            <MudText>@string.Join(", ", Configuration.Systems)</MudText>
+            @*<MudIconButton Icon="@Icons.Filled.Add" Size="Size.Small" ></MudIconButton>*@
+        </MudItem>
+    </MudGrid>
+</TitleContent>
+<ChildContent>
+<MudGrid Style="padding: 0; margin: 0; width: 99%" Spacing="2">
+    <MudItem xs="12" Class="d-flex align-center" Style="padding:0">
+        <MudItem xs="3" Style="padding-right:8px">
+            <MudSelect T="ConfigEnvironment" Variant="Variant.Outlined" Margin="Margin.Dense" Label="Environments" MultiSelection="true" @bind-SelectedValues="SelectedEnvironments" SelectAll="true">
+                @foreach (var environment in AllEnvironments)
+                {
+                    <MudSelectItem T="ConfigEnvironment" Value="environment" Style="white-space: nowrap !important">@environment.Name</MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+        <MudItem xs="3">
+            <MudSelect T="ConfigSystem" Variant="Variant.Outlined" Margin="Margin.Dense" Label="Systems" MultiSelection="true" @bind-SelectedValues="SelectedSystems" SelectAll="true">
+                @foreach (var system in AllSystems)
+                {
+                    <MudSelectItem T="ConfigSystem" Value="system" Style="white-space: nowrap !important">@system.Name</MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+    </MudItem>
+</MudGrid>
+<MudItem xs="12" Class="d-flex align-center" Style="padding-top:5px">
+    <MudButton Variant="Variant.Filled" OnClick="FormatJson" EndIcon="@Icons.Filled.FormatIndentIncrease">Format JSON</MudButton>
+    <MudText Style="padding-left: 10px" Color="Color.Error">@_jsonValidationError</MudText>
+</MudItem>
+<MudTextField @bind-Text="Configuration.Json" T="string" Variant="Variant.Outlined" Lines="@_jsonLines"></MudTextField>
+</ChildContent>
+</MudExpansionPanel>
+
+@code {
+    private int _jsonLines = 10;
+    private string _jsonValidationError = string.Empty;
+    private IEnumerable<ConfigEnvironment> _selectedEnvironments = new HashSet<ConfigEnvironment>();
+
+    private IEnumerable<ConfigEnvironment> SelectedEnvironments
+    {
+        get => _selectedEnvironments;
+        set
+        {
+            _selectedEnvironments = value;
+            _configuration.Environments = new List<ConfigEnvironment>(value);
+            EnvironmentsText = string.Join(", ", value);
+        }
+    }
+
+    private string EnvironmentsText { get; set; } = string.Empty;
+
+    private IEnumerable<ConfigSystem> SelectedSystems { get; set; } = new HashSet<ConfigSystem>();
+    private Configuration _configuration = new();
+    private Configuration _configurationOriginal = new();
+
+    [Parameter] public List<ConfigEnvironment> AllEnvironments { get; set; } = new();
+    [Parameter] public List<ConfigSystem> AllSystems { get; set; } = new();
+
+    [Parameter]
+    public Configuration Configuration
+    {
+        get => _configuration;
+        set
+        {
+            _configuration = value;
+            _configurationOriginal = ConfigurationMapper.Copy(value);
+            EnvironmentsText = string.Join(", ", value.Environments);
+        }
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        var envs = new List<ConfigEnvironment>();
+        foreach (var environment in AllEnvironments)
+        {
+            if (Configuration.Environments.Any(e => e.Id == environment.Id))
+                envs.Add(environment);
+        }
+        SelectedEnvironments = envs;
+
+        var systs = new List<ConfigSystem>();
+        foreach (var system in AllSystems)
+        {
+            if (Configuration.Systems.Any(s => s.Id == system.Id))
+                systs.Add(system);
+        }
+        SelectedSystems = systs;
+
+        base.OnAfterRender(firstRender);
+    }
+
+    private void FormatJson()
+    {
+        try
+        {
+            _jsonValidationError = string.Empty;
+            dynamic parsedJson = JsonConvert.DeserializeObject(Configuration.Json)!;
+            if (parsedJson == null) return;
+            Configuration.Json = JsonConvert.SerializeObject(parsedJson, Formatting.Indented);
+            var lines = Configuration.Json.Split('\n').Length;
+            _jsonLines = lines < 10 ? 10 : (lines > 30 ? 30 : lines);
+        }
+        catch (Exception ex)
+        {
+            _jsonValidationError = ex.Message;
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    private async Task TestConfiguration()
+    {
+        //var tasks = new List<Task>();
+        //foreach (var system in _testConfigurationSelectedSystems)
+        //{
+        //    foreach (var environment in _testConfigurationSelectedEnvironments)
+        //    {
+        //        var r = await ApiService.TestConfiguration(Configuration.Json, system, environment);
+        //    }
+        //}
+    }
+
+    private void EnvironmentsChanged(IEnumerable<ConfigEnvironment> obj)
+    {
+        
+    }
+
+}

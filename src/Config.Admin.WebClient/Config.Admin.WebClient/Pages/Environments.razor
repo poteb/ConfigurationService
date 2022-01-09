@@ -1,6 +1,8 @@
 ﻿@page "/environments"
 @using pote.Config.Admin.WebClient.Model
 
+<PageTitle>Environments</PageTitle>
+
 <MudTable Items="@List" Dense="true" CanCancelEdit="true" Style="Width: 400px" Elevation="0">
     <ToolBarContent>
         <MudGrid>
@@ -30,7 +32,6 @@
         <MudTh Style="margin:0;padding:0"><MudIconButton Icon="@Icons.Filled.Add" Title="Add item" OnClick="AddItem" Color="Color.Success"></MudIconButton></MudTh>
     </HeaderContent>
     <RowTemplate>
-        @*<MudTd DataLabel="Name">@context.Name</MudTd>*@
         <MudTd Style="border: 0">
             @if (!context.IsDeleted)
             {
@@ -52,13 +53,4 @@
             <MudTd DataLabel="Undo" Style="padding-right: 0; border: 0"><MudIconButton Size="Size.Small" Icon="@Icons.Filled.Undo" Title="Undo" OnClick="() => context.IsDeleted = false"></MudIconButton></MudTd>
         }
     </RowTemplate>
-    @*<RowEditingTemplate>
-        <MudTd DataLabel="Name">
-        <MudTextField @bind-Value="@context.Name" Placeholder="enter name"></MudTextField>
-        </MudTd>
-        <MudTd DataLabel="Delete" Style="padding-right: 0"><MudIconButton Size="Size.Small" Icon="@Icons.Filled.Delete" Title="Delete item" OnClick="() => RemoveItem(context.Id)"></MudIconButton></MudTd>
-        </RowEditingTemplate>*@
-    <FooterContent>
-
-    </FooterContent>
 </MudTable>

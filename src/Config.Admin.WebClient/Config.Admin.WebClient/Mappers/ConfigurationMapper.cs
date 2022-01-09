@@ -5,18 +5,47 @@ namespace pote.Config.Admin.WebClient.Mappers;
 
 public class ConfigurationMapper
 {
+    public static ConfigurationHeader ToClient(Api.Model.ConfigurationHeader header)
+    {
+        return new ConfigurationHeader
+        {
+            Id = header.Id,
+            Name = header.Name,
+            CreatedUtc = header.CreatedUtc,
+            UpdateUtc = header.UpdateUtc,
+            Deleted = header.Deleted,
+            IsActive = header.IsActive,
+            Configurations = ToClient(header.Configurations)
+        };
+    }
+
+    public static Api.Model.ConfigurationHeader ToApi(ConfigurationHeader header)
+    {
+        return new Api.Model.ConfigurationHeader
+        {
+            Id = header.Id,
+            Name = header.Name,
+            CreatedUtc = header.CreatedUtc,
+            UpdateUtc = header.UpdateUtc,
+            Deleted = header.Deleted,
+            IsActive = header.IsActive,
+            Configurations = ToApi(header.Configurations)
+        };
+    }
+
     public static Configuration ToClient(Api.Model.Configuration configuration)
     {
         return new Configuration
         {
-            Gid = configuration.Gid,
-            Name = configuration.Name,
+            HeaderId = configuration.HeaderId,
+            Id = configuration.Id,
             CreatedUtc = configuration.CreatedUtc,
             Json = configuration.Json,
             Deleted = configuration.Deleted,
             IsActive = configuration.IsActive,
             Systems = StringToList<ConfigSystem>(configuration.Systems),
-            Environments = StringToList<ConfigEnvironment>(configuration.Environments)
+            Environments = StringToList<ConfigEnvironment>(configuration.Environments),
+            History = ToClient(configuration.History)
         };
     }
 
@@ -30,8 +59,8 @@ public class ConfigurationMapper
     {
         return new Api.Model.Configuration
         {
-            Gid = configuration.Gid,
-            Name = configuration.Name,
+            HeaderId = configuration.HeaderId,
+            Id = configuration.Id,
             CreatedUtc = configuration.CreatedUtc,
             Json = configuration.Json,
             Deleted = configuration.Deleted,
@@ -56,12 +85,21 @@ public class ConfigurationMapper
         return configurations.Select(ToApi).ToList();
     }
 
+    public static List<ConfigurationHeader> ToClient(List<Api.Model.ConfigurationHeader> headers)
+    {
+        return headers.Select(ToClient).ToList();
+    }
+
+    public static List<Api.Model.ConfigurationHeader> ToApi(List<ConfigurationHeader> headers)
+    {
+        return headers.Select(ToApi).ToList();
+    }
+
     public static Configuration Copy(Configuration configuration)
     {
         var newConfig = new Configuration
         {
-            Gid = Guid.NewGuid().ToString(),
-            Name = $"{configuration.Name} COPY",
+            Id = Guid.NewGuid().ToString(),
             CreatedUtc = DateTime.UtcNow,
             Json = configuration.Json,
             Deleted = false,

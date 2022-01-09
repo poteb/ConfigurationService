@@ -40,25 +40,24 @@ public class ConfigurationsController : ControllerBase
         }
     }
 
-    [HttpGet("{gid}")]
-    public async Task<ActionResult<ConfigurationResponse>> Get(string gid, CancellationToken cancellationToken)
+    [HttpGet("{id}")]
+    public async Task<ActionResult<ConfigurationResponse>> Get(string id, CancellationToken cancellationToken)
     {
         try
         {
-            var (configuration, history) = await _dataProvider.GetConfiguration(gid, cancellationToken);
+            var configuration = await _dataProvider.GetConfiguration(id, cancellationToken);
             if (configuration == null) return NotFound();
             var systems = await _dataProvider.GetSystems(cancellationToken);
             var environments = await _dataProvider.GetEnvironments(cancellationToken);
             var response = new ConfigurationResponse
             {
                 Configuration = ConfigurationMapper.ToApi(configuration, systems, environments),
-                History = history.Select(h => ConfigurationMapper.ToApi(h, systems, environments)).ToList()
             };
             return Ok(response);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error getting configuration, gid {gid}");
+            _logger.LogError(ex, $"Error getting configuration, gid {id}");
             return Problem(ex.Message);
         }
     }
@@ -73,7 +72,7 @@ public class ConfigurationsController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error inserting configuration, gid {configuration.Gid}");
+            _logger.LogError(ex, $"Error inserting configuration, gid {configuration.Id}");
             return Problem(ex.Message);
         }
     }

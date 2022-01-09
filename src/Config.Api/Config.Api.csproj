@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Config.DataProvider.SqlServer\Config.DataProvider.SqlServer.csproj" />
+    <ProjectReference Include="..\Config.DataProvider.File\Config.DataProvider.File.csproj" />
     <ProjectReference Include="..\Config.Parser\Config.Parser.csproj" />
     <ProjectReference Include="..\Config.Shared\Config.Shared.csproj" />
   </ItemGroup>

@@ -5,19 +5,47 @@ namespace pote.Config.Admin.Api.Mappers;
 
 public class ConfigurationMapper
 {
+    public static DbModel.ConfigurationHeader ToDb(ConfigurationHeader apiHeader)
+    {
+        return new DbModel.ConfigurationHeader
+        {
+            Id = apiHeader.Id,
+            Name = apiHeader.Name,
+            CreatedUtc = apiHeader.CreatedUtc,
+            UpdateUtc = apiHeader.UpdateUtc,
+            Deleted = apiHeader.Deleted,
+            IsActive = apiHeader.IsActive,
+            Configurations = ToDb(apiHeader.Configurations)
+        };
+    }
+
+    public static ConfigurationHeader ToApi(DbModel.ConfigurationHeader dbHeader, List<DbModel.System> systems, List<DbModel.Environment> environments)
+    {
+        return new ConfigurationHeader
+        {
+            Id = dbHeader.Id,
+            Name = dbHeader.Name,
+            CreatedUtc = dbHeader.CreatedUtc,
+            UpdateUtc = dbHeader.UpdateUtc,
+            Deleted = dbHeader.Deleted,
+            IsActive = dbHeader.IsActive,
+            Configurations = ToApi(dbHeader.Configurations, systems, environments)
+        };
+    }
+
     public static DbModel.Configuration ToDb(Configuration apiConfiguration)
     {
         return new DbModel.Configuration
         {
+            HeaderId = apiConfiguration.HeaderId,
             Id = string.Empty,
-            Gid = apiConfiguration.Gid,
-            Name = apiConfiguration.Name,
             CreatedUtc = apiConfiguration.CreatedUtc,
             Json = apiConfiguration.Json,
             Systems = JsonSerializer.Serialize(JsonSerializer.Deserialize<List<Model.System>>(apiConfiguration.Systems)?.Select(s => s.Id) ?? new List<string>()),
             Environments = JsonSerializer.Serialize(JsonSerializer.Deserialize<List<Model.Environment>>(apiConfiguration.Environments)?.Select(s => s.Id) ?? new List<string>()),
             Deleted = apiConfiguration.Deleted,
-            IsActive = apiConfiguration.IsActive
+            IsActive = apiConfiguration.IsActive,
+            History = ToDb(apiConfiguration.History)
         };
     }
 
@@ -25,14 +53,15 @@ public class ConfigurationMapper
     {
         return new Configuration
         {
-            Gid = dbConfiguration.Gid,
-            Name = dbConfiguration.Name,
+            HeaderId = dbConfiguration.HeaderId,
+            Id = dbConfiguration.Id,
             CreatedUtc = dbConfiguration.CreatedUtc,
             Json = dbConfiguration.Json,
             Systems = GetFullSystems(dbConfiguration, systems),
             Environments = GetFullEnvironments(dbConfiguration, environments),
             Deleted = dbConfiguration.Deleted,
-            IsActive = dbConfiguration.IsActive
+            IsActive = dbConfiguration.IsActive,
+            History = ToApi(dbConfiguration.History, systems, environments)
         };
     }
 
@@ -58,5 +87,15 @@ public class ConfigurationMapper
     public static List<Configuration> ToApi(List<DbModel.Configuration> configurations, List<DbModel.System> systems, List<DbModel.Environment> environments)
     {
         return configurations.Select(c => ToApi(c, systems, environments)).ToList();
+    }
+
+    public static List<DbModel.ConfigurationHeader> ToDb(List<ConfigurationHeader> headers)
+    {
+        return headers.Select(ToDb).ToList();
+    }
+
+    public static List<ConfigurationHeader> ToApi(List<DbModel.ConfigurationHeader> headers, List<DbModel.System> systems, List<DbModel.Environment> environments)
+    {
+        return headers.Select(h => ToApi(h, systems, environments)).ToList();
     }
 }

@@ -11,11 +11,18 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddSingleton<SearchCriteria>();
 
-//builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.Configuration.GetConnectionString("AdminApi")) });
+builder.Services.AddHttpClient("AdminApi", client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration.GetConnectionString("AdminApi"));
+});
+builder.Services.AddHttpClient("Api", client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration.GetConnectionString("Api"));
+});
 
 builder.Services.AddMudServices();
 
 builder.Services.AddScoped<IAdminApiService, AdminApiService>();
+builder.Services.AddScoped<IApiService, ApiService>();
 
 await builder.Build().RunAsync(); 

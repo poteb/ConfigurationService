@@ -1,6 +1,6 @@
 global using pote.Config.Parser;
 global using pote.Config.Shared;
-using pote.Config.DataProvider.SqlServer;
+using pote.Config.DataProvider.File;
 
 var builder = WebApplication.CreateBuilder(args);
 

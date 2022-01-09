@@ -1,33 +1,9 @@
 ﻿@page "/EditConfiguration"
 @page "/EditConfiguration/{Gid}"
 @using pote.Config.Admin.WebClient.Model
+@using pote.Config.Admin.WebClient.Components
 
-@*<MudMessageBox @ref="deleteMessageBox" Title="Delete configuration" CancelText="Cancel">
-    <MessageContent>
-    Are you sure you want to <b>delete</b> the configuration?
-    </MessageContent>
-    <YesButton>
-    <MudButton Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.DeleteForever">Delete</MudButton>
-    </YesButton>
-    </MudMessageBox>*@
-@*<MudMessageBox @ref="deleteMessageBox" Title="Warning" CancelText="Cancel">
-    <MessageContent>
-    Deleting can <b><i>not</i></b> be undone!
-    </MessageContent>
-    <YesButton>
-    <MudButton Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.DeleteForever">Delete!</MudButton>
-    </YesButton>
-    </MudMessageBox>
-
-    <MudPopover Open="@_isOpen" Fixed="true" Class="px-4 pt-4">
-    <div class="d-flex flex-column">
-    <MudText>Content of the popover can be anything.</MudText>
-    <MudButton OnClick="@ToggleOpen" Class="ml-auto mr-n3 mb-1" Color="Color.Error">Close</MudButton>
-    </div>
-    </MudPopover>
-    <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="OnButtonClicked" >Delete</MudButton>
-    <MudButton OnClick="@ToggleOpen" Class="ml-auto mr-n3 mb-1" Color="Color.Error">Close</MudButton>
-    <MudIconButton Style="margin-left: 100px" Icon="@Icons.Filled.Delete" Color="Color.Error" OnClick="Delete" Title="Delete"></MudIconButton>*@
+<PageTitle>Edit configuration</PageTitle>
 
 <MudGrid Style="padding: 0; margin: 0; width: 99%" Spacing="2">
     <MudItem xs="6" Class="d-flex">
@@ -52,59 +28,134 @@
     <MudItem xs="4">
         <MudGrid Style="padding: 0; margin: 0" Spacing="2">
             <MudItem xs="12">
-                <MudText Style="font-size: 8pt">ID: @Configuration.Gid</MudText>
+                <MudText Style="font-size: 8pt">ID: @Header.Id</MudText>
             </MudItem>
             <MudItem xs="12">
-                <MudText Style="font-size: 8pt">Created: @Configuration.CreatedUtc</MudText>
+                <MudText Style="font-size: 8pt">Created: @Header.CreatedUtc</MudText>
             </MudItem>
             <MudItem xs="12">
-                <MudTextField Label="Name" @bind-Value="@Configuration.Name"></MudTextField>
+                <MudTextField Label="Name" @bind-Value="@Header.Name"></MudTextField>
             </MudItem>
             <MudItem xs="12">
-                <MudCheckBox Label="Active" @bind-checked="Configuration.IsActive" T="bool"></MudCheckBox>
+                <MudCheckBox Label="Active" @bind-checked="Header.IsActive" T="bool"></MudCheckBox>
             </MudItem>
         </MudGrid>
     </MudItem>
-    <MudItem xs="4">
+    @*<MudItem xs="4">
         <MudText>Systems</MudText>
         <MudTable Items="Systems" Dense="true" Height="350px" Striped="true">
-            <ColGroup>
-                <col style="width: 30px;" />
-            </ColGroup>
-            <HeaderContent>
-                <MudTh Style="display:none"><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<ConfigSystem,object>(GetSortValue)"></MudTableSortLabel></MudTh>
-            </HeaderContent>
-            <RowTemplate>
-                <MudTd Style="border:0">
-                    <MudText Style="font-size:4pt;line-height: 1px"><MudCheckBox @bind-Checked="@context.IsSelected"></MudCheckBox></MudText>
-                </MudTd>
-                <MudTd Style="border:0">
-                    <MudText Style="font-size:10pt;">@context.Name</MudText>
-                </MudTd>
-            </RowTemplate>
+        <ColGroup>
+        <col style="width: 30px;" />
+        </ColGroup>
+        <HeaderContent>
+        <MudTh Style="display:none"><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<ConfigSystem,object>(GetSortValue)"></MudTableSortLabel></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+        <MudTd Style="border:0">
+        <MudText Style="font-size:4pt;line-height: 1px"><MudCheckBox @bind-Checked="@context.IsSelected"></MudCheckBox></MudText>
+        </MudTd>
+        <MudTd Style="border:0">
+        <MudText Style="font-size:10pt;">@context.Name</MudText>
+        </MudTd>
+        </RowTemplate>
         </MudTable>
-    </MudItem>
-    <MudItem xs="4">
+        </MudItem>
+        <MudItem xs="4">
         <MudText>Environments</MudText>
         <MudTable Items="Environments" Dense="true" Height="350px" Striped="true">
-            <ColGroup>
-                <col style="width: 30px;" />
-            </ColGroup>
-            <HeaderContent>
-                <MudTh Style="display:none"><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<ConfigEnvironment,object>(GetSortValue)"></MudTableSortLabel></MudTh>
-            </HeaderContent>
-            <RowTemplate>
-                <MudTd Style="border:0">
-                    <MudText Style="font-size:4pt;line-height: 1px"><MudCheckBox @bind-Checked="@context.IsSelected"></MudCheckBox></MudText>
-                </MudTd>
-                <MudTd Style="border:0">
-                    <MudText Style="font-size:10pt;">@context.Name</MudText>
-                </MudTd>
-            </RowTemplate>
+        <ColGroup>
+        <col style="width: 30px;" />
+        </ColGroup>
+        <HeaderContent>
+        <MudTh Style="display:none"><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<ConfigEnvironment,object>(GetSortValue)"></MudTableSortLabel></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+        <MudTd Style="border:0">
+        <MudText Style="font-size:4pt;line-height: 1px"><MudCheckBox @bind-Checked="@context.IsSelected"></MudCheckBox></MudText>
+        </MudTd>
+        <MudTd Style="border:0">
+        <MudText Style="font-size:10pt;">@context.Name</MudText>
+        </MudTd>
+        </RowTemplate>
         </MudTable>
+        </MudItem>*@
+        
+</MudGrid>
+<br />
+
+<MudGrid Style="padding: 0; margin: 0; width: 99%" Spacing="2">
+    <MudItem xs="4">
+        <MudText Class="Headline" Style="padding-left:16px">Configurations</MudText>
+    </MudItem>
+    <MudItem xs="8" Class="d-flex justify-end">
+        <MudButton EndIcon="@GetExpandAllConfigurationsButtonIcon()" OnClick="ExpandAllConfigurations">@GetExpandAllConfigurationsButtonText()</MudButton>
     </MudItem>
 </MudGrid>
 
-<MudGrid Style="padding: 0; margin: 0; width: 99%" Spacing="2">
-    Test config
-</MudGrid>
+<MudExpansionPanels MultiExpansion="true" Elevation="3" Style="width: calc(100% - 30px)" @ref="_expansionPanels">
+    @foreach (var configuration in Header.Configurations)
+    {
+        @*<MudExpansionPanel>
+            <TitleContent>
+                <MudGrid Style="padding: 0; margin: 0; width: 99%">
+                    <MudItem xs="12" Class="d-flex" Style="padding-bottom: 0">
+                        <MudText Style="min-width: 110px;">Environments:</MudText>
+                        <MudText>@string.Join(", ", configuration.Environments)</MudText>
+                    </MudItem>
+                    <MudItem xs="12" Class="d-flex" Style="padding-top:0">
+                        <MudText Style="min-width: 110px;">Systems:</MudText>
+                        <MudText>@string.Join(", ", configuration.Systems)</MudText>
+                    </MudItem>
+                </MudGrid>
+            </TitleContent>
+            <ChildContent>*@
+                <ConfigurationContent Configuration="configuration" AllEnvironments="Environments" AllSystems="Systems"></ConfigurationContent>
+                @*<MudGrid Style="padding: 0; margin: 0; width: 99%" Spacing="2">
+                    <MudItem xs="12" Class="d-flex align-center" Style="padding:0">
+                        <MudItem xs="3" Style="padding-right:8px">
+                            <MudSelect T="ConfigEnvironment" Variant="Variant.Outlined" Margin="Margin.Dense" Label="Environments" MultiSelection="true" SelectAll="true">
+                                @foreach (var environment in Environments)
+                                {
+                                    <MudSelectItem T="ConfigEnvironment" Value="environment" Style="white-space: nowrap !important">@environment.Name</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="3">
+                            <MudSelect T="ConfigSystem" Variant="Variant.Outlined" Margin="Margin.Dense" Label="Systems" MultiSelection="true" @bind-SelectedValues="_testConfigurationSelectedSystems" SelectAll="true">
+                                @foreach (var system in Systems)
+                                {
+                                    <MudSelectItem T="ConfigSystem" Value="system" Style="white-space: nowrap !important">@system.Name</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudItem>
+                    </MudItem>
+                </MudGrid>
+                <MudTextField @bind-Text="configuration.Json" T="string" Variant="Variant.Outlined" Lines="@_jsonLines"></MudTextField>
+            </ChildContent>
+        </MudExpansionPanel>*@
+    }
+</MudExpansionPanels>
+<br />
+
+@*<MudGrid Style="padding: 0; margin: 0; width: 99%" Spacing="2">
+    <MudItem xs="12" Class="d-flex align-center">
+        <MudButton Variant="Variant.Filled" OnClick="TestConfiguration">Test configuration</MudButton>
+        <MudItem xs="3" Style="padding: 0 15px">
+            <MudSelect T="ConfigSystem" Variant="Variant.Outlined" Margin="Margin.Dense" Label="Systems" MultiSelection="true" @bind-SelectedValues="_testConfigurationSelectedSystems" SelectAll="true">
+                @foreach (var system in Systems)
+                {
+                    <MudSelectItem T="ConfigSystem" Value="system" Style="white-space: nowrap !important">@system.Name</MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+        <MudItem xs="3">
+            <MudSelect T="ConfigEnvironment" Variant="Variant.Outlined" Margin="Margin.Dense" Label="Environments" MultiSelection="true" @bind-SelectedValues="_testConfigurationSelectedEnvironments" SelectAll="true">
+                @foreach (var environment in Environments)
+                {
+                    <MudSelectItem T="ConfigEnvironment" Value="environment" Style="white-space: nowrap !important">@environment.Name</MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+    </MudItem>
+</MudGrid>*@
+

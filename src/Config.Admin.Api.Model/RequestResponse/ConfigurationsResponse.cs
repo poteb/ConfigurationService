@@ -2,5 +2,5 @@
 
 public class ConfigurationsResponse
 {
-    public List<Configuration> Configurations { get; set; } = new();
+    public List<ConfigurationHeader> Configurations { get; set; } = new();
 }
