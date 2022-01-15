@@ -6,35 +6,53 @@ namespace pote.Config.DataProvider.File;
 
 public class DataProvider : IDataProvider
 {
-    private readonly string _configurationsDir;
+    private readonly string _configurationRootDir;
     private readonly string _environmentsDir;
     private readonly string _systemsDir;
 
     public DataProvider(string directory)
     {
-        _configurationsDir = Path.Combine(directory, "configurations");
+        _configurationRootDir = Path.Combine(directory, "configurations");
+        //_configurationHistoryDir = Path.Combine(_configurationRootDir, "history");
         _environmentsDir = Path.Combine(directory, "environments");
         _systemsDir = Path.Combine(directory, "systems");
+
+        if (!Directory.Exists(_configurationRootDir))
+            Directory.CreateDirectory(_configurationRootDir);
+        //if (!Directory.Exists(_configurationHistoryDir))
+        //    Directory.CreateDirectory(_configurationHistoryDir);
+        if (!Directory.Exists(_environmentsDir))
+            Directory.CreateDirectory(_environmentsDir);
+        if (!Directory.Exists(_systemsDir))
+            Directory.CreateDirectory(_systemsDir);
     }
 
     public async Task<string> GetConfigurationJson(string gid, CancellationToken cancellationToken)
     {
-        var file = Path.ChangeExtension(Path.Combine(_configurationsDir, gid), ".txt");
+        var file = Path.ChangeExtension(Path.Combine(_configurationRootDir, gid), ".txt");
         if (!System.IO.File.Exists(file)) throw new FileNotFoundException();
         var configuration = JsonConvert.DeserializeObject<Configuration>(await System.IO.File.ReadAllTextAsync(file, cancellationToken));
         if (configuration == null) throw new InvalidOperationException($"Could not read json from file {file}");
         return configuration.Json;
     }
 
-    public async Task<string> GetConfigurationJson(string name, string system, string environment, CancellationToken cancellationToken)
+    public async Task<string> GetConfigurationJson(string name, string systemId, string environmentId, CancellationToken cancellationToken)
     {
-        return "";
-        //var systems
-        //foreach (var file in Directory.GetFiles(_configurationsDir))
-        //{
-        //    var configuration = JsonConvert.DeserializeObject<Configuration>(await System.IO.File.ReadAllTextAsync(file, cancellationToken));
-        //    if (!configuration.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase) || !configuration.Systems.Any(system => system.Equals(system)))
-        //}
+        foreach (var file in Directory.GetFiles(_configurationRootDir))
+        {
+            var header = JsonConvert.DeserializeObject<ConfigurationHeader>(await System.IO.File.ReadAllTextAsync(file, cancellationToken));
+            if (header == null) continue;
+            if (!header.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase)) continue;
+            foreach (var configuration in header.Configurations)
+            {
+                if (!configuration.Systems.Contains(systemId, StringComparison.InvariantCultureIgnoreCase)) continue;
+                if (!configuration.Environments.Contains(environmentId, StringComparison.InvariantCultureIgnoreCase)) continue;
+
+                return configuration.Json;
+            }
+        }
+
+        return string.Empty;
     }
 
     private async Task<List<DbModel.System>> GetSystems(CancellationToken cancellationToken)

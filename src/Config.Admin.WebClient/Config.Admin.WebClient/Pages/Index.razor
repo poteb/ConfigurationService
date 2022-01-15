@@ -3,7 +3,7 @@
 
 <PageTitle>Configurations</PageTitle>
 
-<MudTable Items="@Headers" Dense="true" FixedHeader="true" Striped="true" Filter="new Func<ConfigurationHeader,bool>(FilterFunc)">
+<MudTable Items="@Headers" Dense="true" FixedHeader="true" Striped="true" Filter="new Func<ConfigurationHeader,bool>(FilterFunc)" Style="width: calc(100% - 15px)">
     <ToolBarContent>
         <MudGrid>
             <MudItem xs="2" Style="vertical-align: center" Class="d-flex align-center">
@@ -54,8 +54,8 @@
     <HeaderContent>
         <MudTh></MudTh>
         <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<ConfigurationHeader, object>(x => x.Name)">Name</MudTableSortLabel></MudTh>
-        <MudTh>Systems</MudTh>
-        <MudTh>Environments</MudTh>
+        @*<MudTh>Systems</MudTh>
+        <MudTh>Environments</MudTh>*@
     </HeaderContent>
     <RowTemplate>
         <MudTd><MudButton OnClick="() => EditConfiguration(context.Id)"  Variant="Variant.Filled">Edit</MudButton></MudTd>

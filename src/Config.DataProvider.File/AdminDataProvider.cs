@@ -52,44 +52,54 @@ public class AdminDataProvider : IAdminDataProvider
         var header = JsonConvert.DeserializeObject<ConfigurationHeader>(await System.IO.File.ReadAllTextAsync(headerFile, cancellationToken));
         if (header == null) throw new InvalidOperationException($"Could not read json from file {headerFile}");
 
-        var configurationDir = Path.Combine(_configurationRootDir, id);
-        if (!Directory.Exists(configurationDir))
-            return (header);
+        //var configurationDir = Path.Combine(_configurationRootDir, id);
+        //if (!Directory.Exists(configurationDir))
+        //    return (header);
 
-        foreach (var configFile in Directory.GetFiles(configurationDir))
-        {
-            var configuration = JsonConvert.DeserializeObject<Configuration>(await System.IO.File.ReadAllTextAsync(configFile, cancellationToken));
-            if (configuration == null) throw new InvalidOperationException($"Could not read json from file {configFile}");
-            header.Configurations.Add(configuration);
-        }
+        //foreach (var configFile in Directory.GetFiles(configurationDir))
+        //{
+        //    var configuration = JsonConvert.DeserializeObject<Configuration>(await System.IO.File.ReadAllTextAsync(configFile, cancellationToken));
+        //    if (configuration == null) throw new InvalidOperationException($"Could not read json from file {configFile}");
+        //    header.Configurations.Add(configuration);
+        //}
 
-        if (!includeHistory) return header;
-        
-        foreach (var configuration in header.Configurations)
-        {
-            var historyDir = Path.Combine(configurationDir, configuration.Id);
-            if (!Directory.Exists(historyDir))
-                continue;
-            foreach (var hf in Directory.GetFiles(historyDir))
-            {
-                try
-                {
-                    var history = JsonConvert.DeserializeObject<Configuration>(await System.IO.File.ReadAllTextAsync(hf, cancellationToken));
-                    if (history == null) continue;
-                    configuration.History.Add(history);
-                }
-                catch (Exception)
-                {
-                    /* ignore */
-                }
-            }
-        }
+        //if (!includeHistory) return header;
+
+        //foreach (var configuration in header.Configurations)
+        //{
+        //    var historyDir = Path.Combine(configurationDir, configuration.Id);
+        //    if (!Directory.Exists(historyDir))
+        //        continue;
+        //    foreach (var hf in Directory.GetFiles(historyDir))
+        //    {
+        //        try
+        //        {
+        //            var history = JsonConvert.DeserializeObject<Configuration>(await System.IO.File.ReadAllTextAsync(hf, cancellationToken));
+        //            if (history == null) continue;
+        //            configuration.History.Add(history);
+        //        }
+        //        catch (Exception)
+        //        {
+        //            /* ignore */
+        //        }
+        //    }
+        //}
 
         return header;
     }
 
-    public async Task Insert(ConfigurationHeader configuration, CancellationToken cancellationToken)
+    public async Task Insert(ConfigurationHeader header, CancellationToken cancellationToken)
     {
+        var headerFile = Path.ChangeExtension(Path.Combine(_configurationRootDir, header.Id), ".txt");
+        if (System.IO.File.Exists(headerFile))
+        {
+            var historyDir = Path.Combine(_configurationRootDir, header.Id, "history");
+            if (!Directory.Exists(historyDir))
+                Directory.CreateDirectory(historyDir);
+            var historyFile = Path.ChangeExtension(Path.Combine(historyDir, $"{header.Id}_{Guid.NewGuid().ToString()}"), ".txt");
+            System.IO.File.Move(headerFile, historyFile);
+        }
+        await System.IO.File.WriteAllTextAsync(headerFile, JsonConvert.SerializeObject(header), cancellationToken);
         //var file = Path.ChangeExtension(Path.Combine(_configurationRootDir, configuration.Id), ".txt");
         //if (System.IO.File.Exists(file))
         //{
