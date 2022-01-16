@@ -3,6 +3,7 @@
 @using Newtonsoft.Json
 @using pote.Config.Admin.WebClient.Mappers
 @using pote.Config.Admin.WebClient.Services
+@using pote.Config.Shared
 <MudExpansionPanel>
     <TitleContent>
         <MudGrid Style="padding: 0; margin: 0; width: 99%">
@@ -10,14 +11,14 @@
                 <MudText Style="min-width: 110px;">Environments:</MudText>
                 <MudText>@_environmentsText</MudText>
                 @*<MudIconButton Icon="@Icons.Filled.Add" OnClick="ToggleEnvironmentsPopup" Size="Size.Small" ></MudIconButton>
-                <MudPopover Open="@_environmentPopupOpen" Fixed="true" Class="px-4 pt-4">
+                    <MudPopover Open="@_environmentPopupOpen" Fixed="true" Class="px-4 pt-4">
                     <MudSelect T="ConfigEnvironment" Variant="Variant.Outlined" Margin="Margin.Dense" Label="Environments" MultiSelection="true" @bind-SelectedValues="SelectedEnvironments" SelectAll="true">
-                        @foreach (var environment in AllEnvironments)
-                        {
-                            <MudSelectItem T="ConfigEnvironment" Value="environment" Style="white-space: nowrap !important">@environment.Name</MudSelectItem>
-                        }
+                    @foreach (var environment in AllEnvironments)
+                    {
+                    <MudSelectItem T="ConfigEnvironment" Value="environment" Style="white-space: nowrap !important">@environment.Name</MudSelectItem>
+                    }
                     </MudSelect>
-                </MudPopover>*@
+                    </MudPopover>*@
             </MudItem>
             <MudItem xs="12" Class="d-flex" Style="padding-top:0">
                 <MudText Style="min-width: 110px;">Systems:</MudText>
@@ -30,7 +31,7 @@
         <MudGrid Style="padding: 0; margin: 0; width: 99%" Spacing="2">
             <MudItem xs="12" Class="d-flex align-center" Style="padding:0">
                 <MudItem xs="3" Style="padding-right:8px">
-                    <MudSelect T="ConfigEnvironment" Variant="Variant.Outlined"  Margin="Margin.Dense" Label="Environments" MultiSelection="true" @bind-SelectedValues="SelectedEnvironments" SelectAll="true">
+                    <MudSelect T="ConfigEnvironment" Variant="Variant.Outlined" Margin="Margin.Dense" Label="Environments" MultiSelection="true" @bind-SelectedValues="SelectedEnvironments" SelectAll="true">
                         @foreach (var environment in AllEnvironments)
                         {
                             <MudSelectItem T="ConfigEnvironment" Value="environment" Style="white-space: nowrap !important">@environment.Name</MudSelectItem>
@@ -58,9 +59,35 @@
                     <MudText>Test</MudText>
                 </TitleContent>
                 <ChildContent>
-                    <MudCard Outlined="true" Elevation="2" Style="padding:10px">
-                        <MudButton Variant="Variant.Filled" OnClick="RunTests">Run tests</MudButton>
-                    </MudCard>
+                    <MudGrid>
+                        <MudItem xs="12">
+                            <MudButton Variant="Variant.Filled" OnClick="RunTests">Run tests</MudButton>
+                        </MudItem>
+                        <MudItem xs="12" Style="border-left: 10px solid #008b8b; padding-left: 30px">
+                            @foreach (var result in _testResults)
+                            {
+                                <MudItem xs="12" Style="margin-bottom:20px">
+                                    <MudGrid Style="padding: 0;margin:0">
+                                        <MudItem xs="12" Style="padding: 0">
+                                            System: @_allSystems.FirstOrDefault(x => x.Id == result.System)?.Name
+                                        </MudItem>
+                                        <MudItem xs="12" Style="padding: 0">
+                                            Environment: @_allEnvironments.FirstOrDefault(x => x.Id == result.Environment)?.Name
+                                        </MudItem>
+                                        <MudItem xs="12" Style="padding: 0">
+                                            @foreach (var problem in result.Problems)
+                                            {
+                                                <MudItem Style="color: red">• @problem</MudItem>
+                                            }
+                                        </MudItem>
+                                        <MudItem xs="12" Style="padding: 0">
+                                            <MudTextField ReadOnly="true" T="string" Text="@FormatJson(result.GetJson())" Variant="Variant.Outlined" Lines="10" Style="width: calc(100% - 25px)"></MudTextField>
+                                        </MudItem>
+                                    </MudGrid>
+                                </MudItem>
+                            }
+                        </MudItem>
+                    </MudGrid>
                 </ChildContent>
             </MudExpansionPanel>
         </MudExpansionPanels>
@@ -79,6 +106,7 @@
     private List<ConfigSystem> _allSystems = new();
     private List<ConfigEnvironment> _allEnvironments = new();
     [Parameter] public IApiService ApiService { get; set; } = null!;
+    private List<ParseResponse> _testResults = new();
     //public bool _environmentPopupOpen;
 
     private IEnumerable<ConfigEnvironment> SelectedEnvironments
@@ -151,6 +179,20 @@
         base.OnAfterRender(firstRender);
     }
 
+    private string FormatJson(string json)
+    {
+        try
+        {
+            dynamic parsedJson = JsonConvert.DeserializeObject(json)!;
+            if (parsedJson == null) return "Unable to parse json";
+            return JsonConvert.SerializeObject(parsedJson, Formatting.Indented);
+        }
+        catch (Exception ex)
+        {
+            return ex.Message;
+        }
+    }
+
     private void FormatJson()
     {
         try
@@ -165,7 +207,6 @@
         catch (Exception ex)
         {
             _jsonValidationError = ex.Message;
-            Console.WriteLine(ex.Message);
         }
     }
 
@@ -193,11 +234,21 @@
     //}
     private async Task RunTests()
     {
+        _testResults.Clear();
         foreach (var system in Configuration.Systems)
         {
             foreach (var environment in Configuration.Environments)
             {
-                await ApiService.TestConfiguration(Configuration.Json, system, environment);
+                var response = await ApiService.TestConfiguration(Configuration.Json, system, environment);
+                if (!response.IsSuccess || response.Response == null)
+                {
+                    _testResults.Add(new ParseResponse
+                        {
+                            Problems = new List<string> { "Call to API failed" }
+                        });
+                    continue;
+                }
+                _testResults.Add(response.Response);
             }
         }
     }
