@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
-using Newtonsoft.Json;
 using pote.Config.Admin.WebClient.Mappers;
 using pote.Config.Admin.WebClient.Model;
 using pote.Config.Admin.WebClient.Services;
@@ -14,18 +13,17 @@ public partial class EditConfiguration
     private bool _allPanelsExpanded;
 
     [Parameter] public string Gid { get; set; } = string.Empty;
-    public bool IsNew => string.IsNullOrWhiteSpace(Gid);
-    public ConfigurationHeader Header { get; set; } = new();
+    private bool IsNew => string.IsNullOrWhiteSpace(Gid);
+    private ConfigurationHeader Header { get; set; } = new();
     [Inject] public IAdminApiService AdminApiService { get; set; } = null!;
     [Inject] public IApiService ApiService { get; set; } = null!;
     [CascadingParameter] public PageError PageError { get; set; } = null!;
-    public List<ConfigSystem> Systems { get; set; } = new();
-    public List<ConfigEnvironment> Environments { get; set; } = new();
-    public ConfigSystem SelectedSystem { get; set; } = null!;
+    private List<ConfigSystem> Systems { get; set; } = new();
+    private List<ConfigEnvironment> Environments { get; set; } = new();
+    private List<ConfigSystem> UnhandledSystems { get; set; } = new(); 
+    private List<ConfigEnvironment> UnhandledEnvironments { get; set; } = new();
     [Inject] public NavigationManager NavigationManager { get; set; } = null!;
-
-
-
+    
     protected override async Task OnInitializedAsync()
     {
         if (IsNew)
@@ -34,15 +32,47 @@ public partial class EditConfiguration
         {
             var callResponse = await AdminApiService.GetConfiguration(Gid);
             if (callResponse.IsSuccess && callResponse.Response != null)
+            {
                 Header = ConfigurationMapper.ToClient(callResponse.Response.Configuration);
+                UpdateConfigurationIndex();
+            }
             else
             {
                 PageError.OnError(callResponse.GenerateErrorMessage(), new Exception());
                 return;
             }
         }
+
         await UpdateSystems();
         await UpdateEnvironments();
+        UpdateUnhandledSystems();
+        UpdateUnhandledEnvironments();
+    }
+
+    private void UpdateConfigurationIndex()
+    {
+        for (var i = 0; i < Header.Configurations.Count; i++)
+            Header.Configurations[i].Index = i;
+    }
+
+    private void UpdateUnhandledSystems()
+    {
+        UnhandledSystems.Clear();
+        foreach (var system in Systems)
+        {
+            if (Header.Configurations.Any(c => c.Systems.Any(s => s.Id == system.Id))) continue;
+            UnhandledSystems.Add(system);
+        }
+    }
+    
+    private void UpdateUnhandledEnvironments()
+    {
+        UnhandledEnvironments.Clear();
+        foreach (var environment in Environments)
+        {
+            if (Header.Configurations.Any(c => c.Environments.Any(e => e.Id == environment.Id))) continue;
+            UnhandledEnvironments.Add(environment);
+        }
     }
 
     private async Task UpdateSystems()
@@ -69,35 +99,25 @@ public partial class EditConfiguration
             PageError.OnError(callResponse.GenerateErrorMessage(), new Exception());
     }
 
-    public object GetSortValue(ConfigSystem system)
-    {
-        return $"{(system.IsSelected ? 1 : 2)} {system.Name}";
-    }
-
-    public object GetSortValue(ConfigEnvironment system)
-    {
-        return $"{(system.IsSelected ? 1 : 2)} {system.Name}";
-    }
-
     private async Task<bool> Save()
     {
         PageError.Reset();
         Header.CreatedUtc = DateTime.UtcNow;
-        //Configuration.Systems.Clear();
-        //Configuration.Systems.AddRange(Systems.Where(s => s.IsSelected));
-        //Configuration.Environments.Clear();
-        //Configuration.Environments.AddRange(Environments.Where(e => e.IsSelected));
         var callResponse = await AdminApiService.SaveConfiguration(Header);
         if (callResponse.IsSuccess)
+        {
+            UpdateUnhandledSystems();
+            UpdateUnhandledEnvironments();
             return true;
+        }
         PageError.OnError(callResponse.GenerateErrorMessage(), new Exception());
         return false;
     }
 
-    private void Duplicate()
-    {
-        //var _ = ConfigurationMapper.Copy(Configuration);
-    }
+    // private void Duplicate()
+    // {
+    //     //var _ = ConfigurationMapper.Copy(Configuration);
+    // }
 
     private async void Delete()
     {
@@ -132,5 +152,22 @@ public partial class EditConfiguration
         }
 
         _allPanelsExpanded = !_allPanelsExpanded;
+    }
+
+    private void AddConfiguration()
+    {
+        Header.Configurations.Add(new Configuration());
+        UpdateConfigurationIndex();
+    }
+
+    private void ConfigurationDeleted(Configuration configuration)
+    {
+        var index = Header.Configurations.FindIndex(x => x.Id == configuration.Id);
+        if (index == -1) return;
+        Header.Configurations.RemoveAt(index);
+        Console.WriteLine(Header.Configurations.Count);
+        UpdateConfigurationIndex();
+        StateHasChanged();
+        
     }
 }

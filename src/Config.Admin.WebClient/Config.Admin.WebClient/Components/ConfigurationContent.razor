@@ -4,13 +4,15 @@
 @using pote.Config.Admin.WebClient.Mappers
 @using pote.Config.Admin.WebClient.Services
 @using pote.Config.Shared
-<MudExpansionPanel>
+<MudExpansionPanel Style="@($"background-color:{(Index % 2 == 0 ? Colors.Indigo.Lighten5 : Colors.Teal.Lighten5)}")">
     <TitleContent>
         <MudGrid Style="padding: 0; margin: 0; width: 99%">
-            <MudItem xs="12" Class="d-flex" Style="padding-bottom: 0">
-                <MudText Style="min-width: 110px;">Environments:</MudText>
-                <MudText>@_environmentsText</MudText>
-                @*<MudIconButton Icon="@Icons.Filled.Add" OnClick="ToggleEnvironmentsPopup" Size="Size.Small" ></MudIconButton>
+            <MudItem xs="11" Style="padding-bottom: 0">
+                <MudGrid Style="padding: 0; margin: 0; width: 99%">
+                    <MudItem xs="12" Class="d-flex" Style="padding-bottom: 0">
+                        <MudText Style="min-width: 110px;">Environments:</MudText>
+                        <MudText Style="font-weight: bold">@_environmentsText</MudText>
+                        @*<MudIconButton Icon="@Icons.Filled.Add" OnClick="ToggleEnvironmentsPopup" Size="Size.Small" ></MudIconButton>
                     <MudPopover Open="@_environmentPopupOpen" Fixed="true" Class="px-4 pt-4">
                     <MudSelect T="ConfigEnvironment" Variant="Variant.Outlined" Margin="Margin.Dense" Label="Environments" MultiSelection="true" @bind-SelectedValues="SelectedEnvironments" SelectAll="true">
                     @foreach (var environment in AllEnvironments)
@@ -19,11 +21,18 @@
                     }
                     </MudSelect>
                     </MudPopover>*@
+                    </MudItem>
+                    <MudItem xs="12" Class="d-flex" Style="padding-top:0">
+                        <MudText Style="min-width: 110px;">Systems:</MudText>
+                        <MudText Style="font-weight: bold">@string.Join(", ", Configuration.Systems)</MudText>
+                        @*<MudIconButton Icon="@Icons.Filled.Add" Size="Size.Small" ></MudIconButton>*@
+                    </MudItem>
+                </MudGrid>
             </MudItem>
-            <MudItem xs="12" Class="d-flex" Style="padding-top:0">
-                <MudText Style="min-width: 110px;">Systems:</MudText>
-                <MudText>@string.Join(", ", Configuration.Systems)</MudText>
-                @*<MudIconButton Icon="@Icons.Filled.Add" Size="Size.Small" ></MudIconButton>*@
+            <MudItem xs="1">
+                <MudTooltip Text="Delete configuration">
+                    <MudIconButton Icon="@Icons.Filled.Delete" Color="Color.Error" OnClick="DeleteConfiguration"></MudIconButton>
+                </MudTooltip>
             </MudItem>
         </MudGrid>
     </TitleContent>
@@ -31,7 +40,7 @@
         <MudGrid Style="padding: 0; margin: 0; width: 99%" Spacing="2">
             <MudItem xs="12" Class="d-flex align-center" Style="padding:0">
                 <MudItem xs="3" Style="padding-right:8px">
-                    <MudSelect T="ConfigEnvironment" Variant="Variant.Outlined" Margin="Margin.Dense" Label="Environments" MultiSelection="true" @bind-SelectedValues="SelectedEnvironments" SelectAll="true">
+                    <MudSelect T="ConfigEnvironment" Style="background-color: white" Variant="Variant.Outlined" Margin="Margin.Dense" Label="Environments" MultiSelection="true" @bind-SelectedValues="SelectedEnvironments" SelectAll="true">
                         @foreach (var environment in AllEnvironments)
                         {
                             <MudSelectItem T="ConfigEnvironment" Value="environment" Style="white-space: nowrap !important">@environment.Name</MudSelectItem>
@@ -39,7 +48,7 @@
                     </MudSelect>
                 </MudItem>
                 <MudItem xs="3">
-                    <MudSelect T="ConfigSystem" Variant="Variant.Outlined" Margin="Margin.Dense" Label="Systems" MultiSelection="true" @bind-SelectedValues="SelectedSystems" SelectAll="true">
+                    <MudSelect T="ConfigSystem" Style="background-color: white" Variant="Variant.Outlined" Margin="Margin.Dense" Label="Systems" MultiSelection="true" @bind-SelectedValues="SelectedSystems" SelectAll="true">
                         @foreach (var system in AllSystems)
                         {
                             <MudSelectItem T="ConfigSystem" Value="system" Style="white-space: nowrap !important">@system.Name</MudSelectItem>
@@ -49,11 +58,11 @@
             </MudItem>
         </MudGrid>
         <MudItem xs="12" Class="d-flex align-center" Style="padding-top:5px">
-            <MudButton Variant="Variant.Filled" OnClick="FormatJson" EndIcon="@Icons.Filled.FormatIndentIncrease">Format JSON</MudButton>
+            <MudButton Variant="Variant.Filled" Style="background-color: white" OnClick="FormatJson" EndIcon="@Icons.Filled.FormatIndentIncrease">Format JSON</MudButton>
             <MudText Style="padding-left: 10px" Color="Color.Error">@_jsonValidationError</MudText>
         </MudItem>
-        <MudTextField @bind-Text="Configuration.Json" T="string" Variant="Variant.Outlined" Lines="@_jsonLines"></MudTextField>
-        <MudExpansionPanels>
+        <MudTextField @bind-Text="Configuration.Json" T="string" Variant="Variant.Outlined" Lines="@_jsonLines" Style="background-color:#fff"></MudTextField>
+        <MudExpansionPanels Style="padding-top:5px">
             <MudExpansionPanel HideIcon="true">
                 <TitleContent>
                     <MudText>Test</MudText>
@@ -63,16 +72,19 @@
                         <MudItem xs="12">
                             <MudButton Variant="Variant.Filled" OnClick="RunTests">Run tests</MudButton>
                         </MudItem>
-                        <MudItem xs="12" Style="border-left: 10px solid #008b8b; padding-left: 30px">
+                        <MudItem xs="12" Style="border-left: 10px solid #FFA726; padding-left: 30px">
                             @foreach (var result in _testResults)
                             {
+                                var json = result.GetJson();
+                                var lines = json.Split('\n').Length;
+                                var jsonLines = lines < 3 ? 3 : lines > 10 ? 10 : lines;
                                 <MudItem xs="12" Style="margin-bottom:20px">
                                     <MudGrid Style="padding: 0;margin:0">
                                         <MudItem xs="12" Style="padding: 0">
-                                            System: @_allSystems.FirstOrDefault(x => x.Id == result.System)?.Name
+                                            System: <b>@_allSystems.FirstOrDefault(x => x.Id == result.System)?.Name</b>
                                         </MudItem>
                                         <MudItem xs="12" Style="padding: 0">
-                                            Environment: @_allEnvironments.FirstOrDefault(x => x.Id == result.Environment)?.Name
+                                            Environment: <b>@_allEnvironments.FirstOrDefault(x => x.Id == result.Environment)?.Name</b>
                                         </MudItem>
                                         <MudItem xs="12" Style="padding: 0">
                                             @foreach (var problem in result.Problems)
@@ -81,7 +93,7 @@
                                             }
                                         </MudItem>
                                         <MudItem xs="12" Style="padding: 0">
-                                            <MudTextField ReadOnly="true" T="string" Text="@FormatJson(result.GetJson())" Variant="Variant.Outlined" Lines="10" Style="width: calc(100% - 25px)"></MudTextField>
+                                            <MudTextField ReadOnly="true" T="string" Text="@FormatJson(json)" Variant="Variant.Outlined" Lines="@jsonLines" Style="width: calc(100% - 25px)"></MudTextField>
                                         </MudItem>
                                     </MudGrid>
                                 </MudItem>
@@ -105,9 +117,24 @@
     private string _systemsText = string.Empty;
     private List<ConfigSystem> _allSystems = new();
     private List<ConfigEnvironment> _allEnvironments = new();
-    [Parameter] public IApiService ApiService { get; set; } = null!;
     private List<ParseResponse> _testResults = new();
-    //public bool _environmentPopupOpen;
+    private int _index = -1;
+
+    [Inject]
+    IDialogService DialogService { get; set; } = null!;
+
+    [Parameter]
+    public Action<Configuration> DeleteThisConfigurationCallback { get; set; } = null!;
+
+    [Parameter]
+    public int Index
+    {
+        get => _index;
+        set => _index = _index == -1 ? value : _index;
+    }
+
+    [Parameter]
+    public IApiService ApiService { get; set; } = null!;
 
     private IEnumerable<ConfigEnvironment> SelectedEnvironments
     {
@@ -210,21 +237,8 @@
         }
     }
 
-    private async Task TestConfiguration()
-    {
-        //var tasks = new List<Task>();
-        //foreach (var system in _testConfigurationSelectedSystems)
-        //{
-        //    foreach (var environment in _testConfigurationSelectedEnvironments)
-        //    {
-        //        var r = await ApiService.TestConfiguration(Configuration.Json, system, environment);
-        //    }
-        //}
-    }
-
     private void EnvironmentsChanged(IEnumerable<ConfigEnvironment> obj)
     {
-
     }
 
     //private void ToggleEnvironmentsPopup()
@@ -243,9 +257,9 @@
                 if (!response.IsSuccess || response.Response == null)
                 {
                     _testResults.Add(new ParseResponse
-                        {
-                            Problems = new List<string> { "Call to API failed" }
-                        });
+                    {
+                        Problems = new List<string> { "Call to API failed" }
+                    });
                     continue;
                 }
                 _testResults.Add(response.Response);
@@ -253,4 +267,25 @@
         }
     }
 
+    private async void DeleteConfiguration()
+    {
+        var parameters = new DialogParameters
+        {
+            { nameof(ConfirmationDialog.ContentText), "Do you want to delete the configuration?" },
+            { nameof(ConfirmationDialog.ButtonText), "Delete?" },
+            { nameof(ConfirmationDialog.Color), Color.Error }
+        };
+
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall, CloseOnEscapeKey = true };
+        var dialog = DialogService.Show<ConfirmationDialog>("Delete", parameters, options);
+        var result = await dialog.Result;
+        if (result.Cancelled) return;
+
+        DeleteThisConfigurationCallback(_configuration);
+    }
+
+    public void StateChanged()
+    {
+        StateHasChanged();
+    }
 }

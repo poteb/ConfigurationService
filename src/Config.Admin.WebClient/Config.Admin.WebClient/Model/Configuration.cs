@@ -12,6 +12,7 @@ public class Configuration
     public List<ConfigEnvironment> Environments { get; set; } = new();
     public List<ConfigSystem> Systems { get; set; } = new();
     public List<Configuration> History { get; set; } = new();
+    public int Index { get; set; }
 }
 
 public class ConfigurationHeader
