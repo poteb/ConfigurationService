@@ -18,4 +18,10 @@ public class ParseResponse
     {
         OutputConfiguration = Encoding.ASCII.GetBytes(json);
     }
+
+    public string GetJson()
+    {
+        if (OutputConfiguration == null) return string.Empty; 
+        return Encoding.ASCII.GetString(OutputConfiguration);
+    }
 }

@@ -5,3 +5,8 @@
     background-color: darkred;
     color: #fff;
 }
+
+.Headline {
+    font-size: 21px !important;
+    font-weight: bold !important;
+}

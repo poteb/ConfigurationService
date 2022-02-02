@@ -7,7 +7,7 @@ namespace pote.Config.Admin.WebClient.Pages;
 
 public partial class Index
 {
-    public List<Configuration> Configurations { get; set; } = new();
+    public List<ConfigurationHeader> Headers { get; set; } = new();
     public List<ConfigSystem> Systems { get; set; } = new();
     public List<ConfigEnvironment> Environments { get; set; } = new();
     [Inject] public IAdminApiService AdminApiService { get; set; } = null!;
@@ -25,7 +25,7 @@ public partial class Index
         PageError.Reset();
         var callResponse = await AdminApiService.GetConfigurations();
         if (callResponse.IsSuccess && callResponse.Response != null)
-            Configurations = ConfigurationMapper.ToClient(callResponse.Response.Configurations);
+            Headers = ConfigurationMapper.ToClient(callResponse.Response.Configurations);
         else
             PageError.OnError(callResponse.GenerateErrorMessage(), new Exception());
         await UpdateSystems();
@@ -60,23 +60,23 @@ public partial class Index
         NavigationManager.NavigateTo($"EditConfiguration/{gid}");
     }
 
-    private bool FilterFunc(Configuration configuration)
+    private bool FilterFunc(ConfigurationHeader header)
     {
         // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-        if (!string.IsNullOrWhiteSpace(SearchCriteria.SelectedSystem))
-        {
-            if (configuration.Systems.All(s => s.Name != SearchCriteria.SelectedSystem))
-                return false;
-        }
+        //if (!string.IsNullOrWhiteSpace(SearchCriteria.SelectedSystem))
+        //{
+        //    if (configuration.Systems.All(s => s.Name != SearchCriteria.SelectedSystem))
+        //        return false;
+        //}
 
-        // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-        if (!string.IsNullOrWhiteSpace(SearchCriteria.SelectedEnvironment))
-        {
-            if (configuration.Environments.All(e => e.Name != SearchCriteria.SelectedEnvironment))
-                return false;
-        }
+        //// ReSharper disable once ConditionIsAlwaysTrueOrFalse
+        //if (!string.IsNullOrWhiteSpace(SearchCriteria.SelectedEnvironment))
+        //{
+        //    if (configuration.Environments.All(e => e.Name != SearchCriteria.SelectedEnvironment))
+        //        return false;
+        //}
 
-        if (!string.IsNullOrEmpty(SearchCriteria.SearchText) && !configuration.Name.Contains(SearchCriteria.SearchText, StringComparison.InvariantCultureIgnoreCase))
+        if (!string.IsNullOrEmpty(SearchCriteria.SearchText) && !header.Name.Contains(SearchCriteria.SearchText, StringComparison.InvariantCultureIgnoreCase))
             return false;
 
         return true;

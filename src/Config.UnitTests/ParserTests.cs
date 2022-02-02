@@ -42,11 +42,6 @@ namespace pote.Config.UnitTests
 
     public class TestDataProvider : IDataProvider
     {
-        public Task<string> GetConfigurationJson(int id, CancellationToken cancellationToken)
-        {
-            return Task.FromResult("{\"Wagga\":\"Mama\"}");
-        }
-
         public Task<string> GetConfigurationJson(string name, string system, string environment, CancellationToken cancellationToken)
         {
             return name switch

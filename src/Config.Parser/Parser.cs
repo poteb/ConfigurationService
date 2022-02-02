@@ -42,25 +42,19 @@ namespace pote.Config.Parser
             var match = Regex.Match(value, RefPattern);
             if (!match.Success) return;
             var json = "";
-            if (int.TryParse(match.Groups["ref"].Value, out var refId))
+            var nameMatch = Regex.Match(match.Groups[1].Value, NamePattern);
+            if (nameMatch.Success)
             {
-                json = await _dataProvider.GetConfigurationJson(refId, cancellationToken);
+                var name = nameMatch.Groups["name"].Value;
+                var nSystem = nameMatch.Groups["system"].Value.Replace("system", system);
+                if (string.IsNullOrEmpty(nSystem))
+                    nSystem = system;
+                var nEnvironment = nameMatch.Groups["environment"].Value.Replace("environment", environment);
+                if (string.IsNullOrEmpty(nEnvironment))
+                    nEnvironment = environment;
+                json = await _dataProvider.GetConfigurationJson(name, nSystem, nEnvironment, cancellationToken);
             }
-            else
-            {
-                var nameMatch = Regex.Match(match.Groups[1].Value, NamePattern);
-                if (nameMatch.Success)
-                {
-                    var name = nameMatch.Groups["name"].Value;
-                    var nSystem = nameMatch.Groups["system"].Value.Replace("system", system);
-                    if (string.IsNullOrEmpty(nSystem))
-                        nSystem = system;
-                    var nEnvironment = nameMatch.Groups["environment"].Value.Replace("environment", environment);
-                    if (string.IsNullOrEmpty(nEnvironment))
-                        nEnvironment = environment;
-                    json = await _dataProvider.GetConfigurationJson(name, nSystem, nEnvironment, cancellationToken);
-                }
-            }
+
             if (string.IsNullOrEmpty(json))
             {
                 problems($"Reference could not be resolved, {match.Groups[0].Value}");

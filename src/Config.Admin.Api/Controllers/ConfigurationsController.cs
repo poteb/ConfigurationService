@@ -40,40 +40,39 @@ public class ConfigurationsController : ControllerBase
         }
     }
 
-    [HttpGet("{gid}")]
-    public async Task<ActionResult<ConfigurationResponse>> Get(string gid, CancellationToken cancellationToken)
+    [HttpGet("{id}")]
+    public async Task<ActionResult<ConfigurationResponse>> Get(string id, CancellationToken cancellationToken)
     {
         try
         {
-            var (configuration, history) = await _dataProvider.GetConfiguration(gid, cancellationToken);
-            if (configuration == null) return NotFound();
+            var header = await _dataProvider.GetConfiguration(id, cancellationToken);
+            if (header == null) return NotFound();
             var systems = await _dataProvider.GetSystems(cancellationToken);
             var environments = await _dataProvider.GetEnvironments(cancellationToken);
             var response = new ConfigurationResponse
             {
-                Configuration = ConfigurationMapper.ToApi(configuration, systems, environments),
-                History = history.Select(h => ConfigurationMapper.ToApi(h, systems, environments)).ToList()
+                Configuration = ConfigurationMapper.ToApi(header, systems, environments),
             };
             return Ok(response);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error getting configuration, gid {gid}");
+            _logger.LogError(ex, $"Error getting configuration header, id {id}");
             return Problem(ex.Message);
         }
     }
 
     [HttpPost]
-    public async Task<ActionResult> Insert([FromBody] Configuration configuration, CancellationToken cancellationToken)
+    public async Task<ActionResult> Insert([FromBody] ConfigurationHeader header, CancellationToken cancellationToken)
     {
         try
         {
-            await _dataProvider.Insert(ConfigurationMapper.ToDb(configuration), cancellationToken);
+            await _dataProvider.Insert(ConfigurationMapper.ToDb(header), cancellationToken);
             return Ok();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error inserting configuration, gid {configuration.Gid}");
+            _logger.LogError(ex, $"Error inserting configuration header, id {header.Id}");
             return Problem(ex.Message);
         }
     }

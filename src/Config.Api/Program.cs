@@ -1,6 +1,6 @@
 global using pote.Config.Parser;
 global using pote.Config.Shared;
-using pote.Config.DataProvider.SqlServer;
+using pote.Config.DataProvider.File;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,7 +15,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IParser, Parser>();
-builder.Services.AddScoped<IDataProvider>(s => new DataProvider(builder.Configuration.GetConnectionString("DefaultConnection")));
+var fileDb = builder.Configuration.GetSection("FileDatabase").GetSection("Directory").Value;
+builder.Services.AddScoped<IDataProvider>(d => new DataProvider(fileDb));
 
 var app = builder.Build();
 

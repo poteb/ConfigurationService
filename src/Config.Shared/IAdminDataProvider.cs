@@ -5,11 +5,11 @@ namespace pote.Config.Shared;
 public interface IAdminDataProvider
 {
     /// <summary>Returns all configurations (without history)</summary>
-    Task<List<Configuration>> GetAll(CancellationToken cancellationToken);
+    Task<List<ConfigurationHeader>> GetAll(CancellationToken cancellationToken);
     /// <summary>Returns a configuration (with its history)</summary>
-    Task<(Configuration configuration, List<Configuration> history)> GetConfiguration(string guid, CancellationToken cancellationToken);
+    Task<ConfigurationHeader> GetConfiguration(string id, CancellationToken cancellationToken, bool includeHistory = true);
 
-    Task Insert(Configuration configuration, CancellationToken cancellationToken);
+    Task Insert(ConfigurationHeader header, CancellationToken cancellationToken);
 
     //Task<Configuration> Update(Configuration configuration, CancellationToken cancellationToken);
 

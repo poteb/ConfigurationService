@@ -2,6 +2,6 @@
 
 public class ConfigurationResponse
 {
-    public Configuration Configuration { get; set; } = new();
+    public ConfigurationHeader Configuration { get; set; } = new();
     public List<Configuration> History { get; set; } = new();
 }
