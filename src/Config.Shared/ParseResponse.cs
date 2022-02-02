@@ -21,6 +21,7 @@ public class ParseResponse
 
     public string GetJson()
     {
+        if (OutputConfiguration == null) return string.Empty; 
         return Encoding.ASCII.GetString(OutputConfiguration);
     }
 }

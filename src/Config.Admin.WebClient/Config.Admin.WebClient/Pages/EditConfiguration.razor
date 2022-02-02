@@ -60,6 +60,6 @@
 <MudExpansionPanels MultiExpansion="true" Elevation="3" Style="width: calc(100% - 15px);margin-bottom: 30px" @ref="_expansionPanels">
     @foreach (var configuration in Header.Configurations)
     {
-        <ConfigurationContent Index="@(configuration.Index)" DeleteThisConfigurationCallback="ConfigurationDeleted" Configuration="configuration" AllEnvironments="Environments" AllSystems="Systems" ApiService="ApiService"></ConfigurationContent>
+        <ConfigurationContent Index="@(configuration.Index)" Configuration="configuration" AllEnvironments="Environments" AllSystems="Systems" ApiService="ApiService"></ConfigurationContent>
     }
 </MudExpansionPanels>

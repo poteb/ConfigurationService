@@ -26,6 +26,11 @@ public partial class EditConfiguration
     
     protected override async Task OnInitializedAsync()
     {
+        await Load();
+    }
+
+    private async Task Load()
+    {
         if (IsNew)
             Header = new();
         else
@@ -103,11 +108,15 @@ public partial class EditConfiguration
     {
         PageError.Reset();
         Header.CreatedUtc = DateTime.UtcNow;
+        var reload = Header.Configurations.Any(c => c.Deleted);
+        Header.Configurations = Header.Configurations.Where(c => !c.Deleted).ToList();
         var callResponse = await AdminApiService.SaveConfiguration(Header);
         if (callResponse.IsSuccess)
         {
             UpdateUnhandledSystems();
             UpdateUnhandledEnvironments();
+            if (reload)
+                await Load();        
             return true;
         }
         PageError.OnError(callResponse.GenerateErrorMessage(), new Exception());
@@ -158,16 +167,5 @@ public partial class EditConfiguration
     {
         Header.Configurations.Add(new Configuration());
         UpdateConfigurationIndex();
-    }
-
-    private void ConfigurationDeleted(Configuration configuration)
-    {
-        var index = Header.Configurations.FindIndex(x => x.Id == configuration.Id);
-        if (index == -1) return;
-        Header.Configurations.RemoveAt(index);
-        Console.WriteLine(Header.Configurations.Count);
-        UpdateConfigurationIndex();
-        StateHasChanged();
-        
     }
 }
