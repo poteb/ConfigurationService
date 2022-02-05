@@ -6,6 +6,7 @@ using pote.Config.Shared;
 
 namespace pote.Config.UnitTests
 {
+    [TestFixture]
     public class ParserTests
     {
         [SetUp]

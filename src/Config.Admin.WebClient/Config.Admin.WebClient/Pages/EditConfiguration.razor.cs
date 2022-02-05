@@ -15,6 +15,7 @@ public partial class EditConfiguration
     [Parameter] public string Gid { get; set; } = string.Empty;
     private bool IsNew => string.IsNullOrWhiteSpace(Gid);
     private ConfigurationHeader Header { get; set; } = new();
+    private ConfigurationHeader OriginalHeader { get; set; } = null!;
     [Inject] public IAdminApiService AdminApiService { get; set; } = null!;
     [Inject] public IApiService ApiService { get; set; } = null!;
     [CascadingParameter] public PageError PageError { get; set; } = null!;
@@ -39,6 +40,7 @@ public partial class EditConfiguration
             if (callResponse.IsSuccess && callResponse.Response != null)
             {
                 Header = ConfigurationMapper.ToClient(callResponse.Response.Configuration);
+                OriginalHeader = ConfigurationMapper.Copy(Header);
                 UpdateConfigurationIndex();
             }
             else
@@ -106,6 +108,8 @@ public partial class EditConfiguration
 
     private async Task<bool> Save()
     {
+        if (Header.Equals(OriginalHeader)) return true;
+        
         PageError.Reset();
         Header.CreatedUtc = DateTime.UtcNow;
         var reload = Header.Configurations.Any(c => c.Deleted);

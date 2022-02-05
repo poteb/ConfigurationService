@@ -16,7 +16,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IParser, Parser>();
 var fileDb = builder.Configuration.GetSection("FileDatabase").GetSection("Directory").Value;
-builder.Services.AddScoped<IDataProvider>(d => new DataProvider(fileDb));
+builder.Services.AddScoped<IDataProvider>(_ => new DataProvider(new FileHandler(fileDb)));
 
 var app = builder.Build();
 

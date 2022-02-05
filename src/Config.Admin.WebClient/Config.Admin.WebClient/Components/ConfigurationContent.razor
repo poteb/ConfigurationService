@@ -32,7 +32,7 @@
             <MudItem xs="1">
                 @if (!Configuration.Deleted)
                 {
-                    <MudTooltip Text="Delete configuration">
+                    <MudTooltip Text="Delete configuration section">
                         <MudIconButton Icon="@Icons.Filled.Delete" Color="Color.Error" OnClick="() => DeleteConfiguration(true)"></MudIconButton>
                     </MudTooltip>
                 }
@@ -119,12 +119,12 @@
 </MudExpansionPanel>
 
 @code {
-    private MudExpansionPanel _expansionPanel;
+    private MudExpansionPanel _expansionPanel = null!;
     private int _jsonLines = 10;
     private string _jsonValidationError = string.Empty;
     private IEnumerable<ConfigEnvironment> _selectedEnvironments = new HashSet<ConfigEnvironment>();
     private Configuration _configuration = new();
-    private Configuration _configurationOriginal = new();
+    //private Configuration _configurationOriginal = new();
     private IEnumerable<ConfigSystem> _selectedSystems = new HashSet<ConfigSystem>();
     private string _environmentsText = string.Empty;
     private string _systemsText = string.Empty;
@@ -194,7 +194,7 @@
         set
         {
             _configuration = value;
-            _configurationOriginal = ConfigurationMapper.Copy(value);
+            //_configurationOriginal = ConfigurationMapper.Copy(value);
             _environmentsText = string.Join(", ", value.Environments.OrderBy(x => x.Name));
             _systemsText = string.Join(", ", value.Systems.OrderBy(x => x.Name));
         }

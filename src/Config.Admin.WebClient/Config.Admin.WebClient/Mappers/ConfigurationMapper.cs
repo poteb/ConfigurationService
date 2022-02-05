@@ -95,11 +95,11 @@ public class ConfigurationMapper
         return headers.Select(ToApi).ToList();
     }
 
-    public static Configuration Copy(Configuration configuration)
+    private static Configuration Copy(Configuration configuration)
     {
         var newConfig = new Configuration
         {
-            Id = Guid.NewGuid().ToString(),
+            Id = configuration.Id,
             CreatedUtc = DateTime.UtcNow,
             Json = configuration.Json,
             Deleted = false,
@@ -108,5 +108,19 @@ public class ConfigurationMapper
             Environments = StringToList<ConfigEnvironment>(ListToString(configuration.Environments))
         };
         return newConfig;
+    }
+
+    public static ConfigurationHeader Copy(ConfigurationHeader header)
+    {
+        return new ConfigurationHeader
+        {
+            Id = header.Id,
+            Name = header.Name,
+            CreatedUtc = header.CreatedUtc,
+            UpdateUtc = header.UpdateUtc,
+            Deleted = header.Deleted,
+            IsActive = header.IsActive,
+            Configurations = header.Configurations.Select(Copy).ToList()
+        };
     }
 }
