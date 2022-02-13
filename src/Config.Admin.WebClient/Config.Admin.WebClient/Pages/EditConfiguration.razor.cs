@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
+using pote.Config.Admin.WebClient.Components;
 using pote.Config.Admin.WebClient.Mappers;
 using pote.Config.Admin.WebClient.Model;
 using pote.Config.Admin.WebClient.Services;
@@ -11,6 +12,7 @@ public partial class EditConfiguration
 {
     private MudExpansionPanels _expansionPanels = null!;
     private bool _allPanelsExpanded;
+    private List<ConfigurationContent> _configurationContents = new();
 
     [Parameter] public string Gid { get; set; } = string.Empty;
     private bool IsNew => string.IsNullOrWhiteSpace(Gid);
@@ -21,10 +23,12 @@ public partial class EditConfiguration
     [CascadingParameter] public PageError PageError { get; set; } = null!;
     private List<ConfigSystem> Systems { get; set; } = new();
     private List<ConfigEnvironment> Environments { get; set; } = new();
-    private List<ConfigSystem> UnhandledSystems { get; set; } = new(); 
+    private List<ConfigSystem> UnhandledSystems { get; set; } = new();
     private List<ConfigEnvironment> UnhandledEnvironments { get; set; } = new();
     [Inject] public NavigationManager NavigationManager { get; set; } = null!;
-    
+
+    private ConfigurationContent ConfigurationContentRef { set => _configurationContents.Add(value); }
+
     protected override async Task OnInitializedAsync()
     {
         await Load();
@@ -71,7 +75,7 @@ public partial class EditConfiguration
             UnhandledSystems.Add(system);
         }
     }
-    
+
     private void UpdateUnhandledEnvironments()
     {
         UnhandledEnvironments.Clear();
@@ -109,7 +113,7 @@ public partial class EditConfiguration
     private async Task<bool> Save()
     {
         if (Header.Equals(OriginalHeader)) return true;
-        
+
         PageError.Reset();
         Header.CreatedUtc = DateTime.UtcNow;
         var reload = Header.Configurations.Any(c => c.Deleted);
@@ -120,9 +124,10 @@ public partial class EditConfiguration
             UpdateUnhandledSystems();
             UpdateUnhandledEnvironments();
             if (reload)
-                await Load();        
+                await Load();
             return true;
         }
+
         PageError.OnError(callResponse.GenerateErrorMessage(), new Exception());
         return false;
     }
@@ -152,17 +157,22 @@ public partial class EditConfiguration
 
     private void ExpandAllConfigurations()
     {
-        var panelsType = typeof(MudExpansionPanels);
-        var panelsField = panelsType.GetField("_panels", BindingFlags.Instance | BindingFlags.NonPublic);
-        var list = panelsField?.GetValue(_expansionPanels) as List<MudExpansionPanel>;
-        if (list == null) return;
-        foreach (var panel in list)
-        {
-            if (!_allPanelsExpanded)
-                panel.Expand();
-            else
-                panel.Collapse();
-        }
+        if (!_allPanelsExpanded)
+            _expansionPanels.ExpandAll();
+        else
+            _expansionPanels.CollapseAll();
+        
+        // var panelsType = typeof(MudExpansionPanels);
+        // var panelsField = panelsType.GetField("_panels", BindingFlags.Instance | BindingFlags.NonPublic);
+        // var list = panelsField?.GetValue(_expansionPanels) as List<MudExpansionPanel>;
+        // if (list == null) return;
+        // foreach (var panel in list)
+        // {
+        //     if (!_allPanelsExpanded)
+        //         panel.Expand();
+        //     else
+        //         panel.Collapse();
+        // }
 
         _allPanelsExpanded = !_allPanelsExpanded;
     }
@@ -171,5 +181,15 @@ public partial class EditConfiguration
     {
         Header.Configurations.Add(new Configuration());
         UpdateConfigurationIndex();
+    }
+
+    private async Task TestAll()
+    {
+        _expansionPanels.ExpandAll();
+        _allPanelsExpanded = true;
+        foreach (var configurationContent in _configurationContents)
+        {
+            await configurationContent.RunTest();
+        }
     }
 }

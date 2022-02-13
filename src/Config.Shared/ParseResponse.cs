@@ -4,10 +4,10 @@ namespace pote.Config.Shared;
 
 public class ParseResponse
 {
-    public byte[] OutputConfiguration { get; set; }
-    public string System { get; set; }
-    public string Environment { get; set; }
-    public List<string> Problems { get; set; } = new List<string>();
+    public byte[] OutputConfiguration { get; set; } = null!;
+    public string System { get; set; } = null!;
+    public string Environment { get; set; } = null!;
+    public List<string> Problems { get; set; } = new();
 
     public void AddProblem(string problem)
     {

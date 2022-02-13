@@ -1,0 +1,128 @@
+﻿@using Newtonsoft.Json
+@using pote.Config.Admin.WebClient.Model
+@using pote.Config.Admin.WebClient.Services
+@using pote.Config.Shared
+
+<MudExpansionPanels Style="padding-top:5px">
+    <MudExpansionPanel @ref="_expansionPanel">
+        <TitleContent>
+            <MudButton StartIcon="@Icons.Filled.Check" Variant="Variant.Outlined" Color="Color.Info" OnClick="RunTests" Disabled="@_runningTests">Run tests</MudButton>
+        </TitleContent>
+        <ChildContent>
+            <MudGrid>
+                <MudItem xs="12">
+                    @if (_runningTests)
+                    {
+                         <MudProgressLinear Color="Color.Primary" Indeterminate="true" />
+                    }
+                    else
+                    {
+                        <div style="height:4px"></div>
+                    }
+                </MudItem>
+                <MudItem xs="12" Style="padding-left: 30px">
+                    @* <MudItem xs="12" Style="border-left: 10px solid #FFA726; padding-left: 30px"> *@
+                    @foreach (var result in _testResults)
+                    {
+                        var json = result.GetJson();
+                        var lines = json.Split('\n').Length;
+                        var jsonLines = lines < 3 ? 3 : lines > 10 ? 10 : lines;
+                        <MudItem xs="12" Style="margin-bottom:20px">
+                            <MudGrid Style="padding: 0;margin:0">
+                                <MudItem xs="12" Style="padding: 0">
+                                    System: <b>@AllSystems.FirstOrDefault(x => x.Id == result.System)?.Name</b>
+                                </MudItem>
+                                <MudItem xs="12" Style="padding: 0">
+                                    Environment: <b>@AllEnvironments.FirstOrDefault(x => x.Id == result.Environment)?.Name</b>
+                                </MudItem>
+                                <MudItem xs="12" Style="padding: 0">
+                                    @if (result.Problems.Any())
+                                    {
+                                        <MudIcon Size="Size.Small" Icon="@Icons.Filled.ThumbDown" Color="Color.Error"/>
+                                        @foreach (var problem in result.Problems)
+                                        {
+                                            <MudItem Style="color: red">• @problem</MudItem>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <MudIcon Size="Size.Small" Icon="@Icons.Filled.ThumbUp" Color="Color.Success"/>
+                                    }
+                                </MudItem>
+                                <MudItem xs="12" Style="padding: 0">
+                                    <MudTextField ReadOnly="true" T="string" Text="@FormatJson(json)" Variant="Variant.Outlined" Lines="@jsonLines" Style="width: calc(100% - 25px)"></MudTextField>
+                                </MudItem>
+                            </MudGrid>
+                        </MudItem>
+                    }
+                </MudItem>
+            </MudGrid>
+        </ChildContent>
+    </MudExpansionPanel>
+</MudExpansionPanels>
+
+@code {
+    private bool _runningTests;
+    private List<ParseResponse> _testResults = new();
+    private MudExpansionPanel _expansionPanel = null!;
+
+    [Parameter] public Configuration Configuration { get; set; } = null!;
+    [Parameter] public List<ConfigSystem> AllSystems { get; set; } = null!;
+    [Parameter] public List<ConfigEnvironment> AllEnvironments { get; set; } = null!;
+    [Inject] public IApiService ApiService { get; set; } = null!;
+
+    public async Task RunTests()
+    {
+        if (!_expansionPanel.IsExpanded)
+            _expansionPanel.Expand();
+        //_testResults.Clear();
+        _runningTests = true;
+        List<ParseResponse> tempResults = new();
+        try
+        {
+            foreach (var system in Configuration.Systems)
+            {
+                foreach (var environment in Configuration.Environments)
+                {
+                    var response = await ApiService.TestConfiguration(Configuration.Json, system, environment);
+                    Console.WriteLine($"response.IsSuccess={response.IsSuccess}");
+                    if (!response.IsSuccess || response.Response == null)
+                    {
+                        tempResults.Add(new ParseResponse
+                        {
+                            Problems = new List<string> { $"Call to API failed" }
+                        });
+                        return;
+                    }
+                    tempResults.Add(response.Response);
+                }
+            }
+            _testResults.Clear();
+            _testResults = tempResults;
+        }
+        catch (Exception)
+        {
+            _testResults.Clear();
+            throw;
+        }
+        finally
+        {
+            _runningTests = false;
+        }
+    }
+
+    private string FormatJson(string json)
+    {
+        try
+        {
+            dynamic parsedJson = JsonConvert.DeserializeObject(json)!;
+            if (parsedJson == null) return "Unable to parse json";
+            return JsonConvert.SerializeObject(parsedJson, Formatting.Indented);
+        }
+        catch (Exception ex)
+        {
+            return ex.Message;
+        }
+    }
+
+}

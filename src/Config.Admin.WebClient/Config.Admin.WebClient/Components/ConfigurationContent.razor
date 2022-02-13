@@ -69,57 +69,19 @@
                 </MudItem>
             </MudGrid>
             <MudItem xs="12" Class="d-flex align-center" Style="padding-top:5px">
-                <MudButton Variant="Variant.Filled" Style="background-color: white" OnClick="FormatJson" EndIcon="@Icons.Filled.FormatIndentIncrease">Format JSON</MudButton>
+                <MudButton Variant="Variant.Outlined" Style="background-color: white" OnClick="FormatJson" EndIcon="@Icons.Filled.FormatIndentIncrease">Format JSON</MudButton>
                 <MudText Style="padding-left: 10px" Color="Color.Error">@_jsonValidationError</MudText>
             </MudItem>
             <MudTextField @bind-Text="Configuration.Json" T="string" Variant="Variant.Outlined" Lines="@_jsonLines" Style="background-color:#fff"></MudTextField>
-            <MudExpansionPanels Style="padding-top:5px">
-                <MudExpansionPanel HideIcon="true">
-                    <TitleContent>
-                        <MudText>Test</MudText>
-                    </TitleContent>
-                    <ChildContent>
-                        <MudGrid>
-                            <MudItem xs="12">
-                                <MudButton Variant="Variant.Filled" OnClick="RunTests" Disabled="@_runningTests">Run tests</MudButton>
-                            </MudItem>
-                            <MudItem xs="12" Style="border-left: 10px solid #FFA726; padding-left: 30px">
-                                @foreach (var result in _testResults)
-                                {
-                                    var json = result.GetJson();
-                                    var lines = json.Split('\n').Length;
-                                    var jsonLines = lines < 3 ? 3 : lines > 10 ? 10 : lines;
-                                    <MudItem xs="12" Style="margin-bottom:20px">
-                                        <MudGrid Style="padding: 0;margin:0">
-                                            <MudItem xs="12" Style="padding: 0">
-                                                System: <b>@_allSystems.FirstOrDefault(x => x.Id == result.System)?.Name</b>
-                                            </MudItem>
-                                            <MudItem xs="12" Style="padding: 0">
-                                                Environment: <b>@_allEnvironments.FirstOrDefault(x => x.Id == result.Environment)?.Name</b>
-                                            </MudItem>
-                                            <MudItem xs="12" Style="padding: 0">
-                                                @foreach (var problem in result.Problems)
-                                                {
-                                                    <MudItem Style="color: red">• @problem</MudItem>
-                                                }
-                                            </MudItem>
-                                            <MudItem xs="12" Style="padding: 0">
-                                                <MudTextField ReadOnly="true" T="string" Text="@FormatJson(json)" Variant="Variant.Outlined" Lines="@jsonLines" Style="width: calc(100% - 25px)"></MudTextField>
-                                            </MudItem>
-                                        </MudGrid>
-                                    </MudItem>
-                                }
-                            </MudItem>
-                        </MudGrid>
-                    </ChildContent>
-                </MudExpansionPanel>
-            </MudExpansionPanels>
+
+            <ConfigurationContentTestPanel @ref="_testPanel" AllEnvironments="_allEnvironments" AllSystems="_allSystems" Configuration="_configuration"></ConfigurationContentTestPanel>
         }
     </ChildContent>
 </MudExpansionPanel>
 
 @code {
     private MudExpansionPanel _expansionPanel = null!;
+    private ConfigurationContentTestPanel _testPanel = null!;
     private int _jsonLines = 10;
     private string _jsonValidationError = string.Empty;
     private IEnumerable<ConfigEnvironment> _selectedEnvironments = new HashSet<ConfigEnvironment>();
@@ -130,12 +92,9 @@
     private string _systemsText = string.Empty;
     private List<ConfigSystem> _allSystems = new();
     private List<ConfigEnvironment> _allEnvironments = new();
-    private List<ParseResponse> _testResults = new();
     private int _index = -1;
-    private bool _runningTests;
 
-    [Inject]
-    IDialogService DialogService { get; set; } = null!;
+    [Inject] IDialogService DialogService { get; set; } = null!;
 
     //[Parameter]
     //public Action<Configuration> DeleteThisConfigurationCallback { get; set; } = null!;
@@ -147,8 +106,7 @@
         set => _index = _index == -1 ? value : _index;
     }
 
-    [Parameter]
-    public IApiService ApiService { get; set; } = null!;
+    [Inject] public IApiService ApiService { get; set; } = null!;
 
     private IEnumerable<ConfigEnvironment> SelectedEnvironments
     {
@@ -221,19 +179,7 @@
         base.OnAfterRender(firstRender);
     }
 
-    private string FormatJson(string json)
-    {
-        try
-        {
-            dynamic parsedJson = JsonConvert.DeserializeObject(json)!;
-            if (parsedJson == null) return "Unable to parse json";
-            return JsonConvert.SerializeObject(parsedJson, Formatting.Indented);
-        }
-        catch (Exception ex)
-        {
-            return ex.Message;
-        }
-    }
+    
 
     private void FormatJson()
     {
@@ -261,35 +207,7 @@
     //    _environmentPopupOpen = !_environmentPopupOpen;
     //    Console.WriteLine(_environmentPopupOpen);
     //}
-    private async Task RunTests()
-    {
-        _testResults.Clear();
-        _runningTests = true;
-        try
-        {
-            foreach (var system in Configuration.Systems)
-            {
-                foreach (var environment in Configuration.Environments)
-                {
-                    var response = await ApiService.TestConfiguration(Configuration.Json, system, environment);
-                    Console.WriteLine($"response.IsSuccess={response.IsSuccess}");
-                    if (!response.IsSuccess || response.Response == null)
-                    {
-                        _testResults.Add(new ParseResponse
-                        {
-                            Problems = new List<string> { $"Call to API failed" }
-                        });
-                        return;
-                    }
-                    _testResults.Add(response.Response);
-                }
-            }
-        }
-        finally
-        {
-            _runningTests = false;
-        }
-    }
+    
 
     private void DeleteConfiguration(bool delete)
     {
@@ -297,4 +215,10 @@
         _expansionPanel.Collapse();
         StateHasChanged();
     }
+
+    public async Task RunTest()
+    {
+        await _testPanel.RunTests();
+    }
+
 }

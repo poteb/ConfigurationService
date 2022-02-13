@@ -52,7 +52,10 @@
     <MudItem xs="3">
         <MudButton StartIcon="@Icons.Filled.AddCircle" Variant="Variant.Outlined" Color="Color.Success" OnClick="AddConfiguration">Add new configuration</MudButton>
     </MudItem>
-    <MudItem xs="7" Class="d-flex justify-end">
+    <MudItem xs="3">
+        <MudButton StartIcon="@Icons.Filled.Check" OnClick="TestAll" Variant="Variant.Outlined" Color="Color.Info">Test all</MudButton>
+    </MudItem>
+    <MudItem xs="4" Class="d-flex justify-end">
         <MudButton EndIcon="@GetExpandAllConfigurationsButtonIcon()" OnClick="ExpandAllConfigurations">@GetExpandAllConfigurationsButtonText()</MudButton>
     </MudItem>
 </MudGrid>
@@ -60,6 +63,6 @@
 <MudExpansionPanels MultiExpansion="true" Elevation="3" Style="width: calc(100% - 15px);margin-bottom: 30px" @ref="_expansionPanels">
     @foreach (var configuration in Header.Configurations)
     {
-        <ConfigurationContent Index="@(configuration.Index)" Configuration="configuration" AllEnvironments="Environments" AllSystems="Systems" ApiService="ApiService"></ConfigurationContent>
+        <ConfigurationContent @ref="ConfigurationContentRef" Index="@(configuration.Index)" Configuration="configuration" AllEnvironments="Environments" AllSystems="Systems"></ConfigurationContent>
     }
 </MudExpansionPanels>
