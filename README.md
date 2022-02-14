@@ -1,4 +1,5 @@
 
+
 # ConfigurationService
 
 Centralize application-configuration and fetch through an API.
@@ -198,3 +199,6 @@ which results in
     }
 The *settings* key is gone from the original *appsettings.json* and replaced with the result of the reference.
 This works because the name of the configuration begins with *base-*.
+
+## Storage
+The underlying storage is abstracted away from the JSON parser and admin API, which means it's relatively easy to change it. For now you'll find a working file storage data provider and an incomplete SQL Server data provider. Changing the file location is done in *Config.Api/appsettings.Development.json* and *Config.Admin.Api/appsettings.Development.json*.
