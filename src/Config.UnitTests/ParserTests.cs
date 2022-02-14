@@ -1,7 +1,9 @@
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using NUnit.Framework;
+using pote.Config.DbModel;
 using pote.Config.Shared;
 
 namespace pote.Config.UnitTests
@@ -52,6 +54,18 @@ namespace pote.Config.UnitTests
                 "Super" => Task.FromResult("{\"Super\":\"mule\"}"),
                 _ => Task.FromResult("")
             };
+        }
+
+        public async Task<List<Environment>> GetEnvironments(CancellationToken cancellationToken)
+        {
+            var list = new List<Environment> { new() { Id = "dild_id", Name = "test" } };
+            return list;
+        }
+
+        public async Task<List<DbModel.System>> GetSystems(CancellationToken cancellationToken)
+        {
+            var list = new List<DbModel.System> { new() { Id = "dild_id", Name = "unittest" } };
+            return list;
         }
     }
 }

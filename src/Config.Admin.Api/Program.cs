@@ -14,7 +14,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var fileDb = builder.Configuration.GetSection("FileDatabase").GetSection("Directory").Value;
-builder.Services.AddScoped<IAdminDataProvider>(_ => new AdminDataProvider(new FileHandler(fileDb)));
+builder.Services.AddScoped<IFileHandler>(_ => new FileHandler(fileDb));
+builder.Services.AddScoped<ISystemDataAccess, SystemDataAccess>();
+builder.Services.AddScoped<IEnvironmentDataAccess, EnvionmentDataAccess>();
+builder.Services.AddScoped<IAdminDataProvider, AdminDataProvider>();
 
 var app = builder.Build();
 

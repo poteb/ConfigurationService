@@ -1,8 +1,10 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
 using pote.Config.DataProvider.File;
+using pote.Config.Shared;
 
 namespace pote.Config.UnitTests;
 
@@ -22,10 +24,12 @@ public class FileAdminDataProviderTests
             fh.GetEnvironmentContentAbsoluePath("file2", CancellationToken.None) == Task.FromResult(Environment2) &&
             fh.GetEnvironmentContentAbsoluePath("file3", CancellationToken.None) == Task.FromResult(Environment3) 
             );
-
-        var provider = new AdminDataProvider(moq);
-
+        
+        var systemMoq = Mock.Of<ISystemDataAccess>();
+        var environmentAccess = new EnvionmentDataAccess(moq);
+        var provider = new AdminDataProvider(moq, systemMoq, environmentAccess);
         var files = await provider.GetEnvironments(CancellationToken.None);
+
         Assert.AreEqual(3, files.Count);
         Assert.AreEqual("650782c9-ae07-43fd-86fc-7d3c4dfa9fc5", files[0].Id);
         Assert.AreEqual("75730781-ea22-4a27-8dd5-65178b21721a", files[1].Id);

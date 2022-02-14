@@ -4,13 +4,17 @@ using pote.Config.Shared;
 
 namespace pote.Config.DataProvider.File;
 
-public class DataProvider : IDataProvider
+public class DataProvider : IDataProvider, IEnvironmentDataAccess, ISystemDataAccess
 {
     private readonly IFileHandler _fileHandler;
+    private readonly IEnvironmentDataAccess _environmentDataAccess;
+    private readonly ISystemDataAccess _systemDataAccess;
 
-    public DataProvider(IFileHandler fileHandler)
+    public DataProvider(IFileHandler fileHandler, IEnvironmentDataAccess environmentDataAccess, ISystemDataAccess systemDataAccess)
     {
         _fileHandler = fileHandler;
+        _environmentDataAccess = environmentDataAccess;
+        _systemDataAccess = systemDataAccess;
     }
 
     public async Task<string> GetConfigurationJson(string name, string systemId, string environmentId, CancellationToken cancellationToken)
@@ -30,5 +34,15 @@ public class DataProvider : IDataProvider
         }
 
         return string.Empty;
+    }
+    
+    public async Task<List<DbModel.System>> GetSystems(CancellationToken cancellationToken)
+    {
+        return await _systemDataAccess.GetSystems(cancellationToken);
+    }
+
+    public async Task<List<DbModel.Environment>> GetEnvironments(CancellationToken cancellationToken)
+    {
+        return await _environmentDataAccess.GetEnvironments(cancellationToken);
     }
 }

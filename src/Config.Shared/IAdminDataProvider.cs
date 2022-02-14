@@ -2,7 +2,7 @@
 
 namespace pote.Config.Shared;
 
-public interface IAdminDataProvider
+public interface IAdminDataProvider : ISystemDataAccess, IEnvironmentDataAccess
 {
     /// <summary>Returns all configurations (without history)</summary>
     Task<List<ConfigurationHeader>> GetAll(CancellationToken cancellationToken);
@@ -12,12 +12,10 @@ public interface IAdminDataProvider
     Task Insert(ConfigurationHeader header, CancellationToken cancellationToken);
 
     //Task<Configuration> Update(Configuration configuration, CancellationToken cancellationToken);
-
-    Task<List<DbModel.Environment>> GetEnvironments(CancellationToken cancellationToken);
+    
     Task UpsertEnvironment(DbModel.Environment environment, CancellationToken cancellationToken);
     Task DeleteEnvironment(string id, CancellationToken cancellationToken);
-
-    Task<List<DbModel.System>> GetSystems(CancellationToken cancellationToken);
+    
     Task UpsertSystem(DbModel.System system, CancellationToken cancellationToken);
     Task DeleteSystem(string id, CancellationToken cancellationToken);
 }

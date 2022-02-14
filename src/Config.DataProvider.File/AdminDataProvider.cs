@@ -1,16 +1,21 @@
 ﻿using Newtonsoft.Json;
 using pote.Config.DbModel;
 using pote.Config.Shared;
+using Environment = pote.Config.DbModel.Environment;
 
 namespace pote.Config.DataProvider.File;
 
 public class AdminDataProvider : IAdminDataProvider
 {
     private readonly IFileHandler _fileHandler;
+    private readonly ISystemDataAccess _systemDataAccess;
+    private readonly IEnvironmentDataAccess _environmentDataAccess;
 
-    public AdminDataProvider(IFileHandler fileHandler)
+    public AdminDataProvider(IFileHandler fileHandler, ISystemDataAccess systemDataAccess, IEnvironmentDataAccess environmentDataAccess)
     {
         _fileHandler = fileHandler;
+        _systemDataAccess = systemDataAccess;
+        _environmentDataAccess = environmentDataAccess;
     }
 
     public async Task<List<ConfigurationHeader>> GetAll(CancellationToken cancellationToken)
@@ -42,24 +47,7 @@ public class AdminDataProvider : IAdminDataProvider
         await _fileHandler.WriteConfigurationContent(header.Id, JsonConvert.SerializeObject(header), cancellationToken);
     }
 
-    public async Task<List<DbModel.Environment>> GetEnvironments(CancellationToken cancellationToken)
-    {
-        var files = _fileHandler.GetEnvironmentFiles();
-        var result = new List<DbModel.Environment>();
-        foreach (var file in files)
-        {
-            try
-            {
-                var env = JsonConvert.DeserializeObject<DbModel.Environment>(await _fileHandler.GetEnvironmentContentAbsoluePath(file, cancellationToken));
-                if (env == null) continue;
-                result.Add(env);
-            }
-            catch (Exception) { /* ignore */ }
-        }
-
-        return result;
-    }
-
+    
     public async Task UpsertEnvironment(DbModel.Environment environment, CancellationToken cancellationToken)
     {
         await _fileHandler.WriteEnvironmentContent(environment.Id, JsonConvert.SerializeObject(environment), cancellationToken);
@@ -71,24 +59,7 @@ public class AdminDataProvider : IAdminDataProvider
         return Task.CompletedTask;
     }
 
-    public async Task<List<DbModel.System>> GetSystems(CancellationToken cancellationToken)
-    {
-        var files = _fileHandler.GetSystemFiles();
-        var result = new List<DbModel.System>();
-        foreach (var file in files)
-        {
-            try
-            {
-                var system = JsonConvert.DeserializeObject<DbModel.System>(await _fileHandler.GetSystemContentAbsolutePath(file, cancellationToken));
-                if (system == null) continue;
-                result.Add(system);
-            }
-            catch (Exception) { /* ignore */ }
-        }
-
-        return result;
-    }
-
+    
     public async Task UpsertSystem(DbModel.System system, CancellationToken cancellationToken)
     {
         await _fileHandler.WriteSystemContent(system.Id, JsonConvert.SerializeObject(system), cancellationToken);
@@ -98,5 +69,15 @@ public class AdminDataProvider : IAdminDataProvider
     {
         _fileHandler.DeleteSystem(id);
         return Task.CompletedTask;
+    }
+
+    public async Task<List<DbModel.System>> GetSystems(CancellationToken cancellationToken)
+    {
+        return await _systemDataAccess.GetSystems(cancellationToken);
+    }
+
+    public async Task<List<Environment>> GetEnvironments(CancellationToken cancellationToken)
+    {
+        return await _environmentDataAccess.GetEnvironments(cancellationToken);
     }
 }

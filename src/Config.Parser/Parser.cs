@@ -23,7 +23,23 @@ namespace pote.Config.Parser
                 return "";
             }
             var root = JObject.Parse(json);
-            await HandleToken(root, system, environment, problems, cancellationToken);
+            var systems = await _dataProvider.GetSystems(cancellationToken);
+            var dbSystem = systems.FirstOrDefault(s => s.Id == system || s.Name.Equals(system, StringComparison.InvariantCultureIgnoreCase));
+            if (dbSystem == null)
+            {
+                problems($"System {system} not found");
+                return "";
+            }
+
+            var environments = await _dataProvider.GetEnvironments(cancellationToken);
+            var dbEnv = environments.FirstOrDefault(e => e.Id == environment || e.Name.Equals(environment, StringComparison.InvariantCultureIgnoreCase));
+            if (dbEnv == null)
+            {
+                problems($"Environment {environment} not found");
+                return "";
+            }
+            
+            await HandleToken(root, dbSystem.Id, dbEnv.Id, problems, cancellationToken);
             MoveBaseChildrenToRoot(root);
             root.AddFirst(new JProperty("generated_timestamp_utc", DateTime.UtcNow.ToString("s")));
             return root.ToString();
