@@ -175,7 +175,7 @@ But instead we use a base-reference
           "Microsoft.AspNetCore": "Warning"
         }
       },
-      "settings":"$ref:base-MyApplicationConfig"
+      "settings":"$ref:base-configuration"
     }
 which results in 
 
@@ -197,3 +197,4 @@ which results in
       }
     }
 The *settings* key is gone from the original *appsettings.json* and replaced with the result of the reference.
+This works because the name of the configuration begins with *base-*.
