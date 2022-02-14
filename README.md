@@ -80,7 +80,7 @@ First we connect the existing *RabbitMQ-Login* to our application.
     }
 It looks the same, but it's connected to our application.
 Here's a *RabbitMQ-Login* for another application:
-##### *RabbitMQ-Login • More Gold for Scrooge:*
+##### *RabbitMQ-Login • System: More Gold for Scrooge:*
     {
       "Username":"Scrooge",
       "Password":"LuckyCoin"
@@ -99,7 +99,7 @@ Both application use the same base configuration, but the results differ.
       }
     }
 
-##### *Base-configuration • More Gold for Scrooge:*
+##### *Base-configuration • System: More Gold for Scrooge:*
     {
       "ConnectionStrings": {
         "Default": "Data Source=dbserver;Initial Catalog=myDb;User Id=sa;Password=SuperNinjaPassword"
