@@ -43,7 +43,7 @@ Other applications might need a connection to the same database, and since we ha
     }
 *$ref:ConnectionStrings#Default* is a JSON reference pointing to ConnectionStrings configuration's Default value. The output looks like Base-configuration v1.
 Now let's look at the RabbitMQ settings. Just like the SQL connection we can move the entire block to its own configuration.
-##### *Base-configuration (v2):*
+##### *Base-configuration (v3):*
     {
       "ConnectionStrings": {
         "Default": "$ref:ConnectionStrings#Default"
@@ -112,3 +112,88 @@ Both application use the same base configuration, but the results differ.
       }
     }
 The only difference is the username and password for RabbitMQ. If we later create another application that has a similar configuration we only need to create a new *RabbitMQ-Login* configuration and link it to our application. If our new application needs the AnotherConnection SQL connection string we just reference that instead, or create a third one.
+
+Besides different systems it's also required to link all configurations to an environment. This makes it possible to use the same set of configurations across different environments. It could be different test environments and development. An example could *ConnectionStrings* where we want to use a different Default connection string when debugging our application.
+##### *ConnectionStrings • Environments: Test1:*
+    {
+      "Default":"Data Source=dbserver;Initial Catalog=myDbTest1;User Id=sa;Password=SuperNinjaPassword",
+      "AnotherConnection":"Server=dbserver;Database=yourDb;Trusted_Connection=True"
+    }
+##### *ConnectionStrings • Environments: Test2:*
+    {
+      "Default":"Data Source=dbserver;Initial Catalog=myDbTest2;User Id=sa;Password=SuperNinjaPassword",
+      "AnotherConnection":"Server=dbserver;Database=yourDb;Trusted_Connection=True"
+    }
+##### *ConnectionStrings • Environments: Development:*
+    {
+      "Default":"Data Source=.;Initial Catalog=myDb;Trusted_Connection=True",
+      "AnotherConnection":"Server=dbserver;Database=yourDb;Trusted_Connection=True"
+    }
+Here we use different the same SQL Server instance for our test environments but different databases. And locally we use "." and a trusted connection. The base configuration remains unchanged.
+
+### "Base" naming convention
+If a reference begins with "base-" the result of the reference replaces the whole key-value pair.
+Let's look at a standard appsettings.json file.
+##### *appsettings.json:*
+    {
+      "Logging": {
+        "LogLevel": {
+          "Default": "Information",
+          "Microsoft.AspNetCore": "Warning"
+        }
+      },
+      "ConnectionStrings": {
+        "Default": "Data Source=dbserver;Initial Catalog=myDb;User Id=sa;Password=SuperNinjaPassword"
+      },
+      "RabbitMQ": {
+        "Server": "MyMqServer",
+        "Port": 5672,
+        "Username": "Goofy",
+        "Password": "EpicHeroPassword"
+      }
+    }
+We could change this to
+
+    {
+      "Logging": {
+        "LogLevel": {
+          "Default": "Information",
+          "Microsoft.AspNetCore": "Warning"
+        }
+      },
+      "ConnectionStrings": {
+        "Default": "$ref:ConnectionStrings#Default"
+      },
+      "RabbitMQ": "$ref:RabbitMQ#"
+    }
+But instead we use a base-reference
+
+    {
+      "Logging": {
+        "LogLevel": {
+          "Default": "Information",
+          "Microsoft.AspNetCore": "Warning"
+        }
+      },
+      "settings":"$ref:base-MyApplicationConfig"
+    }
+which results in 
+
+    {
+      "Logging": {
+        "LogLevel": {
+          "Default": "Information",
+          "Microsoft.AspNetCore": "Warning"
+        }
+      },
+      "ConnectionStrings": {
+        "Default": "Data Source=dbserver;Initial Catalog=myDb;User Id=sa;Password=SuperNinjaPassword"
+      },
+      "RabbitMQ": {
+        "Server": "MyMqServer",
+        "Port": 5672,
+        "Username": "Goofy",
+        "Password": "EpicHeroPassword"
+      }
+    }
+The *settings* key is gone from the original *appsettings.json* and replaced with the result of the reference.
