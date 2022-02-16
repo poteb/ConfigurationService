@@ -18,7 +18,7 @@ builder.Services.AddScoped<IParser, Parser>();
 var fileDb = builder.Configuration.GetSection("FileDatabase").GetSection("Directory").Value;
 builder.Services.AddScoped<IFileHandler>(_ => new FileHandler(fileDb));
 builder.Services.AddScoped<IDataProvider, DataProvider>();
-builder.Services.AddScoped<ISystemDataAccess, SystemDataAccess>();
+builder.Services.AddScoped<IApplicationDataAccess, ApplicationDataAccess>();
 builder.Services.AddScoped<IEnvironmentDataAccess, EnvionmentDataAccess>();
 
 var app = builder.Build();

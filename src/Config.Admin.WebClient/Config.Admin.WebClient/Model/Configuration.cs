@@ -10,7 +10,7 @@ public class Configuration : IEquatable<Configuration>
     public bool Deleted { get; set; }
 
     public List<ConfigEnvironment> Environments { get; set; } = new();
-    public List<ConfigSystem> Systems { get; set; } = new();
+    public List<Application> Applications { get; set; } = new();
     public List<Configuration> History { get; set; } = new();
     public int Index { get; set; }
 
@@ -24,8 +24,8 @@ public class Configuration : IEquatable<Configuration>
         if (!IsActive == other.IsActive) return false;
         if (!Deleted == other.Deleted) return false;
 
-        if (!Systems.Count.Equals(other.Systems.Count)) return false;
-        if (!string.Join(",", Systems.Select(s => s.Id)).Equals(string.Join(",", other.Systems.Select(s => s.Id)))) return false;
+        if (!Applications.Count.Equals(other.Applications.Count)) return false;
+        if (!string.Join(",", Applications.Select(s => s.Id)).Equals(string.Join(",", other.Applications.Select(s => s.Id)))) return false;
 
         if (!Environments.Count.Equals(other.Environments.Count)) return false;
         if (!string.Join(",", Environments.Select(e => e.Id)).Equals(string.Join(",", other.Environments.Select(e => e.Id)))) return false;
@@ -42,7 +42,7 @@ public class Configuration : IEquatable<Configuration>
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Id, HeaderId, CreatedUtc, Json, Deleted, IsActive, Environments, Systems);
+        return HashCode.Combine(Id, HeaderId, CreatedUtc, Json, Deleted, IsActive, Environments, Applications);
     }
 }
 

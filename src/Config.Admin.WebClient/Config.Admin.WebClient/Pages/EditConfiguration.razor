@@ -39,7 +39,7 @@
         </MudGrid>
     </MudItem>
     <MudItem xs="8">
-        <MudText Style="font-size:10pt">Unhandled systems: @string.Join(", ", UnhandledSystems)</MudText>
+        <MudText Style="font-size:10pt">Unhandled applications: @string.Join(", ", UnhandledApplications)</MudText>
         <MudText Style="font-size:10pt">Unhandled environments: @string.Join(", ", UnhandledEnvironments)</MudText>
     </MudItem>
 </MudGrid>
@@ -63,6 +63,6 @@
 <MudExpansionPanels MultiExpansion="true" Elevation="3" Style="width: calc(100% - 15px);margin-bottom: 30px" @ref="_expansionPanels">
     @foreach (var configuration in Header.Configurations)
     {
-        <ConfigurationContent @ref="ConfigurationContentRef" Index="@(configuration.Index)" Configuration="configuration" AllEnvironments="Environments" AllSystems="Systems"></ConfigurationContent>
+        <ConfigurationContent @ref="ConfigurationContentRef" Index="@(configuration.Index)" Configuration="configuration" AllEnvironments="Environments" AllApplications="Applications"></ConfigurationContent>
     }
 </MudExpansionPanels>

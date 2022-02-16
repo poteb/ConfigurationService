@@ -3,13 +3,13 @@
     public class SearchCriteria
     {
         public string SearchText { get; set; } = string.Empty;
-        public string SelectedSystem { get; set; } = string.Empty;
+        public string SelectedApplication { get; set; } = string.Empty;
         public string SelectedEnvironment { get; set; } = string.Empty;
 
         public void Reset()
         {
             SearchText = string.Empty;
-            SelectedSystem = string.Empty;
+            SelectedApplication = string.Empty;
             SelectedEnvironment = string.Empty;
         }
     }

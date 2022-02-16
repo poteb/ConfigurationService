@@ -23,8 +23,8 @@
                     </MudPopover>*@
                     </MudItem>
                     <MudItem xs="12" Class="d-flex" Style="padding-top:0">
-                        <MudText Style="min-width: 110px;">Systems:</MudText>
-                        <MudText Style="font-weight: bold">@_systemsText</MudText>
+                        <MudText Style="min-width: 110px;">Applications:</MudText>
+                        <MudText Style="font-weight: bold">@_applicationsText</MudText>
                         @*<MudIconButton Icon="@Icons.Filled.Add" Size="Size.Small" ></MudIconButton>*@
                     </MudItem>
                 </MudGrid>
@@ -59,10 +59,10 @@
                         </MudSelect>
                     </MudItem>
                     <MudItem xs="3">
-                        <MudSelect T="ConfigSystem" Style="background-color: white" Variant="Variant.Outlined" Margin="Margin.Dense" Label="Systems" MultiSelection="true" @bind-SelectedValues="SelectedSystems" SelectAll="true">
-                            @foreach (var system in AllSystems)
+                        <MudSelect T="Application" Style="background-color: white" Variant="Variant.Outlined" Margin="Margin.Dense" Label="Applications" MultiSelection="true" @bind-SelectedValues="SelectedApplications" SelectAll="true">
+                            @foreach (var application in AllApplications)
                             {
-                                <MudSelectItem T="ConfigSystem" Value="system" Style="white-space: nowrap !important">@system.Name</MudSelectItem>
+                                <MudSelectItem T="Application" Value="application" Style="white-space: nowrap !important">@application.Name</MudSelectItem>
                             }
                         </MudSelect>
                     </MudItem>
@@ -74,7 +74,7 @@
             </MudItem>
             <MudTextField @bind-Text="Configuration.Json" T="string" Variant="Variant.Outlined" Lines="@_jsonLines" Style="background-color:#fff"></MudTextField>
 
-            <ConfigurationContentTestPanel @ref="_testPanel" AllEnvironments="_allEnvironments" AllSystems="_allSystems" Configuration="_configuration"></ConfigurationContentTestPanel>
+            <ConfigurationContentTestPanel @ref="_testPanel" AllEnvironments="_allEnvironments" AllApplications="_allApplications" Configuration="_configuration"></ConfigurationContentTestPanel>
         }
     </ChildContent>
 </MudExpansionPanel>
@@ -87,10 +87,10 @@
     private IEnumerable<ConfigEnvironment> _selectedEnvironments = new HashSet<ConfigEnvironment>();
     private Configuration _configuration = new();
     //private Configuration _configurationOriginal = new();
-    private IEnumerable<ConfigSystem> _selectedSystems = new HashSet<ConfigSystem>();
+    private IEnumerable<Application> _selectedApplications = new HashSet<Application>();
     private string _environmentsText = string.Empty;
-    private string _systemsText = string.Empty;
-    private List<ConfigSystem> _allSystems = new();
+    private string _applicationsText = string.Empty;
+    private List<Application> _allApplications = new();
     private List<ConfigEnvironment> _allEnvironments = new();
     private int _index = -1;
 
@@ -119,14 +119,14 @@
         }
     }
 
-    private IEnumerable<ConfigSystem> SelectedSystems
+    private IEnumerable<Application> SelectedApplications
     {
-        get => _selectedSystems;
+        get => _selectedApplications;
         set
         {
-            _selectedSystems = value;
-            _configuration.Systems = new List<ConfigSystem>(value);
-            _systemsText = string.Join(", ", value.OrderBy(x => x.Name));
+            _selectedApplications = value;
+            _configuration.Applications = new List<Application>(value);
+            _applicationsText = string.Join(", ", value.OrderBy(x => x.Name));
         }
     }
 
@@ -139,10 +139,10 @@
     }
 
     [Parameter]
-    public List<ConfigSystem> AllSystems
+    public List<Application> AllApplications
     {
-        get => _allSystems;
-        set => _allSystems = value.OrderBy(x => x.Name).ToList();
+        get => _allApplications;
+        set => _allApplications = value.OrderBy(x => x.Name).ToList();
     }
 
     [Parameter]
@@ -154,7 +154,7 @@
             _configuration = value;
             //_configurationOriginal = ConfigurationMapper.Copy(value);
             _environmentsText = string.Join(", ", value.Environments.OrderBy(x => x.Name));
-            _systemsText = string.Join(", ", value.Systems.OrderBy(x => x.Name));
+            _applicationsText = string.Join(", ", value.Applications.OrderBy(x => x.Name));
         }
     }
 
@@ -168,13 +168,13 @@
         }
         SelectedEnvironments = envs;
 
-        var systs = new List<ConfigSystem>();
-        foreach (var system in AllSystems)
+        var systs = new List<Application>();
+        foreach (var application in AllApplications)
         {
-            if (Configuration.Systems.Any(s => s.Id == system.Id))
-                systs.Add(system);
+            if (Configuration.Applications.Any(s => s.Id == application.Id))
+                systs.Add(application);
         }
-        SelectedSystems = systs;
+        SelectedApplications = systs;
 
         base.OnAfterRender(firstRender);
     }

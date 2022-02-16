@@ -45,7 +45,7 @@ namespace pote.Config.UnitTests
 
     public class TestDataProvider : IDataProvider
     {
-        public Task<string> GetConfigurationJson(string name, string system, string environment, CancellationToken cancellationToken)
+        public Task<string> GetConfigurationJson(string name, string applicationId, string environment, CancellationToken cancellationToken)
         {
             return name switch
             {
@@ -62,9 +62,9 @@ namespace pote.Config.UnitTests
             return list;
         }
 
-        public async Task<List<DbModel.System>> GetSystems(CancellationToken cancellationToken)
+        public async Task<List<DbModel.Application>> GetApplications(CancellationToken cancellationToken)
         {
-            var list = new List<DbModel.System> { new() { Id = "dild_id", Name = "unittest" } };
+            var list = new List<DbModel.Application> { new() { Id = "dild_id", Name = "unittest" } };
             return list;
         }
     }

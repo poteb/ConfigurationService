@@ -25,9 +25,9 @@ public class FileAdminDataProviderTests
             fh.GetEnvironmentContentAbsoluePath("file3", CancellationToken.None) == Task.FromResult(Environment3) 
             );
         
-        var systemMoq = Mock.Of<ISystemDataAccess>();
+        var applicationMoq = Mock.Of<IApplicationDataAccess>();
         var environmentAccess = new EnvionmentDataAccess(moq);
-        var provider = new AdminDataProvider(moq, systemMoq, environmentAccess);
+        var provider = new AdminDataProvider(moq, applicationMoq, environmentAccess);
         var files = await provider.GetEnvironments(CancellationToken.None);
 
         Assert.AreEqual(3, files.Count);

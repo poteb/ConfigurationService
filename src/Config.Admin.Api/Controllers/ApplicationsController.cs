@@ -7,25 +7,25 @@ namespace pote.Config.Admin.Api.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class SystemsController : ControllerBase
+public class ApplicationsController : ControllerBase
 {
-    private readonly ILogger<SystemsController> _logger;
+    private readonly ILogger<ApplicationsController> _logger;
     private readonly IAdminDataProvider _dataProvider;
 
-    public SystemsController(ILogger<SystemsController> logger, IAdminDataProvider dataProvider)
+    public ApplicationsController(ILogger<ApplicationsController> logger, IAdminDataProvider dataProvider)
     {
         _logger = logger;
         _dataProvider = dataProvider;
     }
 
     [HttpGet]
-    public async Task<ActionResult<SystemsResponse>> GetAll(CancellationToken cancellationToken)
+    public async Task<ActionResult<ApplicationsResponse>> GetAll(CancellationToken cancellationToken)
     {
         try
         {
-            var response = new SystemsResponse
+            var response = new ApplicationsResponse
             {
-                Systems = SystemMapper.ToApi(await _dataProvider.GetSystems(cancellationToken))
+                Applications = ApplicationMapper.ToApi(await _dataProvider.GetApplications(cancellationToken))
             };
             return Ok(response);
         }
@@ -36,11 +36,11 @@ public class SystemsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult> Insert([FromBody] Model.System system, CancellationToken cancellationToken)
+    public async Task<ActionResult> Insert([FromBody] Model.Application application, CancellationToken cancellationToken)
     {
         try
         {
-            await _dataProvider.UpsertSystem(SystemMapper.ToDb(system), cancellationToken);
+            await _dataProvider.UpsertApplication(ApplicationMapper.ToDb(application), cancellationToken);
             return Ok();
         }
         catch (Exception ex)
@@ -54,7 +54,7 @@ public class SystemsController : ControllerBase
     {
         try
         {
-            await _dataProvider.DeleteSystem(id, cancellationToken);
+            await _dataProvider.DeleteApplication(id, cancellationToken);
             return Ok();
         }
         catch (Exception ex)

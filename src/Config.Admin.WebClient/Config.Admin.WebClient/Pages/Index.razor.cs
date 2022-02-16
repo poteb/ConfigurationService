@@ -8,7 +8,7 @@ namespace pote.Config.Admin.WebClient.Pages;
 public partial class Index
 {
     public List<ConfigurationHeader> Headers { get; set; } = new();
-    public List<ConfigSystem> Systems { get; set; } = new();
+    public List<Application> Applications { get; set; } = new();
     public List<ConfigEnvironment> Environments { get; set; } = new();
     [Inject] public IAdminApiService AdminApiService { get; set; } = null!;
     [Inject] public NavigationManager NavigationManager { get; set; } = null!;
@@ -28,15 +28,15 @@ public partial class Index
             Headers = ConfigurationMapper.ToClient(callResponse.Response.Configurations);
         else
             PageError.OnError(callResponse.GenerateErrorMessage(), new Exception());
-        await UpdateSystems();
+        await UpdateApplications();
         await UpdateEnvironments();
     }
 
-    private async Task UpdateSystems()
+    private async Task UpdateApplications()
     {
-        var callResponse = await AdminApiService.GetSystems();
+        var callResponse = await AdminApiService.GetApplications();
         if (callResponse.IsSuccess && callResponse.Response != null)
-            Systems = SystemMapper.ToClient(callResponse.Response.Systems);
+            Applications = ApplicationMapper.ToClient(callResponse.Response.Applications);
         else
             PageError.OnError(callResponse.GenerateErrorMessage(), new Exception());
     }

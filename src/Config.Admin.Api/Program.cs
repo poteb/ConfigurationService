@@ -15,7 +15,7 @@ builder.Services.AddSwaggerGen();
 
 var fileDb = builder.Configuration.GetSection("FileDatabase").GetSection("Directory").Value;
 builder.Services.AddScoped<IFileHandler>(_ => new FileHandler(fileDb));
-builder.Services.AddScoped<ISystemDataAccess, SystemDataAccess>();
+builder.Services.AddScoped<IApplicationDataAccess, ApplicationDataAccess>();
 builder.Services.AddScoped<IEnvironmentDataAccess, EnvionmentDataAccess>();
 builder.Services.AddScoped<IAdminDataProvider, AdminDataProvider>();
 

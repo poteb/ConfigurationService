@@ -24,12 +24,12 @@ public class ConfigurationsController : ControllerBase
     {
         try
         {
-            var systems = await _dataProvider.GetSystems(cancellationToken);
+            var applications = await _dataProvider.GetApplications(cancellationToken);
             var environments = await _dataProvider.GetEnvironments(cancellationToken);
             var d = await _dataProvider.GetAll(cancellationToken);
             var response = new ConfigurationsResponse
             {
-                Configurations = ConfigurationMapper.ToApi(d, systems, environments)
+                Configurations = ConfigurationMapper.ToApi(d, applications, environments)
             };
             return Ok(response);
         }
@@ -47,11 +47,11 @@ public class ConfigurationsController : ControllerBase
         {
             var header = await _dataProvider.GetConfiguration(id, cancellationToken);
             if (header == null) return NotFound();
-            var systems = await _dataProvider.GetSystems(cancellationToken);
+            var applications = await _dataProvider.GetApplications(cancellationToken);
             var environments = await _dataProvider.GetEnvironments(cancellationToken);
             var response = new ConfigurationResponse
             {
-                Configuration = ConfigurationMapper.ToApi(header, systems, environments),
+                Configuration = ConfigurationMapper.ToApi(header, applications, environments),
             };
             return Ok(response);
         }

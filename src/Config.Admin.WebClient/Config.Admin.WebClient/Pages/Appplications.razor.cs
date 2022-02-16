@@ -4,9 +4,9 @@ using pote.Config.Admin.WebClient.Services;
 
 namespace pote.Config.Admin.WebClient.Pages;
 
-public partial class Systems
+public partial class Appplications
 {
-    public List<ConfigSystem> List { get; set; } = new();
+    public List<Application> List { get; set; } = new();
 
     [Inject] public IAdminApiService AdminApiService { get; set; } = null!;
     [CascadingParameter] public PageError PageError { get; set; } = null!;
@@ -19,16 +19,16 @@ public partial class Systems
     private async Task Load()
     {
         PageError.Reset();
-        var callResponse = await AdminApiService.GetSystems();
+        var callResponse = await AdminApiService.GetApplications();
         if (callResponse.IsSuccess && callResponse.Response != null)
-            List = Mappers.SystemMapper.ToClient(callResponse.Response.Systems);
+            List = Mappers.ApplicationMapper.ToClient(callResponse.Response.Applications);
         else
             PageError.OnError(callResponse.GenerateErrorMessage(), new Exception());
     }
 
     private async Task Save()
     {
-        var callResponse = await AdminApiService.SaveSystems(List);
+        var callResponse = await AdminApiService.SaveApplications(List);
         if (!callResponse.IsSuccess)
             PageError.OnError("Error saving data, please try again", new Exception());
         else
@@ -40,6 +40,6 @@ public partial class Systems
 
     private void AddItem()
     {
-        List.Add(new ConfigSystem());
+        List.Add(new Application());
     }
 }

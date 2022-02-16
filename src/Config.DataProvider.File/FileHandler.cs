@@ -4,14 +4,14 @@ public class FileHandler : IFileHandler
 {
     private readonly string _configurationRootDir;
     private readonly string _environmentsDir;
-    private readonly string _systemsDir;
+    private readonly string _applicationsDir;
 
     public FileHandler(string directory)
     {
         _configurationRootDir = Path.Combine(directory, "configurations");
         //_configurationHistoryDir = Path.Combine(_configurationRootDir, "history");
         _environmentsDir = Path.Combine(directory, "environments");
-        _systemsDir = Path.Combine(directory, "systems");
+        _applicationsDir = Path.Combine(directory, "applications");
         
         if (!Directory.Exists(_configurationRootDir))
             Directory.CreateDirectory(_configurationRootDir);
@@ -19,8 +19,8 @@ public class FileHandler : IFileHandler
         //    Directory.CreateDirectory(_configurationHistoryDir);
         if (!Directory.Exists(_environmentsDir))
             Directory.CreateDirectory(_environmentsDir);
-        if (!Directory.Exists(_systemsDir))
-            Directory.CreateDirectory(_systemsDir);
+        if (!Directory.Exists(_applicationsDir))
+            Directory.CreateDirectory(_applicationsDir);
     }
 
     public string[] GetConfigurationFiles()
@@ -74,27 +74,27 @@ public class FileHandler : IFileHandler
         System.IO.File.Delete(file);
     }
 
-    public string[] GetSystemFiles()
+    public string[] GetApplicationFiles()
     {
-        return Directory.GetFiles(_systemsDir);
+        return Directory.GetFiles(_applicationsDir);
     }
-    public async Task<string> GetSystemContentAbsolutePath(string file, CancellationToken cancellationToken)
+    public async Task<string> GetApplicationContentAbsolutePath(string file, CancellationToken cancellationToken)
     {
         return await System.IO.File.ReadAllTextAsync(file, cancellationToken);
     }
-    public async Task<string> GetSystemContent(string id, CancellationToken cancellationToken)
+    public async Task<string> GetApplicationContent(string id, CancellationToken cancellationToken)
     {
-        var file = Path.ChangeExtension(Path.Combine(_systemsDir, id), ".txt");
-        return await GetSystemContentAbsolutePath(file, cancellationToken);
+        var file = Path.ChangeExtension(Path.Combine(_applicationsDir, id), ".txt");
+        return await GetApplicationContentAbsolutePath(file, cancellationToken);
     }
-    public async Task WriteSystemContent(string id, string content, CancellationToken cancellationToken)
+    public async Task WriteApplicationContent(string id, string content, CancellationToken cancellationToken)
     {
-        var file = Path.ChangeExtension(Path.Combine(_systemsDir, id), ".txt");
+        var file = Path.ChangeExtension(Path.Combine(_applicationsDir, id), ".txt");
         await System.IO.File.WriteAllTextAsync(file, content, cancellationToken);
     }
-    public void DeleteSystem(string id)
+    public void DeleteApplication(string id)
     {
-        var file = Path.ChangeExtension(Path.Combine(_systemsDir, id), ".txt");
+        var file = Path.ChangeExtension(Path.Combine(_applicationsDir, id), ".txt");
         if (!System.IO.File.Exists(file)) return;
         System.IO.File.Delete(file);
     }

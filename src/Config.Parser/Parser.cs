@@ -8,14 +8,14 @@ namespace pote.Config.Parser
     {
         private readonly IDataProvider _dataProvider;
         private const string RefPattern = "\\$ref:(?<ref>[^#]*)#(?<field>[^\"]*)";
-        private const string NamePattern = "(?<name>[^.]*).?(?<system>[^.]*).?(?<environment>[^.]*)";
+        //private const string NamePattern = "(?<name>[^.]*).?(?<application>[^.]*).?(?<environment>[^.]*)";
 
         public Parser(IDataProvider dataProvider)
         {
             _dataProvider = dataProvider;
         }
 
-        public async Task<string> Parse(string json, string system, string environment, Action<string> problems, CancellationToken cancellationToken)
+        public async Task<string> Parse(string json, string application, string environment, Action<string> problems, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(json))
             {
@@ -23,11 +23,11 @@ namespace pote.Config.Parser
                 return "";
             }
             var root = JObject.Parse(json);
-            var systems = await _dataProvider.GetSystems(cancellationToken);
-            var dbSystem = systems.FirstOrDefault(s => s.Id == system || s.Name.Equals(system, StringComparison.InvariantCultureIgnoreCase));
-            if (dbSystem == null)
+            var applications = await _dataProvider.GetApplications(cancellationToken);
+            var dbApplications = applications.FirstOrDefault(s => s.Id == application || s.Name.Equals(application, StringComparison.InvariantCultureIgnoreCase));
+            if (dbApplications == null)
             {
-                problems($"System {system} not found");
+                problems($"Application {application} not found");
                 return "";
             }
 
@@ -39,17 +39,17 @@ namespace pote.Config.Parser
                 return "";
             }
             
-            await HandleToken(root, dbSystem.Id, dbEnv.Id, problems, cancellationToken);
+            await HandleToken(root, dbApplications.Id, dbEnv.Id, problems, cancellationToken);
             MoveBaseChildrenToRoot(root);
             root.AddFirst(new JProperty("generated_timestamp_utc", DateTime.UtcNow.ToString("s")));
             return root.ToString();
         }
 
-        private async Task HandleToken(JToken token, string system, string environment, Action<string> problems, CancellationToken cancellationToken)
+        private async Task HandleToken(JToken token, string application, string environment, Action<string> problems, CancellationToken cancellationToken)
         {
             if (token.HasValues)
                 foreach (var child in token.Children())
-                    await HandleToken(child, system, environment, problems, cancellationToken);
+                    await HandleToken(child, application, environment, problems, cancellationToken);
             if (token.Type != JTokenType.Property) return;
             var jProp = token.Value<JProperty>();
             if (jProp == null || jProp.Value.Type != JTokenType.String) return;
@@ -58,18 +58,18 @@ namespace pote.Config.Parser
             var match = Regex.Match(value, RefPattern);
             if (!match.Success) return;
             var json = "";
-            var nameMatch = Regex.Match(match.Groups[1].Value, NamePattern);
-            if (nameMatch.Success)
-            {
-                var name = nameMatch.Groups["name"].Value;
-                var nSystem = nameMatch.Groups["system"].Value.Replace("system", system);
-                if (string.IsNullOrEmpty(nSystem))
-                    nSystem = system;
-                var nEnvironment = nameMatch.Groups["environment"].Value.Replace("environment", environment);
-                if (string.IsNullOrEmpty(nEnvironment))
-                    nEnvironment = environment;
-                json = await _dataProvider.GetConfigurationJson(name, nSystem, nEnvironment, cancellationToken);
-            }
+            //var nameMatch = Regex.Match(match.Groups[1].Value, NamePattern);
+            // if (nameMatch.Success)
+            // {
+            //     var name = nameMatch.Groups["name"].Value;
+            //     var nApplication = nameMatch.Groups["application"].Value.Replace("application", application);
+            //     if (string.IsNullOrEmpty(nApplication))
+            //         nApplication = application;
+            //     var nEnvironment = nameMatch.Groups["environment"].Value.Replace("environment", environment);
+            //     if (string.IsNullOrEmpty(nEnvironment))
+            //         nEnvironment = environment;
+                json = await _dataProvider.GetConfigurationJson(match.Groups[1].Value, application, environment, cancellationToken);
+            //}
 
             if (string.IsNullOrEmpty(json))
             {
@@ -82,7 +82,7 @@ namespace pote.Config.Parser
             if (refToken == null) return;
             jProp.Value = refToken;
             if (string.IsNullOrEmpty(refField.Value))
-                await HandleToken(refO, system, environment, problems, cancellationToken);
+                await HandleToken(refO, application, environment, problems, cancellationToken);
         }
 
         /// <summary>If a child of the root object is named 'Base' or 'base', it's child object are moved to the root. This comes into play when the input JSON needs to be completely replaced by the content of a configuration (not just the value but also the name).</summary>

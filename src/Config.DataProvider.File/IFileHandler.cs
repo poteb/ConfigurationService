@@ -10,9 +10,9 @@ public interface IFileHandler
     Task<string> GetEnvironmentContent(string id, CancellationToken cancellationToken);
     Task WriteEnvironmentContent(string id, string content, CancellationToken cancellationToken);
     void DeleteEnvironment(string id);
-    string[] GetSystemFiles();
-    Task<string> GetSystemContentAbsolutePath(string file, CancellationToken cancellationToken);
-    Task<string> GetSystemContent(string id, CancellationToken cancellationToken);
-    Task WriteSystemContent(string id, string content, CancellationToken cancellationToken);
-    void DeleteSystem(string id);
+    string[] GetApplicationFiles();
+    Task<string> GetApplicationContentAbsolutePath(string file, CancellationToken cancellationToken);
+    Task<string> GetApplicationContent(string id, CancellationToken cancellationToken);
+    Task WriteApplicationContent(string id, string content, CancellationToken cancellationToken);
+    void DeleteApplication(string id);
 }

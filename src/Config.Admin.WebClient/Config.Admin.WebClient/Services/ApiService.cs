@@ -7,7 +7,7 @@ namespace pote.Config.Admin.WebClient.Services;
 
 public interface IApiService
 {
-    Task<ApiCallResponse<ParseResponse>> TestConfiguration(string json, ConfigSystem system, ConfigEnvironment environment);
+    Task<ApiCallResponse<ParseResponse>> TestConfiguration(string json, Application application, ConfigEnvironment environment);
 }
 
 public class ApiService : ApiServiceBase, IApiService
@@ -19,7 +19,7 @@ public class ApiService : ApiServiceBase, IApiService
         _clientFactory = clientFactory;
     }
 
-    public async Task<ApiCallResponse<ParseResponse>> TestConfiguration(string json, ConfigSystem system, ConfigEnvironment environment)
+    public async Task<ApiCallResponse<ParseResponse>> TestConfiguration(string json, Application application, ConfigEnvironment environment)
     {
         try
         {
@@ -27,7 +27,7 @@ public class ApiService : ApiServiceBase, IApiService
             var request = new ParseRequest
             {
                 InputConfiguration = Encoding.ASCII.GetBytes(json), 
-                System = system.Id,
+                Application = application.Id,
                 Environment = environment.Id
             };
             var response = await client.PostAsJsonAsync("Configuration", request);

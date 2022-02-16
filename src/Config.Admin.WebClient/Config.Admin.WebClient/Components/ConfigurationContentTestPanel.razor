@@ -30,7 +30,7 @@
                         <MudItem xs="12" Style="margin-bottom:20px">
                             <MudGrid Style="padding: 0;margin:0">
                                 <MudItem xs="12" Style="padding: 0">
-                                    System: <b>@AllSystems.FirstOrDefault(x => x.Id == result.System)?.Name</b>
+                                    Application: <b>@AllApplications.FirstOrDefault(x => x.Id == result.Application)?.Name</b>
                                 </MudItem>
                                 <MudItem xs="12" Style="padding: 0">
                                     Environment: <b>@AllEnvironments.FirstOrDefault(x => x.Id == result.Environment)?.Name</b>
@@ -67,7 +67,7 @@
     private MudExpansionPanel _expansionPanel = null!;
 
     [Parameter] public Configuration Configuration { get; set; } = null!;
-    [Parameter] public List<ConfigSystem> AllSystems { get; set; } = null!;
+    [Parameter] public List<Application> AllApplications { get; set; } = null!;
     [Parameter] public List<ConfigEnvironment> AllEnvironments { get; set; } = null!;
     [Inject] public IApiService ApiService { get; set; } = null!;
 
@@ -80,11 +80,11 @@
         List<ParseResponse> tempResults = new();
         try
         {
-            foreach (var system in Configuration.Systems)
+            foreach (var application in Configuration.Applications)
             {
                 foreach (var environment in Configuration.Environments)
                 {
-                    var response = await ApiService.TestConfiguration(Configuration.Json, system, environment);
+                    var response = await ApiService.TestConfiguration(Configuration.Json, application, environment);
                     Console.WriteLine($"response.IsSuccess={response.IsSuccess}");
                     if (!response.IsSuccess || response.Response == null)
                     {

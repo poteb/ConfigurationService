@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using pote.Config.Admin.WebClient.Components;
 using pote.Config.Admin.WebClient.Mappers;
@@ -21,9 +20,9 @@ public partial class EditConfiguration
     [Inject] public IAdminApiService AdminApiService { get; set; } = null!;
     [Inject] public IApiService ApiService { get; set; } = null!;
     [CascadingParameter] public PageError PageError { get; set; } = null!;
-    private List<ConfigSystem> Systems { get; set; } = new();
+    private List<Application> Applications { get; set; } = new();
     private List<ConfigEnvironment> Environments { get; set; } = new();
-    private List<ConfigSystem> UnhandledSystems { get; set; } = new();
+    private List<Application> UnhandledApplications { get; set; } = new();
     private List<ConfigEnvironment> UnhandledEnvironments { get; set; } = new();
     [Inject] public NavigationManager NavigationManager { get; set; } = null!;
 
@@ -54,9 +53,9 @@ public partial class EditConfiguration
             }
         }
 
-        await UpdateSystems();
+        await UpdateApplications();
         await UpdateEnvironments();
-        UpdateUnhandledSystems();
+        UpdateUnhandledApplications();
         UpdateUnhandledEnvironments();
     }
 
@@ -66,13 +65,13 @@ public partial class EditConfiguration
             Header.Configurations[i].Index = i;
     }
 
-    private void UpdateUnhandledSystems()
+    private void UpdateUnhandledApplications()
     {
-        UnhandledSystems.Clear();
-        foreach (var system in Systems)
+        UnhandledApplications.Clear();
+        foreach (var application in Applications)
         {
-            if (Header.Configurations.Any(c => c.Systems.Any(s => s.Id == system.Id))) continue;
-            UnhandledSystems.Add(system);
+            if (Header.Configurations.Any(c => c.Applications.Any(s => s.Id == application.Id))) continue;
+            UnhandledApplications.Add(application);
         }
     }
 
@@ -86,13 +85,12 @@ public partial class EditConfiguration
         }
     }
 
-    private async Task UpdateSystems()
+    private async Task UpdateApplications()
     {
-        var callResponse = await AdminApiService.GetSystems();
+        var callResponse = await AdminApiService.GetApplications();
         if (callResponse.IsSuccess && callResponse.Response != null)
         {
-            Systems = SystemMapper.ToClient(callResponse.Response.Systems);
-            //Systems.ForEach(s => s.IsSelected = Configuration.Systems.Any(x => x.Id == s.Id));
+            Applications = ApplicationMapper.ToClient(callResponse.Response.Applications);
         }
         else
             PageError.OnError(callResponse.GenerateErrorMessage(), new Exception());
@@ -121,7 +119,7 @@ public partial class EditConfiguration
         var callResponse = await AdminApiService.SaveConfiguration(Header);
         if (callResponse.IsSuccess)
         {
-            UpdateUnhandledSystems();
+            UpdateUnhandledApplications();
             UpdateUnhandledEnvironments();
             if (reload)
                 await Load();

@@ -43,16 +43,15 @@ public class ConfigurationMapper
             Json = configuration.Json,
             Deleted = configuration.Deleted,
             IsActive = configuration.IsActive,
-            Systems = StringToList<ConfigSystem>(configuration.Systems),
+            Applications = StringToList<Application>(configuration.Applications),
             Environments = StringToList<ConfigEnvironment>(configuration.Environments),
             History = ToClient(configuration.History)
         };
     }
 
-    private static List<T> StringToList<T>(string systemsJson)
+    private static List<T> StringToList<T>(string itemsJson)
     {
-        var list = JsonSerializer.Deserialize<List<T>>(systemsJson) ?? new List<T>();
-        return list;
+        return JsonSerializer.Deserialize<List<T>>(itemsJson) ?? new List<T>();
     }
 
     public static Api.Model.Configuration ToApi(Configuration configuration)
@@ -65,14 +64,14 @@ public class ConfigurationMapper
             Json = configuration.Json,
             Deleted = configuration.Deleted,
             IsActive = configuration.IsActive,
-            Systems = ListToString(configuration.Systems),
+            Applications = ListToString(configuration.Applications),
             Environments = ListToString(configuration.Environments)
         };
     }
 
-    private static string ListToString<T>(List<T> systems)
+    private static string ListToString<T>(List<T> items)
     {
-        return JsonSerializer.Serialize(systems);
+        return JsonSerializer.Serialize(items);
     }
 
     public static List<Configuration> ToClient(List<Api.Model.Configuration> configurations)
@@ -104,7 +103,7 @@ public class ConfigurationMapper
             Json = configuration.Json,
             Deleted = false,
             IsActive = configuration.IsActive,
-            Systems = StringToList<ConfigSystem>(ListToString(configuration.Systems)),
+            Applications = StringToList<Application>(ListToString(configuration.Applications)),
             Environments = StringToList<ConfigEnvironment>(ListToString(configuration.Environments))
         };
         return newConfig;

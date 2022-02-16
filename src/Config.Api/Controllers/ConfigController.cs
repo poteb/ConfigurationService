@@ -20,8 +20,8 @@ public class ConfigurationController : ControllerBase
     {
         try
         {
-            var response = new ParseResponse { System = request.System, Environment = request.Environment };
-            var config = await _parser.Parse(request.AsJson(), request.System, request.Environment, response.AddProblem, CancellationToken.None);
+            var response = new ParseResponse { Application = request.Application, Environment = request.Environment };
+            var config = await _parser.Parse(request.AsJson(), request.Application, request.Environment, response.AddProblem, CancellationToken.None);
             response.FromJson(config);
             return Ok(response);
         }

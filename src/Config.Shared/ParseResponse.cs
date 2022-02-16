@@ -5,7 +5,7 @@ namespace pote.Config.Shared;
 public class ParseResponse
 {
     public byte[] OutputConfiguration { get; set; } = null!;
-    public string System { get; set; } = null!;
+    public string Application { get; set; } = null!;
     public string Environment { get; set; } = null!;
     public List<string> Problems { get; set; } = new();
 

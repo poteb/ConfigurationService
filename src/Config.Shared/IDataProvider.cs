@@ -1,7 +1,7 @@
 ﻿namespace pote.Config.Shared
 {
-    public interface IDataProvider : IEnvironmentDataAccess, ISystemDataAccess
+    public interface IDataProvider : IEnvironmentDataAccess, IApplicationDataAccess
     {
-        Task<string> GetConfigurationJson(string name, string system, string environment, CancellationToken cancellationToken);
+        Task<string> GetConfigurationJson(string name, string applicationId, string environment, CancellationToken cancellationToken);
     }
 }

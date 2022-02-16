@@ -9,9 +9,9 @@ namespace pote.Config.Admin.WebClient.Services
         Task<ApiCallResponse<ConfigurationResponse>> GetConfiguration(string gid);
         Task<ApiCallResponse<ConfigurationsResponse>> GetConfigurations();
         Task<ApiCallResponse<EnvironmentsResponse>> GetEnvironments();
-        Task<ApiCallResponse<SystemsResponse>> GetSystems();
+        Task<ApiCallResponse<ApplicationsResponse>> GetApplications();
         Task<ApiCallResponse<object>> SaveEnvironments(List<ConfigEnvironment> environments);
-        Task<ApiCallResponse<object>> SaveSystems(List<ConfigSystem> systems);
+        Task<ApiCallResponse<object>> SaveApplications(List<Application> applications);
         Task<ApiCallResponse<object>> SaveConfiguration(ConfigurationHeader configuration);
     }
 
@@ -84,23 +84,23 @@ namespace pote.Config.Admin.WebClient.Services
             }
         }
 
-        public async Task<ApiCallResponse<SystemsResponse>> GetSystems()
+        public async Task<ApiCallResponse<ApplicationsResponse>> GetApplications()
         {
             try
             {
                 using var client = _clientFactory.CreateClient("AdminApi");
-                var response = await client.GetAsync("Systems");
+                var response = await client.GetAsync("Applications");
                 if (response.IsSuccessStatusCode)
                 {
-                    var content = await response.Content.ReadFromJsonAsync<SystemsResponse>() ?? new SystemsResponse();
-                    return new ApiCallResponse<SystemsResponse> { IsSuccess = true, Response = content };
+                    var content = await response.Content.ReadFromJsonAsync<ApplicationsResponse>() ?? new ApplicationsResponse();
+                    return new ApiCallResponse<ApplicationsResponse> { IsSuccess = true, Response = content };
                 }
 
-                return DefaultUnsuccessfullResponse(new SystemsResponse(), (int)response.StatusCode);
+                return DefaultUnsuccessfullResponse(new ApplicationsResponse(), (int)response.StatusCode);
             }
             catch (Exception ex)
             {
-                return DefaultExceptionResponse(new SystemsResponse(), "Error getting data from API", ex);
+                return DefaultExceptionResponse(new ApplicationsResponse(), "Error getting data from API", ex);
             }
         }
 
@@ -125,17 +125,17 @@ namespace pote.Config.Admin.WebClient.Services
             }
         }
 
-        public async Task<ApiCallResponse<object>> SaveSystems(List<ConfigSystem> systems)
+        public async Task<ApiCallResponse<object>> SaveApplications(List<Application> applications)
         {
             try
             {
                 using var client = _clientFactory.CreateClient("AdminApi");
-                foreach (var system in systems)
+                foreach (var application in applications)
                 {
-                    if (!system.IsDeleted)
-                        await client.PostAsJsonAsync("Systems", Mappers.SystemMapper.ToApi(system));
+                    if (!application.IsDeleted)
+                        await client.PostAsJsonAsync("Applications", Mappers.ApplicationMapper.ToApi(application));
                     else
-                        await client.DeleteAsync($"Systems?id={system.Id}");
+                        await client.DeleteAsync($"Applications?id={application.Id}");
                 }
 
                 return new ApiCallResponse<object> { IsSuccess = true };

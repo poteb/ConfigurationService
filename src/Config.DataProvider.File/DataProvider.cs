@@ -4,20 +4,20 @@ using pote.Config.Shared;
 
 namespace pote.Config.DataProvider.File;
 
-public class DataProvider : IDataProvider, IEnvironmentDataAccess, ISystemDataAccess
+public class DataProvider : IDataProvider, IEnvironmentDataAccess, IApplicationDataAccess
 {
     private readonly IFileHandler _fileHandler;
     private readonly IEnvironmentDataAccess _environmentDataAccess;
-    private readonly ISystemDataAccess _systemDataAccess;
+    private readonly IApplicationDataAccess _applicationDataAccess;
 
-    public DataProvider(IFileHandler fileHandler, IEnvironmentDataAccess environmentDataAccess, ISystemDataAccess systemDataAccess)
+    public DataProvider(IFileHandler fileHandler, IEnvironmentDataAccess environmentDataAccess, IApplicationDataAccess applicationDataAccess)
     {
         _fileHandler = fileHandler;
         _environmentDataAccess = environmentDataAccess;
-        _systemDataAccess = systemDataAccess;
+        _applicationDataAccess = applicationDataAccess;
     }
 
-    public async Task<string> GetConfigurationJson(string name, string systemId, string environmentId, CancellationToken cancellationToken)
+    public async Task<string> GetConfigurationJson(string name, string applicationId, string environmentId, CancellationToken cancellationToken)
     {
         foreach (var file in _fileHandler.GetConfigurationFiles())
         {
@@ -26,7 +26,7 @@ public class DataProvider : IDataProvider, IEnvironmentDataAccess, ISystemDataAc
             if (!header.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase)) continue;
             foreach (var configuration in header.Configurations)
             {
-                if (!configuration.Systems.Contains(systemId, StringComparison.InvariantCultureIgnoreCase)) continue;
+                if (!configuration.Applications.Contains(applicationId, StringComparison.InvariantCultureIgnoreCase)) continue;
                 if (!configuration.Environments.Contains(environmentId, StringComparison.InvariantCultureIgnoreCase)) continue;
 
                 return configuration.Json;
@@ -36,9 +36,9 @@ public class DataProvider : IDataProvider, IEnvironmentDataAccess, ISystemDataAc
         return string.Empty;
     }
     
-    public async Task<List<DbModel.System>> GetSystems(CancellationToken cancellationToken)
+    public async Task<List<DbModel.Application>> GetApplications(CancellationToken cancellationToken)
     {
-        return await _systemDataAccess.GetSystems(cancellationToken);
+        return await _applicationDataAccess.GetApplications(cancellationToken);
     }
 
     public async Task<List<DbModel.Environment>> GetEnvironments(CancellationToken cancellationToken)

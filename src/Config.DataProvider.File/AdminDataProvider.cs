@@ -8,13 +8,13 @@ namespace pote.Config.DataProvider.File;
 public class AdminDataProvider : IAdminDataProvider
 {
     private readonly IFileHandler _fileHandler;
-    private readonly ISystemDataAccess _systemDataAccess;
+    private readonly IApplicationDataAccess _applicationDataAccess;
     private readonly IEnvironmentDataAccess _environmentDataAccess;
 
-    public AdminDataProvider(IFileHandler fileHandler, ISystemDataAccess systemDataAccess, IEnvironmentDataAccess environmentDataAccess)
+    public AdminDataProvider(IFileHandler fileHandler, IApplicationDataAccess applicationDataAccess, IEnvironmentDataAccess environmentDataAccess)
     {
         _fileHandler = fileHandler;
-        _systemDataAccess = systemDataAccess;
+        _applicationDataAccess = applicationDataAccess;
         _environmentDataAccess = environmentDataAccess;
     }
 
@@ -60,20 +60,20 @@ public class AdminDataProvider : IAdminDataProvider
     }
 
     
-    public async Task UpsertSystem(DbModel.System system, CancellationToken cancellationToken)
+    public async Task UpsertApplication(DbModel.Application application, CancellationToken cancellationToken)
     {
-        await _fileHandler.WriteSystemContent(system.Id, JsonConvert.SerializeObject(system), cancellationToken);
+        await _fileHandler.WriteApplicationContent(application.Id, JsonConvert.SerializeObject(application), cancellationToken);
     }
 
-    public Task DeleteSystem(string id, CancellationToken cancellationToken)
+    public Task DeleteApplication(string id, CancellationToken cancellationToken)
     {
-        _fileHandler.DeleteSystem(id);
+        _fileHandler.DeleteApplication(id);
         return Task.CompletedTask;
     }
 
-    public async Task<List<DbModel.System>> GetSystems(CancellationToken cancellationToken)
+    public async Task<List<DbModel.Application>> GetApplications(CancellationToken cancellationToken)
     {
-        return await _systemDataAccess.GetSystems(cancellationToken);
+        return await _applicationDataAccess.GetApplications(cancellationToken);
     }
 
     public async Task<List<Environment>> GetEnvironments(CancellationToken cancellationToken)
