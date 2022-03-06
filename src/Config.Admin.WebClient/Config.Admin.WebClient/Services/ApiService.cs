@@ -24,17 +24,12 @@ public class ApiService : ApiServiceBase, IApiService
         try
         {
             using var client = _clientFactory.CreateClient("Api");
-            var request = new ParseRequest
-            {
-                InputConfiguration = Encoding.ASCII.GetBytes(json), 
-                Application = application.Id,
-                Environment = environment.Id
-            };
+            var request = new ParseRequest(application.Id, environment.Id, json);
             var response = await client.PostAsJsonAsync("Configuration", request);
             if (!response.IsSuccessStatusCode)
                 return DefaultUnsuccessfullResponse(new ParseResponse(), (int)response.StatusCode);
             var data = await response.Content.ReadFromJsonAsync<ParseResponse>();
-            return new ApiCallResponse<ParseResponse> {  IsSuccess = true, Response = data };
+            return new ApiCallResponse<ParseResponse> { IsSuccess = true, Response = data };
         }
         catch (Exception ex)
         {

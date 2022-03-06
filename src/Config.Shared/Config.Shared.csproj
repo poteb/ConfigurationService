@@ -1,15 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
+		<TargetFramework>netstandard2.1</TargetFramework>
 		<RootNamespace>pote.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
 		<AssemblyName>pote.$(MSBuildProjectName)</AssemblyName>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>warnings</Nullable>
+		<LangVersion>10</LangVersion>
 	</PropertyGroup>
-
-	<ItemGroup>
-	  <ProjectReference Include="..\Config.DbModel\Config.DbModel.csproj" />
-	</ItemGroup>
 
 </Project>

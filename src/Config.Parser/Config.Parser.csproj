@@ -13,6 +13,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\Config.DataProvider.Interfaces\Config.DataProvider.Interfaces.csproj" />
 		<ProjectReference Include="..\Config.Shared\Config.Shared.csproj" />
 	</ItemGroup>
 
