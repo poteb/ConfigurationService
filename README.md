@@ -5,13 +5,18 @@
 Centralize application-configuration and fetch through an API.
 Frontend Blazor app to manage the configurations.
 
+### Creator's note, one-man-mad-idea
+I've so far created everything here myself. But I'd be happy to get your (yes you!) view on this.
+
+It can at first be hard to wrap your head around the concepts described below. Here you'll see that configuration isn't static anymore. IT'S ALIVE!
+
 ## But wait! There's more!
 Administering the configurations is now a whole lot easier with the power of JSON ref.
 Let's look an example.
 Our application *Super Goofy's Super Goobers* has a standard configuration that needs a SQL Server connection string and some RabbitMQ server settings:
 
 ##### *Base-configuration (v1):*
-    {
+    {~~~~
       "ConnectionStrings": {
         "Default": "Data Source=dbserver;Initial Catalog=myDb;User Id=sa;Password=SuperNinjaPassword"
       },
@@ -133,7 +138,7 @@ Besides different systems it's also required to link all configurations to an en
 Here we use different the same SQL Server instance for our test environments but different databases. And locally we use "." and a trusted connection. The base configuration remains unchanged.
 
 ### "Base" naming convention
-If a reference begins with "base-" the result of the reference replaces the whole key-value pair.
+If the name of the json property being processed is named *base* or *Base* the result of the reference replaces the whole key-value pair.
 Let's look at a standard appsettings.json file.
 ##### *appsettings.json:*
     {
@@ -176,7 +181,7 @@ But instead we use a base-reference
           "Microsoft.AspNetCore": "Warning"
         }
       },
-      "settings":"$ref:base-configuration"
+      "base":"$ref:base-configuration"
     }
 which results in 
 
@@ -197,8 +202,13 @@ which results in
         "Password": "EpicHeroPassword"
       }
     }
-The *settings* key is gone from the original *appsettings.json* and replaced with the result of the reference.
-This works because the name of the configuration begins with *base-*.
+The *base* key is gone from the original *appsettings.json* and replaced with the result of the reference.
+This works because the name of the json property is *base* or *Base*.
 
 ## Storage
 The underlying storage is abstracted away from the JSON parser and admin API, which means it's relatively easy to change it. For now you'll find a working file storage data provider and an incomplete SQL Server data provider. Changing the file location is done in *Config.Api/appsettings.Development.json* and *Config.Admin.Api/appsettings.Development.json*.
+
+## Middleware
+*Config.Middleware* contains an extension method for calling and adding the generated configuration to .NET's configuration builder. `IConfigurationBuilder` if .NET Standard and `WebApplicationBuilder` for .NET 6 applications.
+
+If the call to the API fails it will try to load a previously generated configuration file instead. If this fails a `FileNotFoundException` is thrown.~~~~

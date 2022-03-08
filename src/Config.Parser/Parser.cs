@@ -57,20 +57,7 @@ namespace pote.Config.Parser
             if (value == null) return;
             var match = Regex.Match(value, RefPattern);
             if (!match.Success) return;
-            var json = "";
-            //var nameMatch = Regex.Match(match.Groups[1].Value, NamePattern);
-            // if (nameMatch.Success)
-            // {
-            //     var name = nameMatch.Groups["name"].Value;
-            //     var nApplication = nameMatch.Groups["application"].Value.Replace("application", application);
-            //     if (string.IsNullOrEmpty(nApplication))
-            //         nApplication = application;
-            //     var nEnvironment = nameMatch.Groups["environment"].Value.Replace("environment", environment);
-            //     if (string.IsNullOrEmpty(nEnvironment))
-            //         nEnvironment = environment;
-                json = await _dataProvider.GetConfigurationJson(match.Groups[1].Value, application, environment, cancellationToken);
-            //}
-
+            var json = await _dataProvider.GetConfigurationJson(match.Groups[1].Value, application, environment, cancellationToken);
             if (string.IsNullOrEmpty(json))
             {
                 problems($"Reference could not be resolved, {match.Groups[0].Value}");
