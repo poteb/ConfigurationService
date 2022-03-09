@@ -77,22 +77,22 @@ But we can to even better. What if each application has it's own login? Let's mo
       "Username": "$ref:RabbitMQ-Login#Username",
       "Password": "$ref:RabbitMQ-Login#Password"
     }
-But as it is now, every application will get the same configuration output because there's nothing that separates an application from another. Each application need to have it's own *RabbitMQ-Login*, but they have to have the same name for the reference from *RabbitMQ* to work. This is done by saving multiple *RabbitMQ-Login* configurations but connected to different applications (systems).
+But as it is now, every application will get the same configuration output because there's nothing that separates an application from another. Each application need to have it's own *RabbitMQ-Login*, but they have to have the same name for the reference from *RabbitMQ* to work. This is done by saving multiple *RabbitMQ-Login* configurations but connected to different applications.
 First we connect the existing *RabbitMQ-Login* to our application.
-##### *RabbitMQ-Login • System: Super Goofy's Super Goobers:*
+##### *RabbitMQ-Login • Application: Super Goofy's Super Goobers:*
     {
       "Username":"Goofy",
       "Password":"EpicHeroPassword"
     }
 It looks the same, but it's connected to our application.
 Here's a *RabbitMQ-Login* for another application:
-##### *RabbitMQ-Login • System: More Gold for Scrooge:*
+##### *RabbitMQ-Login • Application: More Gold for Scrooge:*
     {
       "Username":"Scrooge",
       "Password":"LuckyCoin"
     }
 Both application use the same base configuration, but the results differ.
-##### *Base-configuration • System: Super Goofy's Super Goobers:*
+##### *Base-configuration • Application: Super Goofy's Super Goobers:*
     {
       "ConnectionStrings": {
         "Default": "Data Source=dbserver;Initial Catalog=myDb;User Id=sa;Password=SuperNinjaPassword"
@@ -105,7 +105,7 @@ Both application use the same base configuration, but the results differ.
       }
     }
 
-##### *Base-configuration • System: More Gold for Scrooge:*
+##### *Base-configuration • Application: More Gold for Scrooge:*
     {
       "ConnectionStrings": {
         "Default": "Data Source=dbserver;Initial Catalog=myDb;User Id=sa;Password=SuperNinjaPassword"
@@ -119,7 +119,7 @@ Both application use the same base configuration, but the results differ.
     }
 The only difference is the username and password for RabbitMQ. If we later create another application that has a similar configuration we only need to create a new *RabbitMQ-Login* configuration and link it to our application. If our new application needs the AnotherConnection SQL connection string we just reference that instead, or create a third one.
 
-Besides different systems it's also required to link all configurations to an environment. This makes it possible to use the same set of configurations across different environments. It could be different test environments and development. An example could *ConnectionStrings* where we want to use a different Default connection string when debugging our application.
+Besides different applications it's also required to link all configurations to an environment. This makes it possible to use the same set of configurations across different environments. It could be different test environments and development. An example could *ConnectionStrings* where we want to use a different Default connection string when debugging our application.
 ##### *ConnectionStrings • Environments: Test1:*
     {
       "Default":"Data Source=dbserver;Initial Catalog=myDbTest1;User Id=sa;Password=SuperNinjaPassword",
