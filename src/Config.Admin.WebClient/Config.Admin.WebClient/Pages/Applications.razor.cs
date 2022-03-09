@@ -4,7 +4,7 @@ using pote.Config.Admin.WebClient.Services;
 
 namespace pote.Config.Admin.WebClient.Pages;
 
-public partial class Appplications
+public partial class Applications
 {
     public List<Application> List { get; set; } = new();
 
