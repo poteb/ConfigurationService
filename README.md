@@ -16,7 +16,7 @@ Let's look an example.
 Our application *Super Goofy's Super Goobers* has a standard configuration that needs a SQL Server connection string and some RabbitMQ server settings:
 
 ##### *Base-configuration (v1):*
-    {~~~~
+    {
       "ConnectionStrings": {
         "Default": "Data Source=dbserver;Initial Catalog=myDb;User Id=sa;Password=SuperNinjaPassword"
       },
