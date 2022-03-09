@@ -218,4 +218,4 @@ The underlying storage is abstracted away from the JSON parser and admin API, wh
 If the call to the API fails it will try to load a previously generated configuration file instead. If this fails a `FileNotFoundException` is thrown.~~~~
 
 ## Security
-None. So don't expose the endpoints externally.
+None. So don't expose the APIs outside your network.
