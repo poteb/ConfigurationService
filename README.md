@@ -215,7 +215,7 @@ The underlying storage is abstracted away from the JSON parser and admin API, wh
 ## Middleware
 *Config.Middleware* contains an extension method for calling and adding the generated configuration to .NET's configuration builder. `IConfigurationBuilder` if .NET Standard and `WebApplicationBuilder` for .NET 6 applications.
 
-If the call to the API fails it will try to load a previously generated configuration file instead. If this fails a `FileNotFoundException` is thrown.~~~~
+If the call to the API fails it will try to load a previously generated configuration file instead. If this fails a `FileNotFoundException` is thrown.
 
 ## Security
 None. So don't expose the APIs outside your network.
