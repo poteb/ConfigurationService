@@ -26,7 +26,10 @@ public partial class EditConfiguration
     private List<ConfigEnvironment> UnhandledEnvironments { get; set; } = new();
     [Inject] public NavigationManager NavigationManager { get; set; } = null!;
 
-    private ConfigurationContent ConfigurationContentRef { set => _configurationContents.Add(value); }
+    private ConfigurationContent ConfigurationContentRef
+    {
+        set => _configurationContents.Add(value);
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -159,7 +162,7 @@ public partial class EditConfiguration
             _expansionPanels.ExpandAll();
         else
             _expansionPanels.CollapseAll();
-        
+
         // var panelsType = typeof(MudExpansionPanels);
         // var panelsField = panelsType.GetField("_panels", BindingFlags.Instance | BindingFlags.NonPublic);
         // var list = panelsField?.GetValue(_expansionPanels) as List<MudExpansionPanel>;
@@ -177,7 +180,7 @@ public partial class EditConfiguration
 
     private void AddConfiguration()
     {
-        Header.Configurations.Add(new Configuration());
+        Header.Configurations.Add(new Configuration { HeaderId = Header.Id });
         UpdateConfigurationIndex();
     }
 

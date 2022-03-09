@@ -38,7 +38,7 @@ public class ConfigurationMapper
         return new DbModel.Configuration
         {
             HeaderId = apiConfiguration.HeaderId,
-            Id = string.Empty,
+            Id = apiConfiguration.Id,
             CreatedUtc = apiConfiguration.CreatedUtc,
             Json = apiConfiguration.Json,
             Applications = JsonSerializer.Serialize(JsonSerializer.Deserialize<List<Model.Application>>(apiConfiguration.Applications)?.Select(s => s.Id) ?? new List<string>()),
