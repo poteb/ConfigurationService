@@ -141,6 +141,7 @@ Here we use different the same SQL Server instance for our test environments but
 If the name of the json property being processed is named *base* or *Base* the result of the reference replaces the whole key-value pair.
 Let's look at a standard appsettings.json file.
 ##### *appsettings.json:*
+
     {
       "Logging": {
         "LogLevel": {
@@ -158,6 +159,7 @@ Let's look at a standard appsettings.json file.
         "Password": "EpicHeroPassword"
       }
     }
+
 We could change this to
 
     {
@@ -172,6 +174,7 @@ We could change this to
       },
       "RabbitMQ": "$ref:RabbitMQ#"
     }
+
 But instead we use a base-reference
 
     {
@@ -183,6 +186,7 @@ But instead we use a base-reference
       },
       "base":"$ref:base-configuration"
     }
+
 which results in 
 
     {
@@ -212,3 +216,6 @@ The underlying storage is abstracted away from the JSON parser and admin API, wh
 *Config.Middleware* contains an extension method for calling and adding the generated configuration to .NET's configuration builder. `IConfigurationBuilder` if .NET Standard and `WebApplicationBuilder` for .NET 6 applications.
 
 If the call to the API fails it will try to load a previously generated configuration file instead. If this fails a `FileNotFoundException` is thrown.~~~~
+
+## Security
+None. So don't expose the endpoints externally.
