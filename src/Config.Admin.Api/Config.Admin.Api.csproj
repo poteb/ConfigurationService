@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>pote.$(MSBuildProjectName)</AssemblyName>
     <RootNamespace>pote.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
