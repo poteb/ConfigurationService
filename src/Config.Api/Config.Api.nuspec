@@ -1,0 +1,15 @@
+<package>
+    <metadata>
+        <id>pote.Config.Api</id>
+        <version>0.1.0.0</version>
+        <authors>Paw</authors>
+        <owners>Paw</owners>
+        <licenseUrl>https://github.com/poteb/ConfigurationService/blob/main/LICENSE</licenseUrl>
+        <projectUrl>https://github.com/poteb/ConfigurationService</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>Configuration API</description>
+    </metadata>
+    <files>
+        <file src="**" target="" />
+    </files>
+</package>
