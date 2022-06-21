@@ -12,7 +12,7 @@ It can at first be hard to wrap your head around the concepts described below. H
 
 ## But wait! There's more!
 Administering the configurations is now a whole lot easier with the power of JSON ref.
-Let's look an example.
+Let's look at an example.
 Our application *Super Goofy's Super Goobers* has a standard configuration that needs a SQL Server connection string and some RabbitMQ server settings:
 
 ##### *Base-configuration (v1):*
