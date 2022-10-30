@@ -7,7 +7,7 @@
 <MudGrid Style="padding: 0; margin: 0; width: 99%" Spacing="2">
     <MudItem xs="6" Class="d-flex">
         <MudTooltip Text="Save">
-            <MudButton StartIcon="@Icons.Filled.Save" Variant="Variant.Outlined" Color="Color.Info" OnClick="Save">Save</MudButton>
+            <MudButton StartIcon="@Icons.Filled.Save" Variant="Variant.Outlined" Color="Color.Info" OnClick="Save" Disabled="!HasUnsavedChanges">Save</MudButton>
         </MudTooltip>
         @* <MudItem Style="margin-left:50px"> *@
         @*     <MudTooltip Text="Duplicate"> *@

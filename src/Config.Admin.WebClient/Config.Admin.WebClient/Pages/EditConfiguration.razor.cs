@@ -7,11 +7,12 @@ using pote.Config.Admin.WebClient.Services;
 
 namespace pote.Config.Admin.WebClient.Pages;
 
-public partial class EditConfiguration
+public partial class EditConfiguration : IDisposable
 {
     private MudExpansionPanels _expansionPanels = null!;
     private bool _allPanelsExpanded;
-    private List<ConfigurationContent> _configurationContents = new();
+    private readonly List<ConfigurationContent> _configurationContents = new();
+    private Timer? _unsavedChangesTimer;
 
     [Parameter] public string Gid { get; set; } = string.Empty;
     private bool IsNew => string.IsNullOrWhiteSpace(Gid);
@@ -25,6 +26,7 @@ public partial class EditConfiguration
     private List<Application> UnhandledApplications { get; set; } = new();
     private List<ConfigEnvironment> UnhandledEnvironments { get; set; } = new();
     [Inject] public NavigationManager NavigationManager { get; set; } = null!;
+    private bool HasUnsavedChanges { get; set; }
 
     private ConfigurationContent ConfigurationContentRef
     {
@@ -34,6 +36,13 @@ public partial class EditConfiguration
     protected override async Task OnInitializedAsync()
     {
         await Load();
+        _unsavedChangesTimer = new Timer(stateInfo =>
+        {
+            var oldHasChanged = HasUnsavedChanges;
+            HasUnsavedChanges = !Header.Equals(OriginalHeader);
+            if (oldHasChanged != HasUnsavedChanges)
+                StateHasChanged();
+        }, new AutoResetEvent(false), 2000, 2000);
     }
 
     private async Task Load()
@@ -103,10 +112,7 @@ public partial class EditConfiguration
     {
         var callResponse = await AdminApiService.GetEnvironments();
         if (callResponse.IsSuccess && callResponse.Response != null)
-        {
             Environments = EnvironmentMapper.ToClient(callResponse.Response.Environments);
-            //Environments.ForEach(e => e.IsSelected = Configuration.Environments.Any(x => x.Id == e.Id));
-        }
         else
             PageError.OnError(callResponse.GenerateErrorMessage(), new Exception());
     }
@@ -126,6 +132,8 @@ public partial class EditConfiguration
             UpdateUnhandledEnvironments();
             if (reload)
                 await Load();
+            else
+                OriginalHeader = ConfigurationMapper.Copy(Header);
             return true;
         }
 
@@ -188,9 +196,9 @@ public partial class EditConfiguration
     {
         _expansionPanels.ExpandAll();
         _allPanelsExpanded = true;
-        foreach (var configurationContent in _configurationContents)
-        {
+        foreach (var configurationContent in _configurationContents) 
             await configurationContent.RunTest();
-        }
     }
+
+    public void Dispose() => _unsavedChangesTimer?.Dispose();
 }
