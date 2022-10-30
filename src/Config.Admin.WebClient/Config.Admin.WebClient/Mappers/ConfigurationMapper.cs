@@ -99,7 +99,7 @@ public class ConfigurationMapper
         var newConfig = new Configuration
         {
             Id = configuration.Id,
-            CreatedUtc = DateTime.UtcNow,
+            CreatedUtc = configuration.CreatedUtc,
             Json = configuration.Json,
             Deleted = false,
             IsActive = configuration.IsActive,

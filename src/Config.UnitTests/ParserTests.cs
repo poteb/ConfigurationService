@@ -56,16 +56,16 @@ namespace pote.Config.UnitTests
             };
         }
 
-        public async Task<List<Environment>> GetEnvironments(CancellationToken cancellationToken)
+        public Task<List<Environment>> GetEnvironments(CancellationToken cancellationToken)
         {
             var list = new List<Environment> { new() { Id = "dild_id", Name = "test" } };
-            return list;
+            return Task.FromResult(list);
         }
 
-        public async Task<List<DbModel.Application>> GetApplications(CancellationToken cancellationToken)
+        public Task<List<DbModel.Application>> GetApplications(CancellationToken cancellationToken)
         {
             var list = new List<DbModel.Application> { new() { Id = "dild_id", Name = "unittest" } };
-            return list;
+            return Task.FromResult(list);
         }
     }
 }
