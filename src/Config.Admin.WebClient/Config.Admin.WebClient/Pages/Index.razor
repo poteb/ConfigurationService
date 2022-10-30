@@ -54,12 +54,14 @@
     <HeaderContent>
         <MudTh></MudTh>
         <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<ConfigurationHeader, object>(x => x.Name)">Name</MudTableSortLabel></MudTh>
+        <MudTh>Applications</MudTh>
         @*<MudTh>Systems</MudTh>
         <MudTh>Environments</MudTh>*@
     </HeaderContent>
     <RowTemplate>
         <MudTd><MudButton OnClick="() => EditConfiguration(context.Id)"  Variant="Variant.Filled">Edit</MudButton></MudTd>
         <MudTd>@context.Name</MudTd>
+        <MudTd>@GetConfigurationApplicationsAsString(context)</MudTd>
         @*<MudTd Style="font-size: 7pt">@string.Join(", ", context.Systems.Select(s => s.Name))</MudTd>
         <MudTd Style="font-size: 7pt">@string.Join(", ", context.Environments.Select(s => s.Name))</MudTd>*@
     </RowTemplate>

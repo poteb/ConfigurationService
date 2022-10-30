@@ -86,4 +86,10 @@ public partial class Index
     {
         SearchCriteria.Reset();
     }
+
+    private string GetConfigurationApplicationsAsString(ConfigurationHeader header)
+    {
+        var applications = header.Configurations.SelectMany(c => c.Applications).Distinct().OrderBy(a => a.Name);
+        return string.Join(",", applications.Select(s => s.Name));
+    }
 }

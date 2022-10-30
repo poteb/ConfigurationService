@@ -1,6 +1,6 @@
 ﻿namespace pote.Config.Admin.WebClient.Model;
 
-public class Application
+public class Application : IEquatable<Application>
 {
     public string Id { get; set; } = Guid.NewGuid().ToString();
     public string Name { get; set; } = string.Empty;
@@ -9,8 +9,20 @@ public class Application
 
     public bool IsSelected { get; set; }
 
+    public bool Equals(Application? other)
+    {
+        if (object.ReferenceEquals(other, null)) return false;
+        if (object.ReferenceEquals(this, other)) return true;
+        return Id.Equals(other.Id) && Name.Equals(other.Name);
+    }
+
     public override string ToString()
     {
         return Name;
+    }
+
+    public override int GetHashCode()
+    {
+        return Id.GetHashCode() ^ Name.GetHashCode();
     }
 }
