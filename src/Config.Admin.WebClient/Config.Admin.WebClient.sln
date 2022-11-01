@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Config.Admin.Api.Model", ".
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Config.Shared", "..\Config.Shared\Config.Shared.csproj", "{2CADE6D8-73D7-4DDC-9E82-66924632FAA0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Config.Admin.WebClient.Tests", "..\Config.Admin.WebClient.Tests\Config.Admin.WebClient.Tests.csproj", "{16D5E712-598E-48EB-8C85-44493D029292}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Config.Admin.WebClient.Tests", "..\Config.Admin.WebClient.Tests\Config.Admin.WebClient.Tests.csproj", "{16D5E712-598E-48EB-8C85-44493D029292}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

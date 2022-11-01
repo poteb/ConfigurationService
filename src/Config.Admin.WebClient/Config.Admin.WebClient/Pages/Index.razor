@@ -3,66 +3,65 @@
 
 <PageTitle>Configurations</PageTitle>
 
-<MudTable Items="@Headers" Dense="true" FixedHeader="true" Striped="true" Filter="new Func<ConfigurationHeader,bool>(FilterFunc)" Style="width: calc(100% - 15px)">
-    <ToolBarContent>
-        <MudGrid>
-            <MudItem xs="2" Style="vertical-align: center" Class="d-flex align-center">
-                <MudText Typo="Typo.h6" Style="">Configurations</MudText>
-            </MudItem>
-            <MudItem xs="6" Class="d-flex">
-                @*<MudItem Style="Width:300px">
-                    <MudSelect @bind-Value="SearchCriteria.SelectedSystem" T="string" Label="System" Variant="Variant.Outlined" Margin="Margin.Dense">
-                        <MudSelectItem Value="string.Empty" T="string"><i>nothing</i></MudSelectItem>
-                        @foreach (var system in Systems)
-                        {
-                            <MudSelectItem Value="system.Name" Style="white-space: nowrap !important">@system.Name</MudSelectItem>
-                        }
-                    </MudSelect>
-                </MudItem>
-                <MudItem Style="Width:300px;padding: 0 4px">
-                    <MudSelect @bind-Value="SearchCriteria.SelectedEnvironment" T="string" Label="Environments" Variant="Variant.Outlined" Margin="Margin.Dense">
-                        <MudSelectItem Value="string.Empty" T="string"><i>nothing</i></MudSelectItem>
-                        @foreach (var environment in Environments)
-                        {
-                            <MudSelectItem Value="environment.Name" Style="white-space: nowrap !important">@environment.Name</MudSelectItem>
-                        }
-                    </MudSelect>
-                </MudItem>*@
-                <MudItem Style="Width: 300px">
-                    <MudTextField @bind-Value="SearchCriteria.SearchText" Variant="Variant.Outlined" Margin="Margin.Dense" Label="Search"></MudTextField>
-                </MudItem>
-                <MudItem>
-                    <MudTooltip Text="Reset">
-                        <MudIconButton Icon="@Icons.Filled.Close" Color="Color.Info" OnClick="ResetSearch"></MudIconButton>
-                    </MudTooltip>
-                </MudItem>
-            </MudItem>
-            <MudItem xs="4">
-                <MudGrid Justify="Justify.FlexEnd" Style="text-align: right">
-                    <MudItem xs="12">
-                        <MudTooltip Text="New Configuration">
-                            <MudIconButton Icon="@Icons.Filled.Add" Color="Color.Info" OnClick="AddNewConfiguration"></MudIconButton>
-                        </MudTooltip>
-                        <MudTooltip Text="Refresh">
-                            <MudIconButton Icon="@Icons.Filled.Refresh" Color="Color.Info" OnClick="Load"></MudIconButton>
-                        </MudTooltip>
-                    </MudItem>
-                </MudGrid>
+<MudGrid>
+    <MudItem sm="2" xs="12" Style="vertical-align: center; margin-left: 10px" Class="d-flex align-center">
+        <MudText Typo="Typo.h6" Style="">Configurations</MudText>
+    </MudItem>
+    <MudItem sm="4" xs="12" Class="d-flex">
+        <MudItem Style="Width:300px">
+            <MudSelect @bind-Value="SearchCriteria.SelectedApplication" T="string" Label="Application" Variant="Variant.Outlined" Margin="Margin.Dense">
+                <MudSelectItem Value="string.Empty" T="string"><i>all</i></MudSelectItem>
+                @foreach (var application in Applications.OrderBy(a => a.Name))
+                {
+                    <MudSelectItem Value="application.Name" Style="white-space: nowrap !important">@application.Name</MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+        <MudItem Style="Width:300px;padding: 0 4px">
+            <MudSelect @bind-Value="SearchCriteria.SelectedEnvironment" T="string" Label="Environments" Variant="Variant.Outlined" Margin="Margin.Dense">
+                <MudSelectItem Value="string.Empty" T="string"><i>all</i></MudSelectItem>
+                @foreach (var environment in Environments)
+                {
+                    <MudSelectItem Value="environment.Name" Style="white-space: nowrap !important">@environment.Name</MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+    </MudItem>
+    <MudItem sm="3" xs="9" Class="d-flex">
+        <MudItem Style="Width: 300px">
+            <MudTextField @bind-Value="SearchCriteria.SearchText" Variant="Variant.Outlined" Margin="Margin.Dense" Label="Search"></MudTextField>
+        </MudItem>
+        <MudItem>
+            <MudTooltip Text="Reset">
+                <MudIconButton Icon="@Icons.Filled.Close" Color="Color.Info" OnClick="ResetSearch"></MudIconButton>
+            </MudTooltip>
+        </MudItem>
+    </MudItem>
+    <MudItem sm="2" xs="3">
+        <MudGrid Justify="Justify.FlexEnd" Style="text-align: right">
+            <MudItem xs="12">
+                <MudTooltip Text="New Configuration">
+                    <MudIconButton Icon="@Icons.Filled.Add" Color="Color.Info" OnClick="AddNewConfiguration"></MudIconButton>
+                </MudTooltip>
+                <MudTooltip Text="Refresh">
+                    <MudIconButton Icon="@Icons.Filled.Refresh" Color="Color.Info" OnClick="Load"></MudIconButton>
+                </MudTooltip>
             </MudItem>
         </MudGrid>
-    </ToolBarContent>
+    </MudItem>
+</MudGrid>
+
+<MudTable Items="@Headers" Dense="true" FixedHeader="true" Striped="true" Filter="new Func<ConfigurationHeader,bool>(FilterFunc)" Style="width: calc(100% - 15px)">
     <HeaderContent>
         <MudTh></MudTh>
         <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<ConfigurationHeader, object>(x => x.Name)">Name</MudTableSortLabel></MudTh>
         <MudTh>Applications</MudTh>
-        @*<MudTh>Systems</MudTh>
-        <MudTh>Environments</MudTh>*@
+        <MudTh>Environments</MudTh>
     </HeaderContent>
     <RowTemplate>
-        <MudTd><MudButton OnClick="() => EditConfiguration(context.Id)"  Variant="Variant.Filled">Edit</MudButton></MudTd>
+        <MudTd><MudButton OnClick="() => EditConfiguration(context.Id)" Variant="Variant.Filled">Edit</MudButton></MudTd>
         <MudTd>@context.Name</MudTd>
         <MudTd>@GetConfigurationApplicationsAsString(context)</MudTd>
-        @*<MudTd Style="font-size: 7pt">@string.Join(", ", context.Systems.Select(s => s.Name))</MudTd>
-        <MudTd Style="font-size: 7pt">@string.Join(", ", context.Environments.Select(s => s.Name))</MudTd>*@
+        <MudTd>@GetConfigurationEnvironmentsAsString(context)</MudTd>
     </RowTemplate>
 </MudTable>

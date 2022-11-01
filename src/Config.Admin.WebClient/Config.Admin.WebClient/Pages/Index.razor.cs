@@ -62,12 +62,17 @@ public partial class Index
 
     private bool FilterFunc(ConfigurationHeader header)
     {
-        // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-        //if (!string.IsNullOrWhiteSpace(SearchCriteria.SelectedSystem))
-        //{
-        //    if (configuration.Systems.All(s => s.Name != SearchCriteria.SelectedSystem))
-        //        return false;
-        //}
+        if (!string.IsNullOrWhiteSpace(SearchCriteria.SelectedApplication))
+        {
+            var headerApplications = header.Configurations.SelectMany(c => c.Applications).Distinct();
+            if (headerApplications.All(a => a.Name != SearchCriteria.SelectedApplication)) return false;
+        }
+
+        if (!string.IsNullOrWhiteSpace(SearchCriteria.SelectedEnvironment))
+        {
+            var headerEnvironments = header.Configurations.SelectMany(c => c.Environments).Distinct();
+            if (headerEnvironments.All(e => e.Name != SearchCriteria.SelectedEnvironment)) return false;
+        }
 
         //// ReSharper disable once ConditionIsAlwaysTrueOrFalse
         //if (!string.IsNullOrWhiteSpace(SearchCriteria.SelectedEnvironment))
@@ -82,6 +87,8 @@ public partial class Index
         return true;
     }
 
+
+
     private void ResetSearch()
     {
         SearchCriteria.Reset();
@@ -90,6 +97,12 @@ public partial class Index
     private string GetConfigurationApplicationsAsString(ConfigurationHeader header)
     {
         var applications = header.Configurations.SelectMany(c => c.Applications).Distinct().OrderBy(a => a.Name);
-        return string.Join(",", applications.Select(s => s.Name));
+        return string.Join(", ", applications.Select(s => s.Name));
+    }
+
+    private string GetConfigurationEnvironmentsAsString(ConfigurationHeader header)
+    {
+        var environments = header.Configurations.SelectMany(c => c.Environments).Distinct().OrderBy(e => e.Name);
+        return string.Join(", ", environments.Select(e => e.Name));
     }
 }

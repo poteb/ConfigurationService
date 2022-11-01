@@ -3,20 +3,20 @@
 @inherits LayoutComponentBase
 
 <MudThemeProvider />
-<MudDialogProvider/>
+<MudDialogProvider />
 
 <MudLayout>
-    @*<MudAppBar Elevation="1">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-        <MudSpacer />
-        <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" />
-        </MudAppBar>*@
-    <MudDrawer Open="true" Elevation="2">
-        <MudDrawerHeader>
-            <MudText Typo="Typo.h5" Class="mt-1">Configurations</MudText>
-        </MudDrawerHeader>
-        <NavMenu/>
-    </MudDrawer>
+    <MudHidden Breakpoint="Breakpoint.SmAndDown">
+        <MudDrawer Open="true" Elevation="2">
+            <MudDrawerHeader>
+                <MudText Typo="Typo.h5" Class="mt-1" Style="padding-top: 3px">Configurations</MudText>
+            </MudDrawerHeader>
+            <NavMenu />
+        </MudDrawer>
+    </MudHidden>
+    <MudHidden Breakpoint="Breakpoint.MdAndUp">
+        <NavMenuMini />
+    </MudHidden>
     <MudMainContent Style="padding-top: 0">
         <CascadingValue Value="@PageError">
             @if (PageError.IsError)
@@ -31,8 +31,6 @@
 </MudLayout>
 
 @code {
-    //bool _drawerOpen = true;
-
     public readonly PageError PageError = new();
 
     protected override void OnInitialized()
@@ -45,9 +43,4 @@
     {
         PageError.IsError = false;
     }
-
-    //void DrawerToggle()
-    //{
-    //    _drawerOpen = !_drawerOpen;
-    //}
 }
