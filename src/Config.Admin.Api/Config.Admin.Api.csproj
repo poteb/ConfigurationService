@@ -17,6 +17,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Config.Admin.Api.Model\Config.Admin.Api.Model.csproj" />
     <ProjectReference Include="..\Config.DataProvider.File\Config.DataProvider.File.csproj" />
+    <ProjectReference Include="..\Config.Parser\Config.Parser.csproj" />
     <ProjectReference Include="..\Config.Shared\Config.Shared.csproj" />
   </ItemGroup>
 
