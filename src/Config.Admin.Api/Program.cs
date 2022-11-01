@@ -1,4 +1,5 @@
 using pote.Config.DataProvider.File;
+using pote.Config.Parser;
 using pote.Config.Shared;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +19,9 @@ builder.Services.AddScoped<IFileHandler>(_ => new FileHandler(fileDb));
 builder.Services.AddScoped<IApplicationDataAccess, ApplicationDataAccess>();
 builder.Services.AddScoped<IEnvironmentDataAccess, EnvionmentDataAccess>();
 builder.Services.AddScoped<IAdminDataProvider, AdminDataProvider>();
+
+builder.Services.AddScoped<IDataProvider, DataProvider>();
+builder.Services.AddScoped<IParser, Parser>();
 
 var app = builder.Build();
 

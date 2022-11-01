@@ -75,7 +75,6 @@
     {
         if (!_expansionPanel.IsExpanded)
             _expansionPanel.Expand();
-        //_testResults.Clear();
         _runningTests = true;
         List<ParseResponse> tempResults = new();
         try
@@ -85,14 +84,13 @@
                 foreach (var environment in Configuration.Environments)
                 {
                     var response = await ApiService.TestConfiguration(Configuration.Json, application, environment);
-                    Console.WriteLine($"response.IsSuccess={response.IsSuccess}");
                     if (!response.IsSuccess || response.Response == null)
                     {
                         tempResults.Add(new ParseResponse
                         {
-                            Problems = new List<string> { $"Call to API failed" }
+                            Problems = new List<string> { "Call to API failed" }
                         });
-                        return;
+                        continue;
                     }
                     tempResults.Add(response.Response);
                 }

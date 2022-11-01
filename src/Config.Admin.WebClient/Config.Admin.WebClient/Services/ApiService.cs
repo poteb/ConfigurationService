@@ -23,9 +23,9 @@ public class ApiService : ApiServiceBase, IApiService
     {
         try
         {
-            using var client = _clientFactory.CreateClient("Api");
+            using var client = _clientFactory.CreateClient("AdminApi");
             var request = new ParseRequest(application.Id, environment.Id, json);
-            var response = await client.PostAsJsonAsync("Configuration", request);
+            var response = await client.PostAsJsonAsync("ConfigParse", request);
             if (!response.IsSuccessStatusCode)
                 return DefaultUnsuccessfullResponse(new ParseResponse(), (int)response.StatusCode);
             var data = await response.Content.ReadFromJsonAsync<ParseResponse>();
