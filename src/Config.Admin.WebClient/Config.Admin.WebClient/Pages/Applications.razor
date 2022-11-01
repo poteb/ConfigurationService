@@ -3,26 +3,24 @@
 
 <PageTitle>Applications</PageTitle>
 
-<MudTable Items="@List" Dense="true" CanCancelEdit="true" Style="Width: 400px" Elevation="0">
-    <ToolBarContent>
-        <MudGrid>
-            <MudItem xs="6">
-                <MudText Typo="Typo.h6" Style="line-height: 48px">Applications</MudText>
-            </MudItem>
-            <MudItem xs="6">
-                <MudGrid Justify="Justify.FlexEnd" Style="text-align: right">
-                    <MudItem xs="12">
-                        <MudTooltip Text="Load from server, will undo changes">
-                            <MudIconButton Icon="@Icons.Filled.Refresh" Color="Color.Info" OnClick="Load" Title="Load from server, will undo changes"></MudIconButton>
-                        </MudTooltip>
-                        <MudTooltip Text="Save changes">
-                            <MudIconButton Icon="@Icons.Filled.Save" Color="Color.Info" OnClick="Save" Title="Save changes"></MudIconButton>
-                        </MudTooltip>
-                    </MudItem>
-                </MudGrid>
+<MudGrid>
+    <MudItem xs="6" Style="margin-left: 10px">
+        <MudText Typo="Typo.h6" Style="line-height: 48px">Applications</MudText>
+    </MudItem>
+    <MudItem xs="6">
+        <MudGrid Justify="Justify.FlexEnd" Style="text-align: right">
+            <MudItem xs="12">
+                <MudTooltip Text="Load from server, will undo changes">
+                    <MudIconButton Icon="@Icons.Filled.Refresh" Color="Color.Info" OnClick="Load" Title="Load from server, will undo changes"></MudIconButton>
+                </MudTooltip>
+                <MudTooltip Text="Save changes">
+                    <MudIconButton Icon="@Icons.Filled.Save" Color="Color.Info" OnClick="Save" Title="Save changes"></MudIconButton>
+                </MudTooltip>
             </MudItem>
         </MudGrid>
-    </ToolBarContent>
+    </MudItem>
+</MudGrid>
+<MudTable Items="@List" Dense="true" CanCancelEdit="true" Style="Width: 400px" Elevation="0">
     <ColGroup>
         <col style="width: 400px;" />
         <col style="width: 30px;" />
