@@ -1,0 +1,39 @@
+﻿<Window x:Class="pote.Config.ByteConverter.Client.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:pote.Config.ByteConverter.Client"
+        mc:Ignorable="d" d:DataContext="{d:DesignInstance Type=local:MainWindow, IsDesignTimeCreatable=False}"
+        Title="Config byte converter" Height="936" Width="957">
+    <Grid>
+
+        <TabControl Margin="3">
+            <TabItem Header="    JSON to BYTES    ">
+                <Grid Background="white">
+                    <TextBlock HorizontalAlignment="Left" Margin="10,5,0,0" TextWrapping="Wrap" Text="Environment:" VerticalAlignment="Top"/>
+                    <TextBox HorizontalAlignment="Left" Margin="85,4,0,0" TextWrapping="Wrap" Text="{Binding SelectedEnvironment}" VerticalAlignment="Top" Width="120"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="232,5,0,0" TextWrapping="Wrap" Text="Application:" VerticalAlignment="Top"/>
+                    <TextBox HorizontalAlignment="Left" Margin="300,4,0,0" TextWrapping="Wrap" Text="{Binding SelectedApplication}" VerticalAlignment="Top" Width="120"/>
+
+                    <TextBlock HorizontalAlignment="Left" Margin="10,32,0,0" TextWrapping="Wrap" Text="Application configuration (JSON):" VerticalAlignment="Top"/>
+                    <TextBox Margin="4,53,4,436" Text="{Binding ApplicationConfigurationJson}" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible"/>
+                    <Button Content="Convert to bytes" HorizontalAlignment="Left" Margin="10,0,0,411" x:Name="BConvertApplicationConfigurationToBytes" VerticalAlignment="Bottom" Width="118" Click="BConvertApplicationConfigurationToBytes_Click"/>
+
+                    <TextBlock HorizontalAlignment="Left" Margin="10,0,0,390" TextWrapping="Wrap" Text="Configuration bytes. This is what the API takes as input:" VerticalAlignment="Bottom"/>
+                    <TextBox Margin="4,0,4,0" Text="{Binding ApplicationConfigurationBytes}" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible" Height="385" VerticalAlignment="Bottom"/>
+                    <Button Content="Copy" HorizontalAlignment="Right" Margin="0,0,20,393" VerticalAlignment="Bottom" x:Name="BCopyAppConfigBytes" Click="BCopyAppConfigBytes_Click"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="    BYTES to JSON    ">
+                <Grid Background="white">
+                    <TextBlock HorizontalAlignment="Left" Margin="10,5,0,0" TextWrapping="Wrap" Text="Result from API:" VerticalAlignment="Top"/>
+                    <TextBox Margin="4,26,4,0" Text="{Binding BytesFromApi}" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible" Height="397" VerticalAlignment="Top"/>
+                    <Button Content="Convert to human readable text" HorizontalAlignment="Left" Margin="10,428,0,0" x:Name="BConvertApiResultToText" VerticalAlignment="Top" Width="202" Click="BConvertApiResultToText_Click"/>
+                    <TextBox Margin="4,453,4,0" Text="{Binding HumanReadableTextFromApi}" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible"/>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+    </Grid>
+</Window>

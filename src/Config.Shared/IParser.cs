@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace pote.Config.Shared
+﻿namespace pote.Config.Shared
 {
     public interface IParser
     {
