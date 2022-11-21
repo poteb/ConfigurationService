@@ -1,6 +1,6 @@
 ﻿namespace pote.Config.Admin.Api.Model;
 
-public class ConfigurationHeader
+public class ConfigurationHeader : IIdentity
 {
     public string Id { get; set; } = Guid.NewGuid().ToString();
     public string Name { get; set; } = string.Empty;

@@ -26,8 +26,8 @@ public class DataProvider : IDataProvider, IEnvironmentDataAccess, IApplicationD
             if (!header.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase)) continue;
             foreach (var configuration in header.Configurations)
             {
-                if (!configuration.Applications.Contains(applicationId, StringComparison.InvariantCultureIgnoreCase)) continue;
-                if (!configuration.Environments.Contains(environmentId, StringComparison.InvariantCultureIgnoreCase)) continue;
+                if (configuration.Applications.All(a => !string.Equals(a, applicationId, StringComparison.InvariantCultureIgnoreCase))) continue;
+                if (configuration.Environments.All(e => !string.Equals(e, environmentId, StringComparison.InvariantCultureIgnoreCase))) continue;
 
                 return configuration.Json;
             }
@@ -35,7 +35,26 @@ public class DataProvider : IDataProvider, IEnvironmentDataAccess, IApplicationD
 
         return string.Empty;
     }
-    
+
+    public async Task<Configuration> GetConfiguration(string name, string applicationId, string environmentId, CancellationToken cancellationToken)
+    {
+        foreach (var file in _fileHandler.GetConfigurationFiles())
+        {
+            var header = JsonConvert.DeserializeObject<ConfigurationHeader>(await System.IO.File.ReadAllTextAsync(file, cancellationToken));
+            if (header == null) continue;
+            if (!header.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase)) continue;
+            foreach (var configuration in header.Configurations)
+            {
+                if (configuration.Applications.All(a => !string.Equals(a, applicationId, StringComparison.InvariantCultureIgnoreCase))) continue;
+                if (configuration.Environments.All(e => !string.Equals(e, environmentId, StringComparison.InvariantCultureIgnoreCase))) continue;
+
+                return configuration;
+            }
+        }
+
+        return new Configuration { Id = string.Empty };
+    }
+
     public async Task<List<DbModel.Application>> GetApplications(CancellationToken cancellationToken)
     {
         return await _applicationDataAccess.GetApplications(cancellationToken);

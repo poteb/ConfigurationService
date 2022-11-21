@@ -41,8 +41,8 @@ public class ConfigurationMapper
             Id = apiConfiguration.Id,
             CreatedUtc = apiConfiguration.CreatedUtc,
             Json = apiConfiguration.Json,
-            Applications = JsonSerializer.Serialize(JsonSerializer.Deserialize<List<Model.Application>>(apiConfiguration.Applications)?.Select(s => s.Id) ?? new List<string>()),
-            Environments = JsonSerializer.Serialize(JsonSerializer.Deserialize<List<Model.Environment>>(apiConfiguration.Environments)?.Select(s => s.Id) ?? new List<string>()),
+            Applications = JsonSerializer.Deserialize<List<Model.Application>>(apiConfiguration.Applications)?.Select(s => s.Id).ToList() ?? new List<string>(),
+            Environments = JsonSerializer.Deserialize<List<Model.Environment>>(apiConfiguration.Environments)?.Select(s => s.Id).ToList() ?? new List<string>(),
             Deleted = apiConfiguration.Deleted,
             IsActive = apiConfiguration.IsActive,
             History = ToDb(apiConfiguration.History)
@@ -67,16 +67,16 @@ public class ConfigurationMapper
 
     private static string GetFullApplications(DbModel.Configuration dbConfiguration, List<DbModel.Application> applications)
     {
-        var applicationIds = JsonSerializer.Deserialize<List<string>>(dbConfiguration.Applications)?.ToList() ?? new List<string>();
-        if (!applicationIds.Any()) return JsonSerializer.Serialize(applicationIds);
-        return JsonSerializer.Serialize(applications.Where(x => applicationIds.Any(y => y == x.Id)));
+        return !dbConfiguration.Applications.Any() 
+            ? JsonSerializer.Serialize(dbConfiguration.Applications) 
+            : JsonSerializer.Serialize(applications.Where(x => dbConfiguration.Applications.Any(y => y == x.Id)));
     }
 
     private static string GetFullEnvironments(DbModel.Configuration dbConfiguration, List<DbModel.Environment> environments)
     {
-        var list = JsonSerializer.Deserialize<List<string>>(dbConfiguration.Environments)?.ToList() ?? new List<string>();
-        if (!list.Any()) return JsonSerializer.Serialize(list);
-        return JsonSerializer.Serialize(environments.Where(x => list.Any(y => y == x.Id)));
+        return !dbConfiguration.Environments.Any()
+            ? JsonSerializer.Serialize(dbConfiguration.Environments) 
+            : JsonSerializer.Serialize(environments.Where(x => dbConfiguration.Environments.Any(y => y == x.Id)));
     }
 
     public static List<DbModel.Configuration> ToDb(List<Configuration> configurations)
@@ -97,5 +97,18 @@ public class ConfigurationMapper
     public static List<ConfigurationHeader> ToApi(List<DbModel.ConfigurationHeader> headers, List<DbModel.Application> applications, List<DbModel.Environment> environments)
     {
         return headers.Select(h => ToApi(h, applications, environments)).ToList();
+    }
+}
+
+public static class ConfigurationMapperExtensions
+{
+    public static Model.Configuration ToApi(this DbModel.Configuration configuration, List<DbModel.Application> applications, List<DbModel.Environment> environments)
+    {
+        return ConfigurationMapper.ToApi(configuration, applications, environments);
+    }
+    
+    public static DbModel.Configuration ToDb(this Configuration configuration)
+    {
+        return ConfigurationMapper.ToDb(configuration);
     }
 }

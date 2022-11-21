@@ -30,3 +30,16 @@ public class ApplicationMapper
         return applications.Select(ToApi).ToList();
     }
 }
+
+public static class ApplicationMapperExtensions
+{
+    public static Model.Application ToApi(this DbModel.Application application)
+    {
+        return ApplicationMapper.ToApi(application);
+    }
+    
+    public static DbModel.Application ToDb(this Model.Application application)
+    {
+        return ApplicationMapper.ToDb(application);
+    }
+}

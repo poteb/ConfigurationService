@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
 using pote.Config.Shared;
 
@@ -7,21 +8,28 @@ namespace pote.Config.Parser
     public class Parser : IParser
     {
         private readonly IDataProvider _dataProvider;
+
         private const string RefPattern = "\\$ref:(?<ref>[^#]*)#(?<field>[^\"]*)";
         //private const string NamePattern = "(?<name>[^.]*).?(?<application>[^.]*).?(?<environment>[^.]*)";
+
+        /// <summary>Add your own value to gather tracking data</summary>
+        public Action<string, string> TrackingAction { get; set; } = (_, _) => { };
 
         public Parser(IDataProvider dataProvider)
         {
             _dataProvider = dataProvider;
         }
 
-        public async Task<string> Parse(string json, string application, string environment, Action<string> problems, CancellationToken cancellationToken)
+        /// <summary>Parses the specified configuration. Will do some pre- and post-processing.</summary>
+        public async Task<string> Parse(string json, string application, string environment, Action<string> problems, CancellationToken cancellationToken, string rootId)
         {
+            // Pre process
             if (string.IsNullOrWhiteSpace(json))
             {
                 problems("Input json is empty.");
                 return "";
             }
+
             var root = JObject.Parse(json);
             var applications = await _dataProvider.GetApplications(cancellationToken);
             var dbApplications = applications.FirstOrDefault(s => s.Id == application || s.Name.Equals(application, StringComparison.InvariantCultureIgnoreCase));
@@ -38,38 +46,66 @@ namespace pote.Config.Parser
                 problems($"Environment {environment} not found");
                 return "";
             }
-            
-            await HandleToken(root, dbApplications.Id, dbEnv.Id, problems, cancellationToken);
+
+            // Process
+            await HandleToken(root, dbApplications.Id, dbEnv.Id, problems, cancellationToken, rootId);
+
+            // Post process
             MoveBaseChildrenToRoot(root);
             root.AddFirst(new JProperty("generated_timestamp_utc", DateTime.UtcNow.ToString("s")));
             return root.ToString();
         }
 
-        private async Task HandleToken(JToken token, string application, string environment, Action<string> problems, CancellationToken cancellationToken)
+        /// <summary>Method for recursively handling the tokens in the json</summary>
+        private async Task HandleToken(JToken token, string application, string environment, Action<string> problems, CancellationToken cancellationToken, string trackId)
         {
-            if (token.HasValues)
-                foreach (var child in token.Children())
-                    await HandleToken(child, application, environment, problems, cancellationToken);
-            if (token.Type != JTokenType.Property) return;
-            var jProp = token.Value<JProperty>();
-            if (jProp == null || jProp.Value.Type != JTokenType.String) return;
-            var value = jProp.Value.Value<string>();
-            if (value == null) return;
-            var match = Regex.Match(value, RefPattern);
-            if (!match.Success) return;
-            var json = await _dataProvider.GetConfigurationJson(match.Groups[1].Value, application, environment, cancellationToken);
-            if (string.IsNullOrEmpty(json))
+            while (true)
             {
-                problems($"Reference could not be resolved, {match.Groups[0].Value}");
-                return;
+                // Recurse into children
+                if (token.HasValues)
+                    foreach (var child in token.Children())
+                        await HandleToken(child, application, environment, problems, cancellationToken, trackId);
+
+                // Check token for different types
+                if (token.Type != JTokenType.Property) return;
+                var jProp = token.Value<JProperty>();
+                if (jProp == null || jProp.Value.Type != JTokenType.String) return;
+                var value = jProp.Value.Value<string>();
+                if (value == null) return;
+
+                // Check if the value is a reference
+                var match = Regex.Match(value, RefPattern);
+                if (!match.Success) return;
+
+                // A match is found, now get the value from the database.
+                var configuration = await _dataProvider.GetConfiguration(match.Groups[1].Value, application, environment, cancellationToken);
+                if (string.IsNullOrWhiteSpace(configuration.Json))
+                {
+                    problems($"Reference could not be resolved, {match.Groups[0].Value}");
+                    return;
+                }
+
+                var refO = JObject.Parse(configuration.Json);
+                var refField = match.Groups["field"];
+                var refToken = refO.SelectToken(refField.Value);
+                if (refToken == null) return;
+
+                // Replace the value with the value from the database.
+                jProp.Value = refToken;
+
+                TrackingAction(trackId, configuration.Id);
+                trackId = configuration.Id;
+                
+                if (string.IsNullOrEmpty(refField.Value))
+                {
+                    // The field has no value, so it might have some children that we can work with. Overwrite token to the current JObject and continue. This is like a recursive call.
+                    token = refO;
+                    continue;
+                }
+
+                // All recursive calls are done, so we can return.
+                break;
             }
-            var refO = JObject.Parse(json);
-            var refField = match.Groups["field"];
-            var refToken = refO.SelectToken(refField.Value);
-            if (refToken == null) return;
-            jProp.Value = refToken;
-            if (string.IsNullOrEmpty(refField.Value))
-                await HandleToken(refO, application, environment, problems, cancellationToken);
         }
 
         /// <summary>If a child of the root object is named 'Base' or 'base', it's child object are moved to the root. This comes into play when the input JSON needs to be completely replaced by the content of a configuration (not just the value but also the name).</summary>

@@ -2,6 +2,8 @@
 {
     public interface IParser
     {
-        Task<string> Parse(string json, string application, string environment, Action<string> problems, CancellationToken cancellationToken);
+        Action<string, string> TrackingAction { get; set; }
+        
+        Task<string> Parse(string json, string application, string environment, Action<string> problems, CancellationToken cancellationToken, string rootId = "");
     }
 }
