@@ -4,9 +4,9 @@ namespace pote.Config.Admin.Api.Model.RequestResponse;
 
 public class DependencyGraphResponse
 {
-    public Dictionary<string, IVertex> Vertices { get; set; }
+    public List<IVertex> Vertices { get; set; } = new();
 
-    public Dictionary<string, Edge> Edges { get; set; }
+    public List<Edge> Edges { get; set; } = new();
     // public List<ApplicationVertex> Applications { get; set; }
     // public List<EnvironmentVertex> Environments { get; set; }
     // public List<ConfigurationVertex> Configurations { get; set; }

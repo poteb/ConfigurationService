@@ -8,15 +8,12 @@ public class Vertex<T> : IVertex where T : IIdentity
 
     public string Id => Value.Id;
 
-    public Type Type => typeof(T);
     public List<Edge> Edges { get; } = new();
     public string Name => _nameFunc();
     
-
     public Vertex(T value, Func<string> nameFunc)
     {
         _nameFunc = nameFunc;
         Value = value;
     }
-
 }

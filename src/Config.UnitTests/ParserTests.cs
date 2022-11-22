@@ -21,11 +21,11 @@ namespace pote.Config.UnitTests
         {
             var dataProvider = new TestDataProvider();
             var parser = new Parser.Parser(dataProvider);
-            var response = await parser.Parse("{\"Value1\":\"$ref:Wagga#Wagga\"}", "unittest", "test", s => { }, CancellationToken.None);
+            var response = await parser.Parse("{\"Value1\":\"$ref:Wagga#Wagga\"}", "unittest", "test", _ => { }, CancellationToken.None, "");
             var dyn = JsonConvert.DeserializeObject<dynamic>(response);
             var value1 = dyn?.Value1.ToString();
             Assert.AreEqual("Mama", value1);
-            response = await parser.Parse("{\"Value1\":\"$ref:Wagga#\"}", "unittest", "test", s => { }, CancellationToken.None);
+            response = await parser.Parse("{\"Value1\":\"$ref:Wagga#\"}", "unittest", "test", _ => { }, CancellationToken.None, "");
             dyn = JsonConvert.DeserializeObject<dynamic>(response);
             value1 = dyn?.Value1.Wagga.ToString();
             Assert.AreEqual("Mama", value1);
@@ -36,7 +36,7 @@ namespace pote.Config.UnitTests
         {
             var dataProvider = new TestDataProvider();
             var parser = new Parser.Parser(dataProvider);
-            var response = await parser.Parse("{\"Value1\":\"$ref:Wagga_nested#\"}", "unittest", "test", s => { }, CancellationToken.None);
+            var response = await parser.Parse("{\"Value1\":\"$ref:Wagga_nested#\"}", "unittest", "test", _ => { }, CancellationToken.None, "");
             var dyn = JsonConvert.DeserializeObject<dynamic>(response);
             var value1 = dyn?.Value1.Wagga.Super.ToString();
             Assert.AreEqual("mule", value1);
@@ -45,14 +45,14 @@ namespace pote.Config.UnitTests
 
     public class TestDataProvider : IDataProvider
     {
-        public Task<string> GetConfigurationJson(string name, string applicationId, string environment, CancellationToken cancellationToken)
+        public Task<Configuration> GetConfiguration(string name, string applicationId, string environment, CancellationToken cancellationToken)
         {
             return name switch
             {
-                "Wagga" => Task.FromResult("{\"Wagga\":\"Mama\"}"),
-                "Wagga_nested" => Task.FromResult("{\"Wagga\":\"$ref:Super#\"}"),
-                "Super" => Task.FromResult("{\"Super\":\"mule\"}"),
-                _ => Task.FromResult("")
+                "Wagga" => Task.FromResult(new Configuration { Json = "{\"Wagga\":\"Mama\"}" }),
+                "Wagga_nested" => Task.FromResult(new Configuration { Json = "{\"Wagga\":\"$ref:Super#\"}" }),
+                "Super" => Task.FromResult(new Configuration { Json = "{\"Super\":\"mule\"}" }),
+                _ => Task.FromResult(new Configuration())
             };
         }
 
@@ -62,9 +62,9 @@ namespace pote.Config.UnitTests
             return Task.FromResult(list);
         }
 
-        public Task<List<DbModel.Application>> GetApplications(CancellationToken cancellationToken)
+        public Task<List<Application>> GetApplications(CancellationToken cancellationToken)
         {
-            var list = new List<DbModel.Application> { new() { Id = "dild_id", Name = "unittest" } };
+            var list = new List<Application> { new() { Id = "dild_id", Name = "unittest" } };
             return Task.FromResult(list);
         }
     }
