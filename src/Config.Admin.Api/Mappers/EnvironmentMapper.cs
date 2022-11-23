@@ -30,3 +30,16 @@ public class EnvironmentMapper
         return environments.Select(ToApi).ToList();
     }
 }
+
+public static class EnvironmentMapperExtensions
+{
+    public static Model.Environment ToApi(this DbModel.Environment environment)
+    {
+        return EnvironmentMapper.ToApi(environment);
+    }
+    
+    public static DbModel.Environment ToDb(this Model.Environment environment)
+    {
+        return EnvironmentMapper.ToDb(environment);
+    }
+}
