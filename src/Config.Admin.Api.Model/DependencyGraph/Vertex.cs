@@ -2,17 +2,16 @@
 
 public class Vertex<T> : IVertex where T : IIdentity
 {
-    private readonly Func<string> _nameFunc;
-
     public T Value { get; }
 
     public string Id => Value.Id;
 
-    public string Name => _nameFunc();
+    public List<string> Edges { get; } = new();
+    public string Name { get; }
     
-    public Vertex(T value, Func<string> nameFunc)
+    public Vertex(T value, string name)
     {
-        _nameFunc = nameFunc;
+        Name = name;
         Value = value;
     }
 }

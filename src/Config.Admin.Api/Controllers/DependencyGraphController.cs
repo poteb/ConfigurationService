@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using pote.Config.Admin.Api.Model.RequestResponse;
 using pote.Config.Admin.Api.Services;
@@ -31,6 +33,8 @@ public class DependencyGraphController : ControllerBase
             
             var response = await _dependencyGraphService.GetDependencyGraphAsync(cancellationToken);
             _memoryCache.Set(DependencyGraphService.CacheName, response, TimeSpan.FromDays(1));
+            // var options = new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.IgnoreCycles };
+            // var jsonResponse = JsonSerializer.Serialize(response, options);
             return Ok(response);
         }
         catch (Exception ex)

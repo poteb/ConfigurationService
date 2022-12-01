@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Http.Json;
 using pote.Config.Admin.Api.Services;
 using pote.Config.DataProvider.File;
 using pote.Config.Parser;
@@ -25,6 +27,11 @@ builder.Services.AddScoped<IDependencyGraphService, DependencyGraphService>();
 
 builder.Services.AddScoped<IDataProvider, DataProvider>();
 builder.Services.AddScoped<IParser, Parser>();
+
+builder.Services.Configure<JsonOptions>(options =>
+{
+    options.SerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+});
 
 var app = builder.Build();
 

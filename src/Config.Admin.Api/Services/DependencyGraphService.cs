@@ -38,18 +38,18 @@ public class DependencyGraphService : IDependencyGraphService
             var toVertice = graph.Vertices.FirstOrDefault(v => v.Id == to);
             if (fromVertice != null && toVertice != null)
             {
-                graph.Edges.Add(new Edge(fromVertice, toVertice));
+                graph.Edges.Add(new Edge(fromVertice.Id, toVertice.Id));
             }
         };
 
         foreach (var application in applications)
         {
-            graph.Vertices.Add(new Vertex<Application>(application.ToApi(), () => application.Name));
+            graph.Vertices.Add(new Vertex<Application>(application.ToApi(), application.Name));
         }
 
         foreach (var environment in environments)
         {
-            graph.Vertices.Add(new Vertex<Model.Environment>(environment.ToApi(), () => environment.Name));
+            graph.Vertices.Add(new Vertex<Model.Environment>(environment.ToApi(), environment.Name));
         }
 
         foreach (var header in configurationHeaders)
@@ -57,25 +57,36 @@ public class DependencyGraphService : IDependencyGraphService
             foreach (var configuration in header.Configurations)
             {
                 var apiConfiguration = configuration.ToApi(applications, environments);
-                var vertext = new Vertex<Configuration>(apiConfiguration, () => $"{header.Name} ({configuration.Id})");
-                graph.Vertices.Add(vertext);
+                var vertex = new Vertex<Configuration>(apiConfiguration, header.Name);
+                graph.Vertices.Add(vertex);
+                
+                // Add applications to edges
                 foreach (var app in configuration.Applications)
                 {
-                    graph.Edges.Add(new Edge(vertext, graph.Vertices.First(v => v.Id == app)));
+                    var toVertex = graph.Vertices.First(v => v.Id == app);
+                    var edge = new Edge(vertex.Id, toVertex.Id);
+                    vertex.Edges.Add(edge.Id);
+                    toVertex.Edges.Add(edge.Id);
+                    graph.Edges.Add(edge);
                 }
 
+                // Add environments to edges
                 foreach (var env in configuration.Environments)
                 {
-                    graph.Edges.Add(new Edge(vertext, graph.Vertices.First(v => v.Id == env)));
+                    var toVertex = graph.Vertices.First(v => v.Id == env);
+                    var edge = new Edge(vertex.Id, toVertex.Id);
+                    vertex.Edges.Add(edge.Id);
+                    toVertex.Edges.Add(edge.Id);
+                    graph.Edges.Add(new Edge(vertex.Id, toVertex.Id));
                 }
 
-                foreach (var app in configuration.Applications)
-                {
-                    foreach (var env in configuration.Environments)
-                    {
-                        var _ = parser.Parse(configuration.Json, app, env, p => { }, cancellationToken, configuration.Id);
-                    }
-                }
+                // foreach (var app in configuration.Applications)
+                // {
+                //     foreach (var env in configuration.Environments)
+                //     {
+                //         var _ = parser.Parse(configuration.Json, app, env, p => { }, cancellationToken, configuration.Id);
+                //     }
+                // }
             }
         }
 

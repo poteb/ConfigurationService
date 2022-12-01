@@ -2,10 +2,11 @@
 
 public class Edge
 {
-    public IVertex From { get; }
-    public IVertex To { get; }
+    public string Id { get; } = Guid.NewGuid().ToString();
+    public string From { get; }
+    public string To { get; }
     
-    public Edge(IVertex from, IVertex to)
+    public Edge(string from, string to)
     {
         From = from;
         To = to;
