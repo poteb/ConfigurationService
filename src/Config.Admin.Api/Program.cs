@@ -9,7 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(c =>
 {
-    c.AddPolicy("AllowOrigin", options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+    c.AddPolicy("CorsAllowAll", options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 });
 
 builder.Services.AddMemoryCache();
@@ -31,6 +31,7 @@ builder.Services.AddScoped<IParser, Parser>();
 builder.Services.Configure<JsonOptions>(options =>
 {
     options.SerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+    
 });
 
 var app = builder.Build();
@@ -40,7 +41,7 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
-app.UseCors("AllowOrigin");
+app.UseCors("CorsAllowAll");
 app.UseAuthorization();
 
 app.MapControllers();
