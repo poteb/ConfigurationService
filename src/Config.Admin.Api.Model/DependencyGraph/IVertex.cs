@@ -2,7 +2,7 @@
 
 public interface IVertex
 {
-    List<Edge> Edges { get; }
+    List<string> Edges { get; }
     string Name { get; }
     string Id { get; }
 }
