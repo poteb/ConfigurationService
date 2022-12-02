@@ -1,0 +1,14 @@
+<package>
+    <metadata>
+        <id>pote.Config.Admin.Client</id>
+        <version>0.1.0.0</version>
+        <authors>Paw</authors>
+        <owners>Paw</owners>
+        <projectUrl>https://github.com/poteb/ConfigurationService</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>Configuration Admin Client</description>
+    </metadata>
+    <files>
+        <file src="**" target="" />
+    </files>
+</package>
