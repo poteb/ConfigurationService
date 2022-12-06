@@ -7,16 +7,15 @@ using pote.Config.Shared;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddCors(c =>
-{
-    c.AddPolicy("AllowOrigin", policy => policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
-});
-
 builder.Services.AddMemoryCache();
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddCors(p => p.AddPolicy("allowall", builder =>
+{
+    builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+}));
 
 var fileDb = builder.Configuration.GetSection("FileDatabase").GetSection("Directory").Value;
 builder.Services.AddScoped<IFileHandler>(_ => new FileHandler(fileDb));
@@ -34,14 +33,14 @@ builder.Services.Configure<JsonOptions>(options =>
 });
 
 var app = builder.Build();
-app.UseCors(b => b.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
-// Configure the HTTP request pipeline.
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseHttpsRedirection();
-app.UseAuthorization();
+app.UseCors("allowall");
+
+//app.UseHttpsRedirection();
+//app.UseAuthorization();
 
 app.MapControllers();
 
