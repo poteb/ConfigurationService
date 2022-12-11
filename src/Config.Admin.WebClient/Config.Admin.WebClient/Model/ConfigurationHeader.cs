@@ -7,7 +7,7 @@ public class ConfigurationHeader : IEquatable<ConfigurationHeader>
     public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
     public DateTime UpdateUtc { get; set; } = DateTime.UtcNow;
     public bool Deleted { get; set; }
-    public bool IsActive { get; set; }
+    public bool IsActive { get; set; } = true;
     public List<Configuration> Configurations { get; set; } = new();
 
     public bool Equals(ConfigurationHeader? other)
