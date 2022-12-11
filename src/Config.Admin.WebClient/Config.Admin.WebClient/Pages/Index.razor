@@ -57,11 +57,18 @@
         <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<ConfigurationHeader, object>(x => x.Name)">Name</MudTableSortLabel></MudTh>
         <MudTh>Applications</MudTh>
         <MudTh>Environments</MudTh>
+        <MudTh></MudTh>
     </HeaderContent>
     <RowTemplate>
         <MudTd><MudButton OnClick="() => EditConfiguration(context.Id)" Variant="Variant.Filled">Edit</MudButton></MudTd>
         <MudTd>@context.Name</MudTd>
         <MudTd>@GetConfigurationApplicationsAsString(context)</MudTd>
         <MudTd>@GetConfigurationEnvironmentsAsString(context)</MudTd>
+        <MudTd>
+            @if (!context.IsActive)
+            {
+                <MudIcon Icon="@Icons.Filled.DoNotDisturb" Title="Inactive"></MudIcon>
+            }
+        </MudTd>
     </RowTemplate>
 </MudTable>
