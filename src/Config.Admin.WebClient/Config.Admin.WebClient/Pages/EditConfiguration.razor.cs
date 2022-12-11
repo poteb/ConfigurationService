@@ -130,6 +130,8 @@ public partial class EditConfiguration : IDisposable
         {
             UpdateUnhandledApplications();
             UpdateUnhandledEnvironments();
+            if (IsNew)
+                Gid = Header.Id;
             if (reload)
                 await Load();
             else
