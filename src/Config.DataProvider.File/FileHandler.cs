@@ -34,6 +34,28 @@ public class FileHandler : IFileHandler
         if (!System.IO.File.Exists(file)) throw new FileNotFoundException();
         return await System.IO.File.ReadAllTextAsync(file, cancellationToken);
     }
+    
+    public void DeleteConfiguration(string id, bool permanent)
+    {
+        var file = Path.ChangeExtension(Path.Combine(_configurationRootDir, id), ".txt");
+        if (!System.IO.File.Exists(file)) throw new FileNotFoundException();
+        if (permanent)
+        {
+            System.IO.File.Delete(file);
+            var dir = Path.Combine(_configurationRootDir, id);
+            if (Directory.Exists(dir))
+                Directory.Delete(dir, true);
+        }
+        else
+        {
+            var historyDir = Path.Combine(_configurationRootDir, id, "history");
+            if (!Directory.Exists(historyDir))
+                Directory.CreateDirectory(historyDir);
+            var historyFile = Path.Combine(historyDir, $"{id}_{DateTime.Now:yyyyMMddHHmmss}_deleted.txt");
+            System.IO.File.Move(file, historyFile, true);
+        }
+    }
+    
 
     public async Task WriteConfigurationContent(string id, string content, CancellationToken cancellationToken)
     {
@@ -43,7 +65,7 @@ public class FileHandler : IFileHandler
             var historyDir = Path.Combine(_configurationRootDir, id, "history");
             if (!Directory.Exists(historyDir))
                 Directory.CreateDirectory(historyDir);
-            var historyFile = Path.ChangeExtension(Path.Combine(historyDir, $"{id}_{Guid.NewGuid().ToString()}"), ".txt");
+            var historyFile = Path.ChangeExtension(Path.Combine(historyDir, $"{id}_{DateTime.Now:yyyyMMddHHmmss}"), ".txt");
             System.IO.File.Move(file, historyFile);
         }
         await System.IO.File.WriteAllTextAsync(file, content, cancellationToken);

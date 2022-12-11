@@ -119,7 +119,7 @@ public partial class EditConfiguration : IDisposable
 
     private async Task<bool> Save()
     {
-        if (Header.Equals(OriginalHeader)) return true;
+        //if (Header.Equals(OriginalHeader)) return true;
 
         PageError.Reset();
         Header.CreatedUtc = DateTime.UtcNow;
@@ -148,12 +148,14 @@ public partial class EditConfiguration : IDisposable
     //     //var _ = ConfigurationMapper.Copy(Configuration);
     // }
 
-    private async void Delete()
+    private async Task Delete()
     {
         Header.Deleted = true;
         PageError.Reset();
-        if (await Save())
-            NavigationManager.NavigateTo("/");
+        var callResponse = await AdminApiService.DeleteConfiguration(Gid, false);
+        if (!callResponse.IsSuccess)
+            PageError.OnError(callResponse.GenerateErrorMessage(), new Exception());
+        NavigationManager.NavigateTo("/");
     }
 
     private string GetExpandAllConfigurationsButtonIcon()
@@ -198,7 +200,7 @@ public partial class EditConfiguration : IDisposable
     {
         _expansionPanels.ExpandAll();
         _allPanelsExpanded = true;
-        foreach (var configurationContent in _configurationContents) 
+        foreach (var configurationContent in _configurationContents)
             await configurationContent.RunTest();
     }
 

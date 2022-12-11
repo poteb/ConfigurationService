@@ -9,6 +9,7 @@ public interface IAdminDataProvider : IApplicationDataAccess, IEnvironmentDataAc
     /// <summary>Returns a configuration (with its history)</summary>
     Task<ConfigurationHeader> GetConfiguration(string id, CancellationToken cancellationToken, bool includeHistory = true);
 
+    void DeleteConfiguration(string id, bool permanent);
     Task Insert(ConfigurationHeader header, CancellationToken cancellationToken);
 
     //Task<Configuration> Update(Configuration configuration, CancellationToken cancellationToken);

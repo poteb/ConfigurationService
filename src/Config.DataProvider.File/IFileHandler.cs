@@ -8,6 +8,7 @@ public interface IFileHandler
     string[] GetEnvironmentFiles();
     Task<string> GetEnvironmentContentAbsoluePath(string file, CancellationToken cancellationToken);
     Task<string> GetEnvironmentContent(string id, CancellationToken cancellationToken);
+    void DeleteConfiguration(string id, bool permanent);
     Task WriteEnvironmentContent(string id, string content, CancellationToken cancellationToken);
     void DeleteEnvironment(string id);
     string[] GetApplicationFiles();
