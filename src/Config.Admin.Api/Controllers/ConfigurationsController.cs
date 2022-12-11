@@ -81,4 +81,19 @@ public class ConfigurationsController : ControllerBase
             return Problem(ex.Message);
         }
     }
+
+    [HttpPost("delete/{id}/{permanent}")]
+    public ActionResult Delete(string id, bool permanent = false)
+    {
+        try
+        {
+            _dataProvider.DeleteConfiguration(id, permanent);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error deleting configuration header, id {id}");
+            return Problem(ex.Message);
+        }
+    }
 }

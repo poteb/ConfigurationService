@@ -13,6 +13,8 @@ namespace pote.Config.Admin.WebClient.Services
         Task<ApiCallResponse<object>> SaveEnvironments(List<ConfigEnvironment> environments);
         Task<ApiCallResponse<object>> SaveApplications(List<Application> applications);
         Task<ApiCallResponse<object>> SaveConfiguration(ConfigurationHeader configuration);
+        Task<ApiCallResponse<bool>> DeleteConfiguration(string id, bool permanent);
+
     }
 
     public class AdminApiService : ApiServiceBase, IAdminApiService
@@ -158,6 +160,20 @@ namespace pote.Config.Admin.WebClient.Services
             catch (Exception ex)
             {
                 return DefaultExceptionResponse(new object(), "Error saving configuration header", ex);
+            }
+        }
+
+        public async Task<ApiCallResponse<bool>> DeleteConfiguration(string id, bool permanent)
+        {
+            try
+            {
+                using var client = _clientFactory.CreateClient("AdminApi");
+                await client.PostAsync($"Configurations/delete/{id}/{permanent}", null);
+                return new ApiCallResponse<bool> { IsSuccess = true };
+            }
+            catch (Exception ex)
+            {
+                return DefaultExceptionResponse(false, "Error deleting configuration", ex);
             }
         }
     }

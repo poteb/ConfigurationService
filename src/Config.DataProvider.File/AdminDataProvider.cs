@@ -42,6 +42,10 @@ public class AdminDataProvider : IAdminDataProvider
         return header;
     }
 
+    public void DeleteConfiguration(string id, bool permanent)
+    {
+        _fileHandler.DeleteConfiguration(id, permanent);
+    }
     public async Task Insert(ConfigurationHeader header, CancellationToken cancellationToken)
     {
         await _fileHandler.WriteConfigurationContent(header.Id, JsonConvert.SerializeObject(header), cancellationToken);
