@@ -20,6 +20,7 @@ public partial class EditConfiguration : IDisposable
     private ConfigurationHeader OriginalHeader { get; set; } = null!;
     [Inject] public IAdminApiService AdminApiService { get; set; } = null!;
     [Inject] public IApiService ApiService { get; set; } = null!;
+    [Inject] public IDialogService DialogService { get; set; }
     [CascadingParameter] public PageError PageError { get; set; } = null!;
     private List<Application> Applications { get; set; } = new();
     private List<ConfigEnvironment> Environments { get; set; } = new();
@@ -150,9 +151,15 @@ public partial class EditConfiguration : IDisposable
 
     private async Task Delete()
     {
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        var dialog = await DialogService.ShowAsync<DeleteConfigurationDialog>("Delete configuration?", options);
+        var result = await dialog.Result;
+        if (result.Cancelled) return;
+        var softDelete = (bool)result.Data;
+        
         Header.Deleted = true;
         PageError.Reset();
-        var callResponse = await AdminApiService.DeleteConfiguration(Gid, false);
+        var callResponse = await AdminApiService.DeleteConfiguration(Gid, !softDelete);
         if (!callResponse.IsSuccess)
             PageError.OnError(callResponse.GenerateErrorMessage(), new Exception());
         NavigationManager.NavigateTo("/");

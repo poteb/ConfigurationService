@@ -1,0 +1,25 @@
+﻿<MudDialog>
+    <DialogContent>
+        <MudText>@ContentText</MudText>
+        <MudTooltip Text="This will keep a backup of the configuration. Uncheck to delete it permanently.">
+            <MudCheckBox @bind-Checked="@SoftDelete" Label="Soft delete"></MudCheckBox>
+        </MudTooltip>
+    </DialogContent>
+    <DialogActions>
+        
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="@Color" Variant="Variant.Filled" OnClick="Submit">@ButtonText</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public string ContentText { get; set; } = "Are you sure you want to delete the configuration?";
+    [Parameter] public string ButtonText { get; set; } = "OK";
+    [Parameter] public Color Color { get; set; } = Color.Warning;
+    //[Parameter] public bool ShowCancelButton { get; set; } = true;
+    public bool SoftDelete { get; set; } = true;
+
+    void Submit() => MudDialog.Close(DialogResult.Ok(SoftDelete));
+    void Cancel() => MudDialog.Cancel();
+}
