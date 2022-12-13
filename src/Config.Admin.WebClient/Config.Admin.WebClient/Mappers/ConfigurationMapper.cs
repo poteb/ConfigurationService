@@ -3,7 +3,7 @@ using pote.Config.Admin.WebClient.Model;
 
 namespace pote.Config.Admin.WebClient.Mappers;
 
-public class ConfigurationMapper
+public static class ConfigurationMapper
 {
     public static ConfigurationHeader ToClient(Api.Model.ConfigurationHeader header)
     {
@@ -74,22 +74,22 @@ public class ConfigurationMapper
         return JsonSerializer.Serialize(items);
     }
 
-    public static List<Configuration> ToClient(List<Api.Model.Configuration> configurations)
+    public static List<Configuration> ToClient(IReadOnlyList<Api.Model.Configuration> configurations)
     {
         return configurations.Select(ToClient).ToList();
     }
 
-    public static List<Api.Model.Configuration> ToApi(List<Configuration> configurations)
+    public static List<Api.Model.Configuration> ToApi(IReadOnlyList<Configuration> configurations)
     {
         return configurations.Select(ToApi).ToList();
     }
 
-    public static List<ConfigurationHeader> ToClient(List<Api.Model.ConfigurationHeader> headers)
+    public static List<ConfigurationHeader> ToClient(IReadOnlyList<Api.Model.ConfigurationHeader> headers)
     {
         return headers.Select(ToClient).ToList();
     }
 
-    public static List<Api.Model.ConfigurationHeader> ToApi(List<ConfigurationHeader> headers)
+    public static List<Api.Model.ConfigurationHeader> ToApi(IReadOnlyList<ConfigurationHeader> headers)
     {
         return headers.Select(ToApi).ToList();
     }

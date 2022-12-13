@@ -1,6 +1,8 @@
-﻿namespace pote.Config.Admin.Api.Model.RequestResponse;
+﻿using System.Collections.Immutable;
+
+namespace pote.Config.Admin.Api.Model.RequestResponse;
 
 public class ConfigurationsResponse
 {
-    public List<ConfigurationHeader> Configurations { get; set; } = new();
+    public IReadOnlyList<ConfigurationHeader> Configurations { get; set; } = ImmutableList<ConfigurationHeader>.Empty;
 }
