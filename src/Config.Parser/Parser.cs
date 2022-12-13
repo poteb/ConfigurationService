@@ -1,5 +1,4 @@
-﻿using System.Security.Cryptography;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
 using pote.Config.Shared;
 
@@ -23,6 +22,8 @@ namespace pote.Config.Parser
         /// <summary>Parses the specified configuration. Will do some pre- and post-processing.</summary>
         public async Task<string> Parse(string json, string application, string environment, Action<string> problems, CancellationToken cancellationToken, string rootId)
         {
+            
+            
             // Pre process
             if (string.IsNullOrWhiteSpace(json))
             {
@@ -32,23 +33,23 @@ namespace pote.Config.Parser
 
             var root = JObject.Parse(json);
             var applications = await _dataProvider.GetApplications(cancellationToken);
-            var dbApplications = applications.FirstOrDefault(s => s.Id == application || s.Name.Equals(application, StringComparison.InvariantCultureIgnoreCase));
-            if (dbApplications == null)
+            var dbApplication = applications.FirstOrDefault(s => s.Id == application || s.Name.Equals(application, StringComparison.InvariantCultureIgnoreCase));
+            if (dbApplication == null)
             {
                 problems($"Application {application} not found");
                 return "";
             }
 
             var environments = await _dataProvider.GetEnvironments(cancellationToken);
-            var dbEnv = environments.FirstOrDefault(e => e.Id == environment || e.Name.Equals(environment, StringComparison.InvariantCultureIgnoreCase));
-            if (dbEnv == null)
+            var dbEnvironment = environments.FirstOrDefault(e => e.Id == environment || e.Name.Equals(environment, StringComparison.InvariantCultureIgnoreCase));
+            if (dbEnvironment == null)
             {
                 problems($"Environment {environment} not found");
                 return "";
             }
 
             // Process
-            await HandleToken(root, dbApplications.Id, dbEnv.Id, problems, cancellationToken, rootId);
+            await HandleToken(root, dbApplication.Id, dbEnvironment.Id, problems, cancellationToken, rootId);
 
             // Post process
             MoveBaseChildrenToRoot(root);
