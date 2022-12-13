@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using System.Collections.Immutable;
+using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using pote.Config.Admin.WebClient.Components;
 using pote.Config.Admin.WebClient.Mappers;
@@ -13,6 +14,9 @@ public partial class EditConfiguration : IDisposable
     private bool _allPanelsExpanded;
     private readonly List<ConfigurationContent> _configurationContents = new();
     private Timer? _unsavedChangesTimer;
+    private IReadOnlyList<ConfigurationHeader> _headers = new List<ConfigurationHeader>();
+    private MudForm _form = null!;
+    private bool _formIsValid;
 
     [Parameter] public string Gid { get; set; } = string.Empty;
     private bool IsNew => string.IsNullOrWhiteSpace(Gid);
@@ -20,7 +24,7 @@ public partial class EditConfiguration : IDisposable
     private ConfigurationHeader OriginalHeader { get; set; } = null!;
     [Inject] public IAdminApiService AdminApiService { get; set; } = null!;
     [Inject] public IApiService ApiService { get; set; } = null!;
-    [Inject] public IDialogService DialogService { get; set; }
+    [Inject] public IDialogService DialogService { get; set; } = null!;
     [CascadingParameter] public PageError PageError { get; set; } = null!;
     private List<Application> Applications { get; set; } = new();
     private List<ConfigEnvironment> Environments { get; set; } = new();
@@ -37,13 +41,14 @@ public partial class EditConfiguration : IDisposable
     protected override async Task OnInitializedAsync()
     {
         await Load();
-        _unsavedChangesTimer = new Timer(stateInfo =>
+        _unsavedChangesTimer = new Timer(_ =>
         {
             var oldHasChanged = HasUnsavedChanges;
             HasUnsavedChanges = !Header.Equals(OriginalHeader);
             if (oldHasChanged != HasUnsavedChanges)
                 StateHasChanged();
-        }, new AutoResetEvent(false), 2000, 2000);
+        }, new AutoResetEvent(false), 1000, 1000);
+        await LoadAllHeaders();
     }
 
     private async Task Load()
@@ -70,6 +75,13 @@ public partial class EditConfiguration : IDisposable
         await UpdateEnvironments();
         UpdateUnhandledApplications();
         UpdateUnhandledEnvironments();
+    }
+
+    private async Task LoadAllHeaders()
+    {
+        var callResponse = await AdminApiService.GetConfigurations();
+        if (callResponse is { IsSuccess: true, Response: { } })
+            _headers = ConfigurationMapper.ToClient(callResponse.Response.Configurations.Where(c => c.Id != Header?.Id).ToImmutableList());
     }
 
     private void UpdateConfigurationIndex()
@@ -120,7 +132,8 @@ public partial class EditConfiguration : IDisposable
 
     private async Task<bool> Save()
     {
-        //if (Header.Equals(OriginalHeader)) return true;
+        await _form.Validate();
+        if (!_formIsValid) return false;
 
         PageError.Reset();
         Header.CreatedUtc = DateTime.UtcNow;
@@ -212,4 +225,22 @@ public partial class EditConfiguration : IDisposable
     }
 
     public void Dispose() => _unsavedChangesTimer?.Dispose();
+
+    private async Task NameChanged()
+    {
+        if (_headers.Any(h => h.Name == Header.Name))
+        {
+            Console.WriteLine("Already exists");
+            return;
+        }
+        Console.WriteLine("All good");
+    }
+
+    private string ValidateHeaderName(string s)
+    {
+        if (string.IsNullOrWhiteSpace(Header.Name)) return "Name is empty";
+        if (_headers.All(h => h.Name != Header.Name)) return null!;
+        Console.WriteLine("Already exists");
+        return "Already exists";
+    }
 }

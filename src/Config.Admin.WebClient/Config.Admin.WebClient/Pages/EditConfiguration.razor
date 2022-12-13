@@ -4,61 +4,65 @@
 
 <PageTitle>Edit configuration</PageTitle>
 
-<MudGrid Style="padding: 0; margin: 0; width: 99%" Spacing="2">
-    <MudItem xs="6" Class="d-flex">
-        <MudTooltip Text="Save">
-            <MudButton StartIcon="@Icons.Filled.Save" Variant="Variant.Outlined" Color="Color.Info" OnClick="Save" Disabled="!HasUnsavedChanges">Save</MudButton>
-        </MudTooltip>
-        @* <MudItem Style="margin-left:50px"> *@
-        @*     <MudTooltip Text="Duplicate"> *@
-        @*         <MudButton StartIcon="@Icons.Filled.FileCopy" Variant="Variant.Outlined" Color="Color.Warning" OnClick="Duplicate">Duplicate</MudButton> *@
-        @*     </MudTooltip> *@
-        @* </MudItem> *@
+<MudForm @ref="_form" @bind-IsValid="@_formIsValid">
+    <MudGrid Style="padding: 0; margin: 0; width: 99%" Spacing="2">
+        <MudItem xs="6" Class="d-flex">
+            <MudTooltip Text="Save">
+                <MudButton StartIcon="@Icons.Filled.Save" Variant="Variant.Outlined" Color="Color.Info" OnClick="Save" Disabled="!HasUnsavedChanges || !_formIsValid">Save</MudButton>
+            </MudTooltip>
+            @* <MudItem Style="margin-left:50px"> *@
+            @*     <MudTooltip Text="Duplicate"> *@
+            @*         <MudButton StartIcon="@Icons.Filled.FileCopy" Variant="Variant.Outlined" Color="Color.Warning" OnClick="Duplicate">Duplicate</MudButton> *@
+            @*     </MudTooltip> *@
+            @* </MudItem> *@
 
-    </MudItem>
-    <MudItem xs="6" Class="d-flex justify-end">
-        <MudTooltip Text="Delete">
-            <MudButton StartIcon="@Icons.Filled.Delete" Variant="Variant.Outlined" Color="Color.Error" OnClick="Delete">Delete</MudButton>
-        </MudTooltip>
-    </MudItem>
-</MudGrid>
+        </MudItem>
+        <MudItem xs="6" Class="d-flex justify-end">
+            <MudTooltip Text="Delete">
+                <MudButton StartIcon="@Icons.Filled.Delete" Variant="Variant.Outlined" Color="Color.Error" OnClick="Delete">Delete</MudButton>
+            </MudTooltip>
+        </MudItem>
+    </MudGrid>
 
-<MudGrid Style="padding: 0;margin: 0;width: 99%" Spacing="2">
-    <MudItem xs="4">
-        <MudGrid Style="padding: 0; margin: 0" Spacing="2">
-            <MudItem xs="12">
-                <MudText Style="font-size: 8pt">ID: @Header.Id</MudText>
-                <MudText Style="font-size: 8pt">Created: @Header.CreatedUtc</MudText>
-            </MudItem>
-            <MudItem xs="12">
-                <MudTextField Variant="Variant.Outlined" Label="Name" @bind-Value="@Header.Name"></MudTextField>
-            </MudItem>
-            <MudItem xs="12">
-                <MudCheckBox Label="Active" @bind-checked="Header.IsActive" T="bool"></MudCheckBox>
-            </MudItem>
-        </MudGrid>
-    </MudItem>
-    <MudItem xs="8">
-        <MudText Style="font-size:10pt">Unhandled applications: @string.Join(", ", UnhandledApplications)</MudText>
-        <MudText Style="font-size:10pt">Unhandled environments: @string.Join(", ", UnhandledEnvironments)</MudText>
-    </MudItem>
-</MudGrid>
-<br/>
+    <MudGrid Style="padding: 0;margin: 0;width: 99%" Spacing="2">
+        <MudItem xs="4">
+            <MudGrid Style="padding: 0; margin: 0" Spacing="2">
+                <MudItem xs="12">
+                    <MudText Style="font-size: 8pt">ID: @Header.Id</MudText>
+                    <MudText Style="font-size: 8pt">Created: @Header.CreatedUtc</MudText>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField Variant="Variant.Outlined" Label="Name" @bind-Value="@Header.Name" Validation="@(new Func<string, string>(ValidateHeaderName))" Immediate="true"></MudTextField>
+                    @* <MudTextField Variant="Variant.Outlined" Label="Name" @bind-Value="@Header.Name" Validation="@(new Func<string, string>(ValidateHeaderName))" Immediate="true" OnKeyUp="NameChanged"></MudTextField> *@
+                </MudItem>
+                <MudItem xs="12">
+                    <MudCheckBox Label="Active" @bind-checked="Header.IsActive" T="bool"></MudCheckBox>
+                </MudItem>
+            </MudGrid>
+        </MudItem>
+        <MudItem xs="8">
+            <MudText Style="font-size:10pt">Unhandled applications: @string.Join(", ", UnhandledApplications)</MudText>
+            <MudText Style="font-size:10pt">Unhandled environments: @string.Join(", ", UnhandledEnvironments)</MudText>
+        </MudItem>
+    </MudGrid>
+    <br/>
 
-<MudGrid Style="padding: 0; margin: 0; width: 99%" Spacing="2">
-    <MudItem xs="2">
-        <MudText Class="Headline" Style="padding-left:16px">Configurations</MudText>
-    </MudItem>
-    <MudItem xs="3">
-        <MudButton StartIcon="@Icons.Filled.AddCircle" Variant="Variant.Outlined" Color="Color.Success" OnClick="AddConfiguration">Add new configuration</MudButton>
-    </MudItem>
-    <MudItem xs="3">
-        <MudButton StartIcon="@Icons.Filled.Check" OnClick="TestAll" Variant="Variant.Outlined" Color="Color.Info">Test all</MudButton>
-    </MudItem>
-    <MudItem xs="4" Class="d-flex justify-end">
-        <MudButton EndIcon="@GetExpandAllConfigurationsButtonIcon()" OnClick="ExpandAllConfigurations">@GetExpandAllConfigurationsButtonText()</MudButton>
-    </MudItem>
-</MudGrid>
+    <MudGrid Style="padding: 0; margin: 0; width: 99%" Spacing="2">
+        <MudItem xs="2">
+            <MudText Class="Headline" Style="padding-left:16px">Configurations</MudText>
+        </MudItem>
+        <MudItem xs="3">
+            <MudButton StartIcon="@Icons.Filled.AddCircle" Variant="Variant.Outlined" Color="Color.Success" OnClick="AddConfiguration">Add new configuration</MudButton>
+        </MudItem>
+        <MudItem xs="3">
+            <MudButton StartIcon="@Icons.Filled.Check" OnClick="TestAll" Variant="Variant.Outlined" Color="Color.Info">Test all</MudButton>
+        </MudItem>
+        <MudItem xs="4" Class="d-flex justify-end">
+            <MudButton EndIcon="@GetExpandAllConfigurationsButtonIcon()" OnClick="ExpandAllConfigurations">@GetExpandAllConfigurationsButtonText()</MudButton>
+        </MudItem>
+    </MudGrid>
+
+</MudForm>
 
 <MudExpansionPanels MultiExpansion="true" Elevation="3" Style="width: calc(100% - 15px);margin-bottom: 30px" @ref="_expansionPanels">
     @foreach (var configuration in Header.Configurations)

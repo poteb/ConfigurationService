@@ -24,7 +24,7 @@ public partial class Index
     {
         PageError.Reset();
         var callResponse = await AdminApiService.GetConfigurations();
-        if (callResponse.IsSuccess && callResponse.Response != null)
+        if (callResponse is { IsSuccess: true, Response: { } })
             Headers = ConfigurationMapper.ToClient(callResponse.Response.Configurations);
         else
             PageError.OnError(callResponse.GenerateErrorMessage(), new Exception());
