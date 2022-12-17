@@ -94,7 +94,8 @@ public static class ConfigurationMapper
         return headers.Select(ToApi).ToList();
     }
 
-    private static Configuration Copy(Configuration configuration)
+    /// <summary>Creates a copy of given <see cref="Configuration"/> except the HeaderId property</summary>
+    public static Configuration Copy(Configuration configuration)
     {
         var newConfig = new Configuration
         {
@@ -104,7 +105,8 @@ public static class ConfigurationMapper
             Deleted = false,
             IsActive = configuration.IsActive,
             Applications = StringToList<Application>(ListToString(configuration.Applications)),
-            Environments = StringToList<ConfigEnvironment>(ListToString(configuration.Environments))
+            Environments = StringToList<ConfigEnvironment>(ListToString(configuration.Environments)), 
+            Index =configuration.Index 
         };
         return newConfig;
     }
@@ -121,5 +123,18 @@ public static class ConfigurationMapper
             IsActive = header.IsActive,
             Configurations = header.Configurations.Select(Copy).ToList()
         };
+    }
+
+    public static void CopyTo(this Configuration from, Configuration to)
+    {
+
+        to.Id = from.Id;
+        to.CreatedUtc = from.CreatedUtc;
+        to.Json = from.Json;
+        to.Deleted = false;
+        to.IsActive = from.IsActive;
+        to.Applications = StringToList<Application>(ListToString(from.Applications));
+        to.Environments = StringToList<ConfigEnvironment>(ListToString(from.Environments));
+        to.Index = from.Index;
     }
 }

@@ -4,10 +4,10 @@
 @using pote.Config.Admin.WebClient.Mappers
 @using pote.Config.Admin.WebClient.Services
 @using pote.Config.Shared
-<MudExpansionPanel Style="@($"background-color:{(Index % 2 == 0 ? Colors.Indigo.Lighten5 : Colors.Teal.Lighten5)}")" Disabled="@Configuration.Deleted" @ref="_expansionPanel">
+<MudExpansionPanel Style="@($"background-color:{(Index % 2 == 0 ? Colors.Indigo.Lighten5 : Colors.Teal.Lighten5)}")" Disabled="@_configuration.Deleted" @ref="_expansionPanel">
     <TitleContent>
         <MudGrid Style="padding: 0; margin: 0; width: 99%">
-            <MudItem xs="11" Style="padding-bottom: 0">
+            <MudItem xs="10" Style="padding-bottom: 0">
                 <MudGrid Style="padding: 0; margin: 0; width: 99%">
                     <MudItem xs="12" Class="d-flex" Style="padding-bottom: 0">
                         <MudText Style="min-width: 110px;">Environments:</MudText>
@@ -29,8 +29,8 @@
                     </MudItem>
                 </MudGrid>
             </MudItem>
-            <MudItem xs="1">
-                @if (!Configuration.Deleted)
+            <MudItem xs="2">
+                @if (!_configuration.Deleted)
                 {
                     <MudTooltip Text="Delete configuration section">
                         <MudIconButton Icon="@Icons.Filled.Delete" Color="Color.Error" OnClick="() => DeleteConfiguration(true)"></MudIconButton>
@@ -42,11 +42,14 @@
                         <MudIconButton Icon="@Icons.Filled.Delete" Color="Color.Error" OnClick="() => DeleteConfiguration(false)"></MudIconButton>
                     </MudTooltip>
                 }
+                <MudTooltip Text="Undo changes to configuration section">
+                    <MudIconButton Icon="@Icons.Filled.Undo" Color="Color.Warning" OnClick="UndoChanges"></MudIconButton>
+                </MudTooltip>
             </MudItem>
         </MudGrid>
     </TitleContent>
     <ChildContent>
-        @if (!Configuration.Deleted)
+        @if (!_configuration.Deleted)
         {
             <MudGrid Style="padding: 0; margin: 0; width: 99%" Spacing="2">
                 <MudItem xs="12" Class="d-flex align-center" Style="padding:0">
@@ -72,7 +75,7 @@
                 <MudButton Variant="Variant.Outlined" Style="background-color: white" OnClick="FormatJson" EndIcon="@Icons.Filled.FormatIndentIncrease">Format JSON</MudButton>
                 <MudText Style="padding-left: 10px" Color="Color.Error">@_jsonValidationError</MudText>
             </MudItem>
-            <MudTextField @bind-Text="Configuration.Json" T="string" Variant="Variant.Outlined" Lines="@_jsonLines" Style="background-color:#fff"></MudTextField>
+            <MudTextField @bind-Text="_configuration.Json" T="string" Variant="Variant.Outlined" Lines="@_jsonLines" Style="background-color:#fff"></MudTextField>
 
             <ConfigurationContentTestPanel @ref="_testPanel" AllEnvironments="_allEnvironments" AllApplications="_allApplications" Configuration="_configuration"></ConfigurationContentTestPanel>
         }
@@ -85,19 +88,18 @@
     private int _jsonLines = 10;
     private string _jsonValidationError = string.Empty;
     private IEnumerable<ConfigEnvironment> _selectedEnvironments = new HashSet<ConfigEnvironment>();
+    private IEnumerable<ConfigEnvironment> _selectedEnvironmentsOriginal = new HashSet<ConfigEnvironment>();
     private Configuration _configuration = new();
-    //private Configuration _configurationOriginal = new();
     private IEnumerable<Application> _selectedApplications = new HashSet<Application>();
+    private IEnumerable<Application> _selectedApplicationsOriginal = new HashSet<Application>();
     private string _environmentsText = string.Empty;
     private string _applicationsText = string.Empty;
     private List<Application> _allApplications = new();
     private List<ConfigEnvironment> _allEnvironments = new();
     private int _index = -1;
 
-    [Inject] IDialogService DialogService { get; set; } = null!;
-
-    //[Parameter]
-    //public Action<Configuration> DeleteThisConfigurationCallback { get; set; } = null!;
+    [Inject]
+    IDialogService DialogService { get; set; } = null!;
 
     [Parameter]
     public int Index
@@ -106,7 +108,8 @@
         set => _index = _index == -1 ? value : _index;
     }
 
-    [Inject] public IApiService ApiService { get; set; } = null!;
+    [Inject]
+    public IApiService ApiService { get; set; } = null!;
 
     private IEnumerable<ConfigEnvironment> SelectedEnvironments
     {
@@ -152,44 +155,46 @@
         set
         {
             _configuration = value;
-            //_configurationOriginal = ConfigurationMapper.Copy(value);
             _environmentsText = string.Join(", ", value.Environments.OrderBy(x => x.Name));
             _applicationsText = string.Join(", ", value.Applications.OrderBy(x => x.Name));
         }
     }
 
+    [Parameter]
+    public Func<string, Configuration> GetOriginalFunc { get; set; } = null!;
+
     protected override void OnAfterRender(bool firstRender)
     {
-        var envs = new List<ConfigEnvironment>();
+        var environments = new List<ConfigEnvironment>();
         foreach (var environment in AllEnvironments)
         {
-            if (Configuration.Environments.Any(e => e.Id == environment.Id))
-                envs.Add(environment);
+            if (_configuration.Environments.Any(e => e.Id == environment.Id))
+                environments.Add(environment);
         }
-        SelectedEnvironments = envs;
+        SelectedEnvironments = environments;
+        _selectedEnvironmentsOriginal = new List<ConfigEnvironment>(environments);
 
-        var systs = new List<Application>();
+        var applications = new List<Application>();
         foreach (var application in AllApplications)
         {
-            if (Configuration.Applications.Any(s => s.Id == application.Id))
-                systs.Add(application);
+            if (_configuration.Applications.Any(s => s.Id == application.Id))
+                applications.Add(application);
         }
-        SelectedApplications = systs;
+        SelectedApplications = applications;
+        _selectedApplicationsOriginal = new List<Application>(applications);
 
         base.OnAfterRender(firstRender);
     }
-
-    
 
     private void FormatJson()
     {
         try
         {
             _jsonValidationError = string.Empty;
-            dynamic parsedJson = JsonConvert.DeserializeObject(Configuration.Json)!;
+            dynamic parsedJson = JsonConvert.DeserializeObject(_configuration.Json)!;
             if (parsedJson == null) return;
-            Configuration.Json = JsonConvert.SerializeObject(parsedJson, Formatting.Indented);
-            var lines = Configuration.Json.Split('\n').Length;
+            _configuration.Json = JsonConvert.SerializeObject(parsedJson, Formatting.Indented);
+            var lines = _configuration.Json.Split('\n').Length;
             _jsonLines = lines < 10 ? 10 : (lines > 30 ? 30 : lines);
         }
         catch (Exception ex)
@@ -198,20 +203,9 @@
         }
     }
 
-    private void EnvironmentsChanged(IEnumerable<ConfigEnvironment> obj)
-    {
-    }
-
-    //private void ToggleEnvironmentsPopup()
-    //{
-    //    _environmentPopupOpen = !_environmentPopupOpen;
-    //    Console.WriteLine(_environmentPopupOpen);
-    //}
-    
-
     private void DeleteConfiguration(bool delete)
     {
-        Configuration.Deleted = delete;
+        _configuration.Deleted = delete;
         _expansionPanel.Collapse();
         StateHasChanged();
     }
@@ -219,6 +213,14 @@
     public async Task RunTest()
     {
         await _testPanel.RunTests();
+    }
+
+    private void UndoChanges()
+    {
+        GetOriginalFunc.Invoke(_configuration.Id).CopyTo(_configuration);
+        SelectedApplications = new List<Application>(_selectedApplicationsOriginal);
+        SelectedEnvironments = new List<ConfigEnvironment>(_selectedEnvironmentsOriginal);
+        StateHasChanged();
     }
 
 }
