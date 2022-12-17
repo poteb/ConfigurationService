@@ -149,7 +149,10 @@ public partial class EditConfiguration : IDisposable
             if (reload)
                 await Load();
             else
+            {
                 OriginalHeader = ConfigurationMapper.Copy(Header);
+                Console.WriteLine("Update original header");
+            }
             return true;
         }
 
@@ -242,5 +245,10 @@ public partial class EditConfiguration : IDisposable
         if (_headers.All(h => h.Name != Header.Name)) return null!;
         Console.WriteLine("Already exists");
         return "Already exists";
+    }
+
+    private Configuration GetOriginalConfiguration(string id)
+    {
+        return OriginalHeader.Configurations.FirstOrDefault(c => c.Id == id) ?? new Configuration();
     }
 }
