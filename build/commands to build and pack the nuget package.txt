@@ -1,0 +1,3 @@
+dotnet build Config.Middleware.NetStandard21\Config.Middleware.NetStandard21.csproj --configuration Release --output E:\build\package\lib\netstandard2.1
+dotnet build Config.Middleware.Net60\Config.Middleware.Net60.csproj --configuration Release --output E:\build\package\lib\net6.0
+E:\build\NuGet.exe pack Config.Middleware.nuspec -OutputDirectory E:\build\artifacts -BasePath E:\build\package -Version 0.1.0.4 -Properties Configuration=Release
