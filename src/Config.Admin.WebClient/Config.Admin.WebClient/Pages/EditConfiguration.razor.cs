@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Reflection;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using pote.Config.Admin.WebClient.Components;
@@ -198,24 +199,12 @@ public partial class EditConfiguration : IDisposable
         else
             _expansionPanels.CollapseAll();
 
-        // var panelsType = typeof(MudExpansionPanels);
-        // var panelsField = panelsType.GetField("_panels", BindingFlags.Instance | BindingFlags.NonPublic);
-        // var list = panelsField?.GetValue(_expansionPanels) as List<MudExpansionPanel>;
-        // if (list == null) return;
-        // foreach (var panel in list)
-        // {
-        //     if (!_allPanelsExpanded)
-        //         panel.Expand();
-        //     else
-        //         panel.Collapse();
-        // }
-
         _allPanelsExpanded = !_allPanelsExpanded;
     }
 
     private void AddConfiguration()
     {
-        Header.Configurations.Add(new Configuration { HeaderId = Header.Id });
+        Header.Configurations.Add(new Configuration { HeaderId = Header.Id, IsNew = true });
         UpdateConfigurationIndex();
     }
 
@@ -228,16 +217,6 @@ public partial class EditConfiguration : IDisposable
     }
 
     public void Dispose() => _unsavedChangesTimer?.Dispose();
-
-    private async Task NameChanged()
-    {
-        if (_headers.Any(h => h.Name == Header.Name))
-        {
-            Console.WriteLine("Already exists");
-            return;
-        }
-        Console.WriteLine("All good");
-    }
 
     private string ValidateHeaderName(string s)
     {

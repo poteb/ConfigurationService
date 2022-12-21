@@ -165,6 +165,9 @@
 
     protected override void OnAfterRender(bool firstRender)
     {
+        if (firstRender && _configuration.IsNew)
+            _expansionPanel.Expand();
+        
         var environments = new List<ConfigEnvironment>();
         foreach (var environment in AllEnvironments)
         {

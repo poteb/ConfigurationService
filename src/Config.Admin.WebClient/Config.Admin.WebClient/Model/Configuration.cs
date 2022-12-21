@@ -13,6 +13,7 @@ public class Configuration : IEquatable<Configuration>
     public List<Application> Applications { get; set; } = new();
     public List<Configuration> History { get; set; } = new();
     public int Index { get; set; }
+    public bool IsNew { get; set; }
 
 
     public bool Equals(Configuration? other)
