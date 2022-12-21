@@ -4,7 +4,7 @@ using pote.Config.Shared;
 namespace pote.Config.Admin.Api.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("Configuration")]
 public class ConfigParseController : ControllerBase
 {
     private readonly ILogger<ConfigParseController> _logger;
