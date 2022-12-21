@@ -9,11 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="pote.Configuration.Middleware" Version="0.1.0.4" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
     </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\Config.Middleware.Net60\Config.Middleware.Net60.csproj" />
-    </ItemGroup>
-
 </Project>
