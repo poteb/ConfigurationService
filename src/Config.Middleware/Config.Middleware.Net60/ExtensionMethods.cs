@@ -13,7 +13,7 @@ public static class ExtensionMethods
         {
             var apiCommunication = new ApiCommunication(configuration.ApiUri);
             var response = await apiCommunication.GetConfiguration(new ParseRequest(configuration.Application, configuration.Environment, inputJson));
-            if (response == null)  throw new InvalidDataException("Reponse from API was empty.");
+            if (response == null)  throw new InvalidDataException("Response from API was empty.");
             var json = response.GetJson();
             await File.WriteAllTextAsync(parsedJsonFile, json);
             builder.Configuration.AddJsonFile(parsedJsonFile, false, false);

@@ -9,8 +9,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Compile Include="..\Config.Middleware.NetStandard20\BuilderConfiguration.cs" Link="BuilderConfiguration.cs" />
-      <Compile Include="..\Config.Middleware.NetStandard20\ApiCommunication.cs" Link="ApiCommunication.cs" />
+      <Compile Include="..\Config.Middleware.NetStandard21\ApiCommunication.cs">
+        <Link>ApiCommunication.cs</Link>
+      </Compile>
+      <Compile Include="..\Config.Middleware.NetStandard21\BuilderConfiguration.cs">
+        <Link>BuilderConfiguration.cs</Link>
+      </Compile>
     </ItemGroup>
 
     <ItemGroup>

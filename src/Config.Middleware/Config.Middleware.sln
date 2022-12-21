@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Config.Middleware.NetStandard20", "Config.Middleware.NetStandard20\Config.Middleware.NetStandard20.csproj", "{310EB490-76CB-4C9B-857E-84EE3F1AFC1E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Config.Middleware.NetStandard21", "Config.Middleware.NetStandard21\Config.Middleware.NetStandard21.csproj", "{310EB490-76CB-4C9B-857E-84EE3F1AFC1E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{CEE24B98-D71F-4CA1-8630-9790FE8300FA}"
 	ProjectSection(SolutionItems) = preProject
