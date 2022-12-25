@@ -38,7 +38,7 @@ namespace pote.Config.Admin.WebClient.Services
                     return new ApiCallResponse<ConfigurationResponse> { IsSuccess = true, Response = content };
                 }
 
-                return DefaultUnsuccessfullResponse(new ConfigurationResponse(), (int)response.StatusCode);
+                return DefaultUnsuccessfulResponse(new ConfigurationResponse(), (int)response.StatusCode);
             }
             catch (Exception ex)
             {
@@ -58,7 +58,7 @@ namespace pote.Config.Admin.WebClient.Services
                     return new ApiCallResponse<ConfigurationsResponse> { IsSuccess = true, Response = content };
                 }
                 
-                return DefaultUnsuccessfullResponse(new ConfigurationsResponse(), (int)response.StatusCode);
+                return DefaultUnsuccessfulResponse(new ConfigurationsResponse(), (int)response.StatusCode);
             }
             catch (Exception ex)
             {
@@ -78,7 +78,7 @@ namespace pote.Config.Admin.WebClient.Services
                     return new ApiCallResponse<EnvironmentsResponse> { IsSuccess = true, Response = content };
                 }
 
-                return DefaultUnsuccessfullResponse(new EnvironmentsResponse(), (int)response.StatusCode);
+                return DefaultUnsuccessfulResponse(new EnvironmentsResponse(), (int)response.StatusCode);
             }
             catch (Exception ex)
             {
@@ -98,7 +98,7 @@ namespace pote.Config.Admin.WebClient.Services
                     return new ApiCallResponse<ApplicationsResponse> { IsSuccess = true, Response = content };
                 }
 
-                return DefaultUnsuccessfullResponse(new ApplicationsResponse(), (int)response.StatusCode);
+                return DefaultUnsuccessfulResponse(new ApplicationsResponse(), (int)response.StatusCode);
             }
             catch (Exception ex)
             {
