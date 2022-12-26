@@ -1,6 +1,6 @@
 ﻿namespace pote.Config.Admin.WebClient.Model;
 
-public class Configuration : IEquatable<Configuration>
+public class Configuration : IEquatable<Configuration>, IComparable<Configuration>
 {
     public string HeaderId { get; set; } = string.Empty;
     public string Id { get; set; } = Guid.NewGuid().ToString();
@@ -14,6 +14,9 @@ public class Configuration : IEquatable<Configuration>
     public List<Configuration> History { get; set; } = new();
     public int Index { get; set; }
     public bool IsNew { get; set; }
+
+    public string EnvironmentsAsText => string.Join(", ", Environments.OrderBy(x => x.Name));
+    public string ApplicationsAsText => string.Join(", ", Applications.OrderBy(x => x.Name));
 
 
     public bool Equals(Configuration? other)
@@ -38,6 +41,12 @@ public class Configuration : IEquatable<Configuration>
         //if (!string.Join(",", Environments.Select(e => e.Id)).Equals(string.Join(",", other.Environments.Select(e => e.Id)))) return false;
 
         return true;
+    }
+
+    public int CompareTo(Configuration? other)
+    {
+        if (Index <= other?.Index) return -1;
+        return 1;
     }
 
     public override bool Equals(object? obj)

@@ -82,7 +82,8 @@ public partial class EditConfiguration : IDisposable
     {
         var callResponse = await AdminApiService.GetConfigurations();
         if (callResponse is { IsSuccess: true, Response: { } })
-            _headers = ConfigurationMapper.ToClient(callResponse.Response.Configurations.Where(c => c.Id != Header?.Id).ToImmutableList());
+            _headers = ConfigurationMapper.ToClient(callResponse.Response.Configurations.Where(c => c.Id != Header?.Id)
+                .ToImmutableList());
     }
 
     private void UpdateConfigurationIndex()
@@ -154,6 +155,7 @@ public partial class EditConfiguration : IDisposable
                 OriginalHeader = ConfigurationMapper.Copy(Header);
                 Console.WriteLine("Update original header");
             }
+
             return true;
         }
 
@@ -173,7 +175,7 @@ public partial class EditConfiguration : IDisposable
         var result = await dialog.Result;
         if (result.Cancelled) return;
         var softDelete = (bool)result.Data;
-        
+
         Header.Deleted = true;
         PageError.Reset();
         var callResponse = await AdminApiService.DeleteConfiguration(Gid, !softDelete);
@@ -216,6 +218,25 @@ public partial class EditConfiguration : IDisposable
             await configurationContent.RunTest();
     }
 
+    private async Task ShowReorderConfigurations()
+    {
+        var list = new List<Configuration>(Header.Configurations);
+        var dialogParameters = new DialogParameters
+        {
+            { nameof(ReorderConfigurationsDialog.Configurations), list }
+        };
+        var dialog =
+            await DialogService.ShowAsync<ReorderConfigurationsDialog>("Reorder configurations", dialogParameters);
+        var result = await dialog.Result;
+        if (result.Cancelled) return;
+        foreach (var c in list.OrderBy(x => x.Index))
+        {
+            var found = Header.Configurations.First(d => d.Id == c.Id);
+            found.Index = c.Index;
+            Header.Configurations.Sort();
+        }
+    }
+
     public void Dispose() => _unsavedChangesTimer?.Dispose();
 
     private string ValidateHeaderName(string s)
@@ -224,10 +245,5 @@ public partial class EditConfiguration : IDisposable
         if (_headers.All(h => h.Name != Header.Name)) return null!;
         Console.WriteLine("Already exists");
         return "Already exists";
-    }
-
-    private Configuration GetOriginalConfiguration(string id)
-    {
-        return OriginalHeader.Configurations.FirstOrDefault(c => c.Id == id) ?? new Configuration();
     }
 }
