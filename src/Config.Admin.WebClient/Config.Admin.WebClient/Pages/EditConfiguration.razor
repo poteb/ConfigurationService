@@ -45,23 +45,22 @@
             <MudText Style="font-size:10pt">Unhandled environments: @string.Join(", ", UnhandledEnvironments)</MudText>
         </MudItem>
     </MudGrid>
-    <br/>
-
-    <MudGrid Style="padding: 0; margin: 0; width: 99%" Spacing="2">
-        <MudItem xs="2">
-            <MudText Class="Headline" Style="padding-left:16px">Configurations</MudText>
-        </MudItem>
-        <MudItem xs="6">
-            <MudButton StartIcon="@Icons.Filled.AddCircle" Variant="Variant.Outlined" Color="Color.Success" OnClick="AddConfiguration">Add new configuration</MudButton>
-            <MudButton StartIcon="@Icons.Filled.Check" OnClick="TestAll" Variant="Variant.Outlined" Color="Color.Info">Test all</MudButton>
-            <MudButton StartIcon="@Icons.Filled.SwapVert" OnClick="ShowReorderConfigurations" Variant="Variant.Outlined" Color="Color.Dark">Reorder</MudButton>
-        </MudItem>
-        <MudItem xs="4" Class="d-flex justify-end">
-            <MudButton EndIcon="@GetExpandAllConfigurationsButtonIcon()" OnClick="ExpandAllConfigurations">@GetExpandAllConfigurationsButtonText()</MudButton>
-        </MudItem>
-    </MudGrid>
-
 </MudForm>
+
+<MudGrid Style="padding: 0; margin: 0; width: 99%" Spacing="2">
+    <MudItem xs="2">
+        <MudText Class="Headline" Style="padding-left:16px">Configurations</MudText>
+    </MudItem>
+    <MudItem xs="6">
+        <MudButton StartIcon="@Icons.Filled.AddCircle" Variant="Variant.Outlined" Color="Color.Success" OnClick="AddConfiguration">Add new configuration</MudButton>
+        <MudButton StartIcon="@Icons.Filled.Check" OnClick="TestAll" Variant="Variant.Outlined" Color="Color.Info">Test all</MudButton>
+        <MudButton StartIcon="@Icons.Filled.SwapVert" OnClick="ShowReorderConfigurations" Variant="Variant.Outlined" Color="Color.Dark">Reorder</MudButton>
+    </MudItem>
+    <MudItem xs="4" Class="d-flex justify-end">
+        <MudButton EndIcon="@GetExpandAllConfigurationsButtonIcon()" OnClick="ExpandAllConfigurations">@GetExpandAllConfigurationsButtonText()</MudButton>
+    </MudItem>
+</MudGrid>
+
 
 <MudExpansionPanels MultiExpansion="true" Elevation="3" Style="width: calc(100% - 15px);margin-bottom: 30px" @ref="_expansionPanels">
     @foreach (var configuration in Header.Configurations)
@@ -69,4 +68,20 @@
         <ConfigurationContent @ref="ConfigurationContentRef" Index="@(configuration.Index)" Configuration="configuration" AllEnvironments="Environments" AllApplications="Applications"></ConfigurationContent>
     }
 </MudExpansionPanels>
+
+<MudGrid Style="padding: 0; margin: 0; width: 99%" Spacing="2">
+    <MudItem xs="2">
+        
+    </MudItem>
+    <MudItem xs="6">
+        <MudButton StartIcon="@Icons.Filled.AddCircle" Variant="Variant.Outlined" Color="Color.Success" OnClick="AddConfiguration">Add new configuration</MudButton>
+        <MudButton StartIcon="@Icons.Filled.Check" OnClick="TestAll" Variant="Variant.Outlined" Color="Color.Info">Test all</MudButton>
+        <MudButton StartIcon="@Icons.Filled.SwapVert" OnClick="ShowReorderConfigurations" Variant="Variant.Outlined" Color="Color.Dark">Reorder</MudButton>
+    </MudItem>
+    <MudItem xs="4" Class="d-flex justify-end">
+        <MudButton EndIcon="@GetExpandAllConfigurationsButtonIcon()" OnClick="ExpandAllConfigurations">@GetExpandAllConfigurationsButtonText()</MudButton>
+    </MudItem>
+</MudGrid>
+
+<div id="bottom"></div>
 
