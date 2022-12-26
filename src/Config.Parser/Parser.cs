@@ -20,10 +20,9 @@ namespace pote.Config.Parser
         }
 
         /// <summary>Parses the specified configuration. Will do some pre- and post-processing.</summary>
-        public async Task<string> Parse(string json, string application, string environment, Action<string> problems, CancellationToken cancellationToken, string rootId)
+        public async Task<string> Parse(string json, string application, string environment, Action<string> problems,
+            CancellationToken cancellationToken, string rootId)
         {
-            
-            
             // Pre process
             if (string.IsNullOrWhiteSpace(json))
             {
@@ -33,7 +32,8 @@ namespace pote.Config.Parser
 
             var root = JObject.Parse(json);
             var applications = await _dataProvider.GetApplications(cancellationToken);
-            var dbApplication = applications.FirstOrDefault(s => s.Id == application || s.Name.Equals(application, StringComparison.InvariantCultureIgnoreCase));
+            var dbApplication = applications.FirstOrDefault(s =>
+                s.Id == application || s.Name.Equals(application, StringComparison.InvariantCultureIgnoreCase));
             if (dbApplication == null)
             {
                 problems($"Application {application} not found");
@@ -41,7 +41,8 @@ namespace pote.Config.Parser
             }
 
             var environments = await _dataProvider.GetEnvironments(cancellationToken);
-            var dbEnvironment = environments.FirstOrDefault(e => e.Id == environment || e.Name.Equals(environment, StringComparison.InvariantCultureIgnoreCase));
+            var dbEnvironment = environments.FirstOrDefault(e =>
+                e.Id == environment || e.Name.Equals(environment, StringComparison.InvariantCultureIgnoreCase));
             if (dbEnvironment == null)
             {
                 problems($"Environment {environment} not found");
@@ -58,7 +59,8 @@ namespace pote.Config.Parser
         }
 
         /// <summary>Method for recursively handling the tokens in the json</summary>
-        private async Task HandleToken(JToken token, string application, string environment, Action<string> problems, CancellationToken cancellationToken, string trackId)
+        private async Task HandleToken(JToken token, string application, string environment, Action<string> problems,
+            CancellationToken cancellationToken, string trackId)
         {
             while (true)
             {
@@ -79,7 +81,8 @@ namespace pote.Config.Parser
                 if (!match.Success) return;
 
                 // A match is found, now get the value from the database.
-                var configuration = await _dataProvider.GetConfiguration(match.Groups[1].Value, application, environment, cancellationToken);
+                var configuration = await _dataProvider.GetConfiguration(match.Groups[1].Value, application,
+                    environment, cancellationToken);
                 if (string.IsNullOrWhiteSpace(configuration.Json))
                 {
                     problems($"Reference could not be resolved, {match.Groups[0].Value}");
@@ -96,16 +99,12 @@ namespace pote.Config.Parser
 
                 TrackingAction(trackId, configuration.Id);
                 trackId = configuration.Id;
-                
-                if (string.IsNullOrEmpty(refField.Value))
+
+                if (string.IsNullOrEmpty(refField.Value) && refToken.HasValues)
                 {
                     // The field has no value, so it might have some children that we can work with. Overwrite token to the current JObject and continue. This is like a recursive call.
                     token = refO;
-                    continue;
                 }
-
-                // All recursive calls are done, so we can return.
-                break;
             }
         }
 
