@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Reflection;
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 using MudBlazor;
 using pote.Config.Admin.WebClient.Components;
 using pote.Config.Admin.WebClient.Mappers;
@@ -19,6 +20,8 @@ public partial class EditConfiguration : IDisposable
     private MudForm _form = null!;
     private bool _formIsValid;
 
+    [Inject]
+    protected IJSRuntime JSRuntime { get; set; } = null!;
     [Parameter] public string Gid { get; set; } = string.Empty;
     private bool IsNew => string.IsNullOrWhiteSpace(Gid);
     private ConfigurationHeader Header { get; set; } = new();
@@ -204,10 +207,11 @@ public partial class EditConfiguration : IDisposable
         _allPanelsExpanded = !_allPanelsExpanded;
     }
 
-    private void AddConfiguration()
+    private async Task AddConfiguration()
     {
         Header.Configurations.Add(new Configuration { HeaderId = Header.Id, IsNew = true });
         UpdateConfigurationIndex();
+        await JSRuntime.InvokeVoidAsync("scrollIntoView", "bottom");
     }
 
     private async Task TestAll()
