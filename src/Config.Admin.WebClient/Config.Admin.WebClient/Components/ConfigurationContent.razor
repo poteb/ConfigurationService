@@ -4,33 +4,24 @@
 @using pote.Config.Admin.WebClient.Mappers
 @using pote.Config.Admin.WebClient.Services
 @using pote.Config.Shared
-<MudExpansionPanel Style="@($"background-color:{(Index % 2 == 0 ? Colors.Indigo.Lighten5 : Colors.Teal.Lighten5)}")" Disabled="@_configuration.Deleted" @ref="_expansionPanel">
+@using System.Collections.ObjectModel
+<MudExpansionPanel Style="@($"background-color:{(Index % 2 == 0 ? Colors.Indigo.Lighten5 : Colors.Teal.Lighten5)}")" Disabled="@Configuration.Deleted" @ref="_expansionPanel">
     <TitleContent>
         <MudGrid Style="padding: 0; margin: 0; width: 99%">
             <MudItem xs="10" Style="padding-bottom: 0">
                 <MudGrid Style="padding: 0; margin: 0; width: 99%">
                     <MudItem xs="12" Class="d-flex" Style="padding-bottom: 0">
                         <MudText Style="min-width: 110px;">Environments:</MudText>
-                        <MudText Style="font-weight: bold">@_environmentsText</MudText>
-                        @*<MudIconButton Icon="@Icons.Filled.Add" OnClick="ToggleEnvironmentsPopup" Size="Size.Small" ></MudIconButton>
-                    <MudPopover Open="@_environmentPopupOpen" Fixed="true" Class="px-4 pt-4">
-                    <MudSelect T="ConfigEnvironment" Variant="Variant.Outlined" Margin="Margin.Dense" Label="Environments" MultiSelection="true" @bind-SelectedValues="SelectedEnvironments" SelectAll="true">
-                    @foreach (var environment in AllEnvironments)
-                    {
-                    <MudSelectItem T="ConfigEnvironment" Value="environment" Style="white-space: nowrap !important">@environment.Name</MudSelectItem>
-                    }
-                    </MudSelect>
-                    </MudPopover>*@
+                        <MudText Style="font-weight: bold">@Configuration.EnvironmentsAsText</MudText>
                     </MudItem>
                     <MudItem xs="12" Class="d-flex" Style="padding-top:0">
                         <MudText Style="min-width: 110px;">Applications:</MudText>
-                        <MudText Style="font-weight: bold">@_applicationsText</MudText>
-                        @*<MudIconButton Icon="@Icons.Filled.Add" Size="Size.Small" ></MudIconButton>*@
+                        <MudText Style="font-weight: bold">@Configuration.ApplicationsAsText</MudText>
                     </MudItem>
                 </MudGrid>
             </MudItem>
             <MudItem xs="2">
-                @if (!_configuration.Deleted)
+                @if (!Configuration.Deleted)
                 {
                     <MudTooltip Text="Delete configuration section">
                         <MudIconButton Icon="@Icons.Filled.Delete" Color="Color.Error" OnClick="() => DeleteConfiguration(true)"></MudIconButton>
@@ -49,7 +40,7 @@
         </MudGrid>
     </TitleContent>
     <ChildContent>
-        @if (!_configuration.Deleted)
+        @if (!Configuration.Deleted)
         {
             <MudGrid Style="padding: 0; margin: 0; width: 99%" Spacing="2">
                 <MudItem xs="12" Class="d-flex align-center" Style="padding:0">
@@ -75,9 +66,9 @@
                 <MudButton Variant="Variant.Outlined" Style="background-color: white" OnClick="FormatJson" EndIcon="@Icons.Filled.FormatIndentIncrease">Format JSON</MudButton>
                 <MudText Style="padding-left: 10px" Color="Color.Error">@_jsonValidationError</MudText>
             </MudItem>
-            <MudTextField @bind-Text="_configuration.Json" T="string" Variant="Variant.Outlined" Lines="@_jsonLines" Style="background-color:#fff"></MudTextField>
+            <MudTextField @bind-Text="Configuration.Json" T="string" Variant="Variant.Outlined" Lines="@_jsonLines" Style="background-color:#fff"></MudTextField>
 
-            <ConfigurationContentTestPanel @ref="_testPanel" AllEnvironments="_allEnvironments" AllApplications="_allApplications" Configuration="_configuration"></ConfigurationContentTestPanel>
+            <ConfigurationContentTestPanel @ref="_testPanel" AllEnvironments="_allEnvironments" AllApplications="_allApplications" Configuration="Configuration"></ConfigurationContentTestPanel>
         }
     </ChildContent>
 </MudExpansionPanel>
@@ -87,16 +78,10 @@
     private ConfigurationContentTestPanel _testPanel = null!;
     private int _jsonLines = 10;
     private string _jsonValidationError = string.Empty;
-    private IEnumerable<ConfigEnvironment> _selectedEnvironments = new HashSet<ConfigEnvironment>();
-    private IEnumerable<ConfigEnvironment> _selectedEnvironmentsOriginal = new HashSet<ConfigEnvironment>();
-    private Configuration _configuration = new();
-    private IEnumerable<Application> _selectedApplications = new HashSet<Application>();
-    private IEnumerable<Application> _selectedApplicationsOriginal = new HashSet<Application>();
-    private string _environmentsText = string.Empty;
-    private string _applicationsText = string.Empty;
     private List<Application> _allApplications = new();
     private List<ConfigEnvironment> _allEnvironments = new();
     private int _index = -1;
+    private Configuration _originalConfiguration = new();
 
     [Inject]
     IDialogService DialogService { get; set; } = null!;
@@ -113,23 +98,21 @@
 
     private IEnumerable<ConfigEnvironment> SelectedEnvironments
     {
-        get => _selectedEnvironments;
+        get => Configuration.Environments;
         set
         {
-            _selectedEnvironments = value;
-            _configuration.Environments = new List<ConfigEnvironment>(value);
-            _environmentsText = string.Join(", ", value.OrderBy(x => x.Name));
+            Configuration.Environments.Clear();
+            Configuration.Environments.AddRange(value);
         }
     }
 
     private IEnumerable<Application> SelectedApplications
     {
-        get => _selectedApplications;
+        get => Configuration.Applications;
         set
         {
-            _selectedApplications = value;
-            _configuration.Applications = new List<Application>(value);
-            _applicationsText = string.Join(", ", value.OrderBy(x => x.Name));
+            Configuration.Applications.Clear();
+            Configuration.Applications.AddRange(value);
         }
     }
 
@@ -149,42 +132,15 @@
     }
 
     [Parameter]
-    public Configuration Configuration
-    {
-        get => _configuration;
-        set
-        {
-            _configuration = value;
-            _environmentsText = string.Join(", ", value.Environments.OrderBy(x => x.Name));
-            _applicationsText = string.Join(", ", value.Applications.OrderBy(x => x.Name));
-        }
-    }
-
-    [Parameter]
-    public Func<string, Configuration> GetOriginalFunc { get; set; } = null!;
+    public Configuration Configuration { get; set; } = new();
 
     protected override void OnAfterRender(bool firstRender)
     {
-        if (firstRender && _configuration.IsNew)
+        if (firstRender && Configuration.IsNew)
             _expansionPanel.Expand();
-        
-        var environments = new List<ConfigEnvironment>();
-        foreach (var environment in AllEnvironments)
-        {
-            if (_configuration.Environments.Any(e => e.Id == environment.Id))
-                environments.Add(environment);
-        }
-        SelectedEnvironments = environments;
-        _selectedEnvironmentsOriginal = new List<ConfigEnvironment>(environments);
 
-        var applications = new List<Application>();
-        foreach (var application in AllApplications)
-        {
-            if (_configuration.Applications.Any(s => s.Id == application.Id))
-                applications.Add(application);
-        }
-        SelectedApplications = applications;
-        _selectedApplicationsOriginal = new List<Application>(applications);
+        if (firstRender)
+            Configuration.CopyTo(_originalConfiguration);
 
         base.OnAfterRender(firstRender);
     }
@@ -194,10 +150,10 @@
         try
         {
             _jsonValidationError = string.Empty;
-            dynamic parsedJson = JsonConvert.DeserializeObject(_configuration.Json)!;
+            dynamic parsedJson = JsonConvert.DeserializeObject(Configuration.Json)!;
             if (parsedJson == null) return;
-            _configuration.Json = JsonConvert.SerializeObject(parsedJson, Formatting.Indented);
-            var lines = _configuration.Json.Split('\n').Length;
+            Configuration.Json = JsonConvert.SerializeObject(parsedJson, Formatting.Indented);
+            var lines = Configuration.Json.Split('\n').Length;
             _jsonLines = lines < 10 ? 10 : (lines > 30 ? 30 : lines);
         }
         catch (Exception ex)
@@ -208,7 +164,7 @@
 
     private void DeleteConfiguration(bool delete)
     {
-        _configuration.Deleted = delete;
+        Configuration.Deleted = delete;
         _expansionPanel.Collapse();
         StateHasChanged();
     }
@@ -220,10 +176,7 @@
 
     private void UndoChanges()
     {
-        GetOriginalFunc.Invoke(_configuration.Id).CopyTo(_configuration);
-        SelectedApplications = new List<Application>(_selectedApplicationsOriginal);
-        SelectedEnvironments = new List<ConfigEnvironment>(_selectedEnvironmentsOriginal);
+        _originalConfiguration.CopyTo(Configuration);
         StateHasChanged();
     }
-
 }

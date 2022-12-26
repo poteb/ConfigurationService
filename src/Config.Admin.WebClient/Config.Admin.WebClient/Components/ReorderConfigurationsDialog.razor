@@ -1,0 +1,52 @@
+﻿@using pote.Config.Admin.WebClient.Model
+@using MudBlazor.Utilities
+
+<MudDialog>
+    <DialogContent>
+        <MudDropContainer T="Configuration" Items="@Configurations" @ref="_container" ItemDropped="ItemDropped" ItemsSelector="@((_, _) => true)" Style="margin:0;padding: 0">
+            <ChildContent>
+                <MudDropZone T="Configuration" Identifier="1" AllowReorder="true"/>
+            </ChildContent>
+            <ItemRenderer>
+                <MudListItem Dense="true" Style="margin:0;padding: 0">
+                    <MudPaper Style="padding:3px 10px" Elevation="3">
+                        <MudItem Class="d-flex flex-nowrap">
+                            <MudText Style="min-width: 110px;">Environments:</MudText>
+                            <MudText Style="font-weight: bold">@context.EnvironmentsAsText</MudText>
+                        </MudItem>
+                        <MudItem Class="d-flex flex-nowrap">
+                            <MudText Style="min-width: 110px;">Applications:</MudText>
+                            <MudText Style="font-weight: bold">@context.ApplicationsAsText</MudText>
+                        </MudItem>
+                    </MudPaper>
+                </MudListItem>
+            </ItemRenderer>
+        </MudDropContainer>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private MudDropContainer<Configuration> _container = null!;
+
+    [Parameter]
+    public List<Configuration> Configurations { get; set; } = new();
+
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; } = null!;
+
+    private void ItemDropped(MudItemDropInfo<Configuration> dropItem)
+    {
+        Configurations.UpdateOrder(dropItem, item => item.Index);
+    }
+
+    void Submit()
+    {
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    void Cancel() => MudDialog.Cancel();
+}
