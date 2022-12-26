@@ -33,7 +33,7 @@
         <MudTd Style="border: 0">
             @if (!context.IsDeleted)
             {
-                <MudTextField @bind-Value="@context.Name" Placeholder="enter name" Style="margin-top: 0"></MudTextField>
+                <MudTextField @bind-Value="@context.Name" Placeholder="enter name" Style="margin-top: 0" AutoFocus="@(string.IsNullOrEmpty(context.Name))"></MudTextField>
             }
             else
             {
