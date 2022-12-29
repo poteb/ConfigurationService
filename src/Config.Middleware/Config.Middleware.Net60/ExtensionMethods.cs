@@ -26,7 +26,7 @@ public static class ExtensionMethods
         }
     }
     
-    public static async Task<IConfigurationBuilder> AddConfigurationFromService(this IConfigurationBuilder builder, BuilderConfiguration configuration, string inputJson, Action<string, Exception> errorOutput = null!)
+    public static async Task<IConfigurationBuilder> AddConfigurationFromApi(this IConfigurationBuilder builder, BuilderConfiguration configuration, string inputJson, Action<string, Exception> errorOutput = null!)
     {
         var parsedJsonFile = Path.Combine(configuration.WorkingDirectory, $"appsettings.{configuration.Environment}.Parsed.json");
         try
