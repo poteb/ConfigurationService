@@ -24,8 +24,6 @@ internal class ApiCommunication : IApiCommunication
         using var client = new HttpClient();
         var response = await client.PostAsync(_apiUri, new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json"));
         response.EnsureSuccessStatusCode();
-        //var content = await response.Content.ReadAsStringAsync();
-        //return JsonSerializer.Deserialize<ParseResponse>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         return await JsonSerializer.DeserializeAsync<ParseResponse>(await response.Content.ReadAsStreamAsync(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
     }
 }

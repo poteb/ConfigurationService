@@ -1,9 +1,9 @@
 <package>
 	<metadata>
-		<id>pote.Configuration.Middleware</id>
+		<id>pote.Configuration.Middleware.Web</id>
 		<authors>pote</authors>
 		<owners>pote</owners>
-		<description>Middleware for getting configuration from the API. This package is for non-web applications where IConfigurationBuilder is used.</description>
+		<description>Middleware for getting configuration from the API. This package is for web applications where WebApplicationBuilder is used.</description>
 		<version>0.1.0</version>
 		<dependencies>
 			<group targetFramework="netstandard2.1">
