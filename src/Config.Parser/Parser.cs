@@ -60,7 +60,7 @@ namespace pote.Config.Parser
         }
 
         /// <summary>Method for recursively handling the tokens in the json</summary>
-        /// <param name="sourceConfigurationId">Used to track what's happening and to prevent endless loop if there is a circular reference.</param>
+        /// <param name="sourceConfigurationId">Used to track what's happening.</param>
         [SuppressMessage("ReSharper", "InvalidXmlDocComment")]
         private async Task HandleToken(JToken token, string application, string environment, Action<string> problems, CancellationToken cancellationToken, string sourceConfigurationId, List<KeyValuePair<string, string>> fetchedConfigurations)
         {
@@ -84,13 +84,13 @@ namespace pote.Config.Parser
 
                 // A match is found, now get the value from the database.
                 var configurationName = match.Groups[1].Value;
-                if (fetchedConfigurations.Any(pair => pair.Key.Equals(configurationName) && pair.Value.Equals(sourceConfigurationId)))
+                if (fetchedConfigurations.Any(pair => pair.Key.Equals(configurationName) && pair.Value.Equals(value)))
                 {
-                    problems($"Referenced configuration {configurationName} was already resolved from source configuration {sourceConfigurationId}.");
+                    problems($"Referenced configuration {configurationName} was already resolved from source configuration {sourceConfigurationId} and reference {value}.");
                     return;
                 }
                 var configuration = await _dataProvider.GetConfiguration(configurationName, application, environment, cancellationToken);
-                fetchedConfigurations.Add(new KeyValuePair<string, string>(configurationName, sourceConfigurationId));
+                fetchedConfigurations.Add(new KeyValuePair<string, string>(configurationName, value));
                 if (string.IsNullOrWhiteSpace(configuration.Json))
                 {
                     problems($"Reference could not be resolved, {match.Groups[0].Value}");
@@ -105,8 +105,8 @@ namespace pote.Config.Parser
                 // Replace the value with the value from the database.
                 jProp.Value = refToken;
 
-                TrackingAction(sourceConfigurationId, configuration.Id);
-                sourceConfigurationId = configuration.Id;
+                TrackingAction(sourceConfigurationId, configuration.HeaderId);
+                sourceConfigurationId = configuration.HeaderId;
 
                 if (string.IsNullOrEmpty(refField.Value) && refToken.HasValues)
                 {
