@@ -50,7 +50,7 @@ namespace pote.Config.Parser
             }
 
             // Process
-            await HandleToken(root, dbApplication.Id, dbEnvironment.Id, problems, cancellationToken, rootId);
+            await HandleToken(root, dbApplication.Id, dbEnvironment.Id, problems, cancellationToken, rootId, new List<KeyValuePair<string, string>>());
 
             // Post process
             MoveBaseChildrenToRoot(root);
@@ -59,15 +59,14 @@ namespace pote.Config.Parser
         }
 
         /// <summary>Method for recursively handling the tokens in the json</summary>
-        private async Task HandleToken(JToken token, string application, string environment, Action<string> problems,
-            CancellationToken cancellationToken, string trackId)
+        private async Task HandleToken(JToken token, string application, string environment, Action<string> problems, CancellationToken cancellationToken, string sourceConfigurationId, List<KeyValuePair<string, string>> fetchedConfigurations)
         {
             while (true)
             {
                 // Recurse into children
                 if (token.HasValues)
                     foreach (var child in token.Children())
-                        await HandleToken(child, application, environment, problems, cancellationToken, trackId);
+                        await HandleToken(child, application, environment, problems, cancellationToken, sourceConfigurationId, fetchedConfigurations);
 
                 // Check token for different types
                 if (token.Type != JTokenType.Property) return;
@@ -81,8 +80,14 @@ namespace pote.Config.Parser
                 if (!match.Success) return;
 
                 // A match is found, now get the value from the database.
-                var configuration = await _dataProvider.GetConfiguration(match.Groups[1].Value, application,
-                    environment, cancellationToken);
+                var configurationName = match.Groups[1].Value;
+                if (fetchedConfigurations.Any(pair => pair.Key.Equals(configurationName) && pair.Value.Equals(sourceConfigurationId)))
+                {
+                    problems($"Referenced configuration {configurationName} was already resolved from source configuration {sourceConfigurationId}.");
+                    return;
+                }
+                var configuration = await _dataProvider.GetConfiguration(configurationName, application, environment, cancellationToken);
+                fetchedConfigurations.Add(new KeyValuePair<string, string>(configurationName, sourceConfigurationId));
                 if (string.IsNullOrWhiteSpace(configuration.Json))
                 {
                     problems($"Reference could not be resolved, {match.Groups[0].Value}");
@@ -97,8 +102,8 @@ namespace pote.Config.Parser
                 // Replace the value with the value from the database.
                 jProp.Value = refToken;
 
-                TrackingAction(trackId, configuration.Id);
-                trackId = configuration.Id;
+                TrackingAction(sourceConfigurationId, configuration.Id);
+                sourceConfigurationId = configuration.Id;
 
                 if (string.IsNullOrEmpty(refField.Value) && refToken.HasValues)
                 {
