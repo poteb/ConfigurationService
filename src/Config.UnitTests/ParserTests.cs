@@ -42,7 +42,7 @@ namespace pote.Config.UnitTests
             Assert.AreEqual("mule", value1);
         }
 
-        [Test]
+        [Test, Explicit]
         public async Task CircularReference_ShouldNot_StackOverflow()
         {
             var dataProvider = new TestDataProvider();

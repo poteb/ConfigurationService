@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
 using pote.Config.Shared;
 
@@ -59,6 +60,8 @@ namespace pote.Config.Parser
         }
 
         /// <summary>Method for recursively handling the tokens in the json</summary>
+        /// <param name="sourceConfigurationId">Used to track what's happening and to prevent endless loop if there is a circular reference.</param>
+        [SuppressMessage("ReSharper", "InvalidXmlDocComment")]
         private async Task HandleToken(JToken token, string application, string environment, Action<string> problems, CancellationToken cancellationToken, string sourceConfigurationId, List<KeyValuePair<string, string>> fetchedConfigurations)
         {
             while (true)
