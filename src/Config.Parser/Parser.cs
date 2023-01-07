@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
+using pote.Config.DataProvider.Interfaces;
 using pote.Config.Shared;
 
 namespace pote.Config.Parser

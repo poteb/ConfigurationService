@@ -4,6 +4,8 @@
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <AssemblyName>pote.Config.DataProvider.Interfaces</AssemblyName>
+        <RootNamespace>pote.Config.DataProvider.Interfaces</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

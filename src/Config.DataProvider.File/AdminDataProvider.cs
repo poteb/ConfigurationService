@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
+using pote.Config.DataProvider.Interfaces;
 using pote.Config.DbModel;
-using pote.Config.Shared;
 using Environment = pote.Config.DbModel.Environment;
 
 namespace pote.Config.DataProvider.File;
@@ -38,7 +38,7 @@ public class AdminDataProvider : IAdminDataProvider
     public async Task<ConfigurationHeader> GetConfiguration(string id, CancellationToken cancellationToken, bool includeHistory = true)
     {
         var header = JsonConvert.DeserializeObject<ConfigurationHeader>(await _fileHandler.GetConfigurationContent(id, cancellationToken));
-        if (header == null) throw new InvalidOperationException($"Could not read json from file {id}");
+        if (header == null) throw new KeyNotFoundException($"Could not read json from file {id}");
         return header;
     }
 
@@ -52,7 +52,7 @@ public class AdminDataProvider : IAdminDataProvider
     }
 
     
-    public async Task UpsertEnvironment(DbModel.Environment environment, CancellationToken cancellationToken)
+    public async Task UpsertEnvironment(Environment environment, CancellationToken cancellationToken)
     {
         await _fileHandler.WriteEnvironmentContent(environment.Id, JsonConvert.SerializeObject(environment), cancellationToken);
     }
@@ -64,7 +64,7 @@ public class AdminDataProvider : IAdminDataProvider
     }
 
     
-    public async Task UpsertApplication(DbModel.Application application, CancellationToken cancellationToken)
+    public async Task UpsertApplication(Application application, CancellationToken cancellationToken)
     {
         await _fileHandler.WriteApplicationContent(application.Id, JsonConvert.SerializeObject(application), cancellationToken);
     }
@@ -75,7 +75,7 @@ public class AdminDataProvider : IAdminDataProvider
         return Task.CompletedTask;
     }
 
-    public async Task<List<DbModel.Application>> GetApplications(CancellationToken cancellationToken)
+    public async Task<List<Application>> GetApplications(CancellationToken cancellationToken)
     {
         return await _applicationDataAccess.GetApplications(cancellationToken);
     }

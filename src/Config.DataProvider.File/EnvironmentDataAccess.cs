@@ -1,13 +1,13 @@
 ﻿using Newtonsoft.Json;
-using pote.Config.Shared;
+using pote.Config.DataProvider.Interfaces;
 
 namespace pote.Config.DataProvider.File;
 
-public class EnvionmentDataAccess : IEnvironmentDataAccess
+public class EnvironmentDataAccess : IEnvironmentDataAccess
 {
     private readonly IFileHandler _fileHandler;
 
-    public EnvionmentDataAccess(IFileHandler fileHandler)
+    public EnvironmentDataAccess(IFileHandler fileHandler)
     {
         _fileHandler = fileHandler;
     }
@@ -20,7 +20,7 @@ public class EnvionmentDataAccess : IEnvironmentDataAccess
         {
             try
             {
-                var env = JsonConvert.DeserializeObject<DbModel.Environment>(await _fileHandler.GetEnvironmentContentAbsoluePath(file, cancellationToken));
+                var env = JsonConvert.DeserializeObject<DbModel.Environment>(await _fileHandler.GetEnvironmentContentAbsolutePath(file, cancellationToken));
                 if (env == null) continue;
                 result.Add(env);
             }

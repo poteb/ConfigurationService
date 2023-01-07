@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using pote.Config.Admin.Api.Helpers;
 using pote.Config.Admin.Api.Mappers;
 using pote.Config.Admin.Api.Model.RequestResponse;
 using pote.Config.Admin.Api.Services;
+using pote.Config.DataProvider.Interfaces;
 using pote.Config.Shared;
 
 namespace pote.Config.Admin.Api.Controllers;
@@ -14,12 +16,14 @@ public class EnvironmentsController : ControllerBase
     private readonly ILogger<EnvironmentsController> _logger;
     private readonly IAdminDataProvider _dataProvider;
     private readonly IMemoryCache _memoryCache;
+    private readonly IAuditLogHandler _auditLogHandler;
 
-    public EnvironmentsController(ILogger<EnvironmentsController> logger, IAdminDataProvider dataProvider, IMemoryCache memoryCache)
+    public EnvironmentsController(ILogger<EnvironmentsController> logger, IAdminDataProvider dataProvider, IMemoryCache memoryCache, IAuditLogHandler auditLogHandler)
     {
         _logger = logger;
         _dataProvider = dataProvider;
         _memoryCache = memoryCache;
+        _auditLogHandler = auditLogHandler;
     }
 
     [HttpGet]
@@ -47,6 +51,7 @@ public class EnvironmentsController : ControllerBase
         {
             await _dataProvider.UpsertEnvironment(EnvironmentMapper.ToDb(environment), cancellationToken);
             _memoryCache.Remove(DependencyGraphService.CacheName);
+            await this.AuditLog(environment.Id, "Insert", _auditLogHandler.AuditLogEnvironment);
             return Ok();
         }
         catch (Exception ex)
@@ -63,6 +68,7 @@ public class EnvironmentsController : ControllerBase
         {
             await _dataProvider.DeleteEnvironment(id, cancellationToken);
             _memoryCache.Remove(DependencyGraphService.CacheName);
+            await this.AuditLog(id, "Delete", _auditLogHandler.AuditLogEnvironment);
             return Ok();
         }
         catch (Exception ex)

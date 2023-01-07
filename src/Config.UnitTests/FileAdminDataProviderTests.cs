@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
 using pote.Config.DataProvider.File;
+using pote.Config.DataProvider.Interfaces;
 using pote.Config.Shared;
 
 namespace pote.Config.UnitTests;
@@ -20,13 +21,13 @@ public class FileAdminDataProviderTests
     {
         var moq = Mock.Of<IFileHandler>(fh =>
             fh.GetEnvironmentFiles() == new[]{"file1","file2","file3"} &&
-            fh.GetEnvironmentContentAbsoluePath("file1", CancellationToken.None) == Task.FromResult(Environment1) &&
-            fh.GetEnvironmentContentAbsoluePath("file2", CancellationToken.None) == Task.FromResult(Environment2) &&
-            fh.GetEnvironmentContentAbsoluePath("file3", CancellationToken.None) == Task.FromResult(Environment3) 
+            fh.GetEnvironmentContentAbsolutePath("file1", CancellationToken.None) == Task.FromResult(Environment1) &&
+            fh.GetEnvironmentContentAbsolutePath("file2", CancellationToken.None) == Task.FromResult(Environment2) &&
+            fh.GetEnvironmentContentAbsolutePath("file3", CancellationToken.None) == Task.FromResult(Environment3) 
             );
         
         var applicationMoq = Mock.Of<IApplicationDataAccess>();
-        var environmentAccess = new EnvionmentDataAccess(moq);
+        var environmentAccess = new EnvironmentDataAccess(moq);
         var provider = new AdminDataProvider(moq, applicationMoq, environmentAccess);
         var files = await provider.GetEnvironments(CancellationToken.None);
 

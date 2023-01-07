@@ -1,10 +1,11 @@
 ﻿using Newtonsoft.Json;
+using pote.Config.DataProvider.Interfaces;
 using pote.Config.DbModel;
 using pote.Config.Shared;
 
 namespace pote.Config.DataProvider.File;
 
-public class DataProvider : IDataProvider, IEnvironmentDataAccess, IApplicationDataAccess
+public class DataProvider : IDataProvider
 {
     private readonly IFileHandler _fileHandler;
     private readonly IEnvironmentDataAccess _environmentDataAccess;
@@ -55,7 +56,7 @@ public class DataProvider : IDataProvider, IEnvironmentDataAccess, IApplicationD
         return new Configuration { Id = string.Empty };
     }
 
-    public async Task<List<DbModel.Application>> GetApplications(CancellationToken cancellationToken)
+    public async Task<List<Application>> GetApplications(CancellationToken cancellationToken)
     {
         return await _applicationDataAccess.GetApplications(cancellationToken);
     }

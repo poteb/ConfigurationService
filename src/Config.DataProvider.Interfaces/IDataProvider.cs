@@ -1,6 +1,6 @@
 ﻿using pote.Config.DbModel;
 
-namespace pote.Config.Shared
+namespace pote.Config.DataProvider.Interfaces
 {
     public interface IDataProvider : IEnvironmentDataAccess, IApplicationDataAccess
     {

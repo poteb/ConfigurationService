@@ -1,4 +1,7 @@
-﻿namespace pote.Config.DataProvider.File;
+﻿using pote.Config.DbModel;
+using Environment = System.Environment;
+
+namespace pote.Config.DataProvider.File;
 
 public class FileHandler : IFileHandler
 {
@@ -55,7 +58,6 @@ public class FileHandler : IFileHandler
             System.IO.File.Move(file, historyFile, true);
         }
     }
-    
 
     public async Task WriteConfigurationContent(string id, string content, CancellationToken cancellationToken)
     {
@@ -75,14 +77,14 @@ public class FileHandler : IFileHandler
     {
         return Directory.GetFiles(_environmentsDir);
     }
-    public async Task<string> GetEnvironmentContentAbsoluePath(string file, CancellationToken cancellationToken)
+    public async Task<string> GetEnvironmentContentAbsolutePath(string file, CancellationToken cancellationToken)
     {
         return await System.IO.File.ReadAllTextAsync(file, cancellationToken);
     }
     public async Task<string> GetEnvironmentContent(string id, CancellationToken cancellationToken)
     {
         var file = Path.ChangeExtension(Path.Combine(_environmentsDir, id), ".txt");
-        return await GetEnvironmentContentAbsoluePath(file, cancellationToken);
+        return await GetEnvironmentContentAbsolutePath(file, cancellationToken);
     }
     public async Task WriteEnvironmentContent(string id, string content, CancellationToken cancellationToken)
     {
@@ -119,5 +121,28 @@ public class FileHandler : IFileHandler
         var file = Path.ChangeExtension(Path.Combine(_applicationsDir, id), ".txt");
         if (!System.IO.File.Exists(file)) return;
         System.IO.File.Delete(file);
+    }
+
+    public async Task AuditLogConfiguration(string id, string content)
+    {
+        await WriteAuditLog(Path.Combine(_configurationRootDir, id, "AuditLog"), content);
+    }
+
+    public async Task AuditLogEnvironment(string id, string content)
+    {
+        await WriteAuditLog(Path.Combine(_environmentsDir, "AuditLog", id), content);
+    }
+
+    public async Task AuditLogApplication(string id, string content)
+    {
+        await WriteAuditLog(Path.Combine(_applicationsDir, "AuditLog", id), content);
+    }
+
+    private async Task WriteAuditLog(string dir, string content)
+    {
+        if (!Directory.Exists(dir))
+            Directory.CreateDirectory(dir);
+        var auditLogFile = Path.ChangeExtension(Path.Combine(dir, $"{DateTime.UtcNow:yyyy-MM-dd HH.mm.ss.fff}"), ".txt");
+        await System.IO.File.WriteAllTextAsync(auditLogFile, content);
     }
 }
