@@ -1,10 +1,12 @@
 using System.Collections.Immutable;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using pote.Config.Admin.Api.Helpers;
 using pote.Config.Admin.Api.Mappers;
 using pote.Config.Admin.Api.Model;
 using pote.Config.Admin.Api.Model.RequestResponse;
 using pote.Config.Admin.Api.Services;
+using pote.Config.DataProvider.Interfaces;
 using pote.Config.Shared;
 
 namespace pote.Config.Admin.Api.Controllers;
@@ -16,12 +18,14 @@ public class ConfigurationsController : ControllerBase
     private readonly ILogger<ConfigurationsController> _logger;
     private readonly IAdminDataProvider _dataProvider;
     private readonly IMemoryCache _memoryCache;
+    private readonly IAuditLogHandler _auditLogHandler;
 
-    public ConfigurationsController(ILogger<ConfigurationsController> logger, IAdminDataProvider dataProvider, IMemoryCache memoryCache)
+    public ConfigurationsController(ILogger<ConfigurationsController> logger, IAdminDataProvider dataProvider, IMemoryCache memoryCache, IAuditLogHandler auditLogHandler)
     {
         _logger = logger;
         _dataProvider = dataProvider;
         _memoryCache = memoryCache;
+        _auditLogHandler = auditLogHandler;
     }
 
     [HttpGet]
@@ -51,7 +55,6 @@ public class ConfigurationsController : ControllerBase
         try
         {
             var header = await _dataProvider.GetConfiguration(id, cancellationToken);
-            if (header == null) return NotFound();
             var applications = await _dataProvider.GetApplications(cancellationToken);
             var environments = await _dataProvider.GetEnvironments(cancellationToken);
             var response = new ConfigurationResponse
@@ -60,9 +63,13 @@ public class ConfigurationsController : ControllerBase
             };
             return Ok(response);
         }
+        catch (KeyNotFoundException)
+        {
+            return NotFound();
+        }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error getting configuration header, id {id}");
+            _logger.LogError(ex, "Error getting configuration header, id {Id}", id);
             return Problem(ex.Message);
         }
     }
@@ -74,26 +81,29 @@ public class ConfigurationsController : ControllerBase
         {
             await _dataProvider.Insert(ConfigurationMapper.ToDb(header), cancellationToken);
             _memoryCache.Remove(DependencyGraphService.CacheName);
+            await this.AuditLog(header.Id, "Insert", _auditLogHandler.AuditLogConfiguration);
             return Ok();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error inserting configuration header, id {header.Id}");
+            _logger.LogError(ex, "Error inserting configuration header, id {HeaderId}", header.Id);
             return Problem(ex.Message);
         }
     }
 
     [HttpPost("delete/{id}/{permanent}")]
-    public ActionResult Delete(string id, bool permanent = false)
+    public async Task<ActionResult> Delete(string id, bool permanent = false)
     {
         try
         {
             _dataProvider.DeleteConfiguration(id, permanent);
+            if (!permanent)
+                await this.AuditLog(id, "Delete", _auditLogHandler.AuditLogConfiguration);
             return Ok();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error deleting configuration header, id {id}");
+            _logger.LogError(ex, "Error deleting configuration header, id {Id}", id);
             return Problem(ex.Message);
         }
     }

@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using pote.Config.DataProvider.Interfaces;
 using pote.Config.DbModel;
 using pote.Config.Shared;
 

@@ -1,4 +1,4 @@
-﻿namespace pote.Config.Shared;
+﻿namespace pote.Config.DataProvider.Interfaces;
 
 public interface IApplicationDataAccess
 {

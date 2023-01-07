@@ -2,6 +2,7 @@
 using pote.Config.Admin.Api.Model;
 using pote.Config.Admin.Api.Model.DependencyGraph;
 using pote.Config.Admin.Api.Model.RequestResponse;
+using pote.Config.DataProvider.Interfaces;
 using pote.Config.Shared;
 
 namespace pote.Config.Admin.Api.Services;

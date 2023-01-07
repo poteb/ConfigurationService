@@ -6,7 +6,7 @@ public interface IFileHandler
     Task<string> GetConfigurationContent(string id, CancellationToken cancellationToken);
     Task WriteConfigurationContent(string id, string content, CancellationToken cancellationToken);
     string[] GetEnvironmentFiles();
-    Task<string> GetEnvironmentContentAbsoluePath(string file, CancellationToken cancellationToken);
+    Task<string> GetEnvironmentContentAbsolutePath(string file, CancellationToken cancellationToken);
     Task<string> GetEnvironmentContent(string id, CancellationToken cancellationToken);
     void DeleteConfiguration(string id, bool permanent);
     Task WriteEnvironmentContent(string id, string content, CancellationToken cancellationToken);
@@ -16,4 +16,8 @@ public interface IFileHandler
     Task<string> GetApplicationContent(string id, CancellationToken cancellationToken);
     Task WriteApplicationContent(string id, string content, CancellationToken cancellationToken);
     void DeleteApplication(string id);
+
+    Task AuditLogConfiguration(string id, string content);
+    Task AuditLogEnvironment(string id, string content);
+    Task AuditLogApplication(string id, string content);
 }

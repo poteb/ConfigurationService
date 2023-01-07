@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using NUnit.Framework;
+using pote.Config.DataProvider.Interfaces;
 using pote.Config.DbModel;
 using pote.Config.Shared;
 
