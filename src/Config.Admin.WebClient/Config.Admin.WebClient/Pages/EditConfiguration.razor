@@ -35,7 +35,7 @@
                     <MudTextField Variant="Variant.Outlined" Label="Name" @bind-Value="@Header.Name" Validation="@(new Func<string, string>(ValidateHeaderName))" Immediate="true"></MudTextField>
                     @* <MudTextField Variant="Variant.Outlined" Label="Name" @bind-Value="@Header.Name" Validation="@(new Func<string, string>(ValidateHeaderName))" Immediate="true" OnKeyUp="NameChanged"></MudTextField> *@
                 </MudItem>
-                <MudItem xs="12">
+                <MudItem xs="4">
                     <MudCheckBox Label="Active" @bind-checked="Header.IsActive" T="bool"></MudCheckBox>
                 </MudItem>
             </MudGrid>
