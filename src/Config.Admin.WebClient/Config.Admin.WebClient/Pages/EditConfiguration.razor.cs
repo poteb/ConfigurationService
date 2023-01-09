@@ -58,11 +58,14 @@ public partial class EditConfiguration : IDisposable
     private async Task Load()
     {
         if (IsNew)
+        {
             Header = new();
+            Header.Configurations.Add(new Configuration());
+        }
         else
         {
             var callResponse = await AdminApiService.GetConfiguration(Gid);
-            if (callResponse.IsSuccess && callResponse.Response != null)
+            if (callResponse is { IsSuccess: true, Response: { } })
             {
                 Header = ConfigurationMapper.ToClient(callResponse.Response.Configuration);
                 OriginalHeader = ConfigurationMapper.Copy(Header);
