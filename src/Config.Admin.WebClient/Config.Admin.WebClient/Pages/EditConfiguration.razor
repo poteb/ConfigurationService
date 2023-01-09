@@ -29,7 +29,7 @@
             <MudGrid Style="padding: 0; margin: 0" Spacing="2">
                 <MudItem xs="12">
                     <MudText Style="font-size: 8pt">ID: @Header.Id</MudText>
-                    <MudText Style="font-size: 8pt">Created: @Header.CreatedUtc</MudText>
+                    <MudText Style="font-size: 8pt">Created: @Header.CreatedUtc.ToLocalTime().ToString("M/d/yyyy H:mm:ss")</MudText>
                 </MudItem>
                 <MudItem xs="12">
                     <MudTextField Variant="Variant.Outlined" Label="Name" @bind-Value="@Header.Name" Validation="@(new Func<string, string>(ValidateHeaderName))" Immediate="true"></MudTextField>
