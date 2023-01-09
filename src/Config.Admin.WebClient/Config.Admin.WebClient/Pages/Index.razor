@@ -62,8 +62,8 @@
     <RowTemplate>
         <MudTd><MudButton OnClick="() => EditConfiguration(context.Id)" Variant="Variant.Filled">Edit</MudButton></MudTd>
         <MudTd>@context.Name</MudTd>
-        <MudTd>@GetConfigurationApplicationsAsString(context)</MudTd>
-        <MudTd>@GetConfigurationEnvironmentsAsString(context)</MudTd>
+        <MudTd Style="font-size:7pt">@GetConfigurationApplicationsAsString(context)</MudTd>
+        <MudTd Style="font-size:7pt">@GetConfigurationEnvironmentsAsString(context)</MudTd>
         <MudTd>
             @if (!context.IsActive)
             {
