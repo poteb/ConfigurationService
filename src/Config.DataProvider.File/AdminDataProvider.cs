@@ -10,12 +10,15 @@ public class AdminDataProvider : IAdminDataProvider
     private readonly IFileHandler _fileHandler;
     private readonly IApplicationDataAccess _applicationDataAccess;
     private readonly IEnvironmentDataAccess _environmentDataAccess;
+    private readonly DataProvider _dataProvider;
 
     public AdminDataProvider(IFileHandler fileHandler, IApplicationDataAccess applicationDataAccess, IEnvironmentDataAccess environmentDataAccess)
     {
         _fileHandler = fileHandler;
         _applicationDataAccess = applicationDataAccess;
         _environmentDataAccess = environmentDataAccess;
+
+        _dataProvider = new DataProvider(fileHandler, environmentDataAccess, applicationDataAccess);
     }
 
     public async Task<List<ConfigurationHeader>> GetAll(CancellationToken cancellationToken)
@@ -29,7 +32,10 @@ public class AdminDataProvider : IAdminDataProvider
                 var header = await GetConfiguration(Path.GetFileNameWithoutExtension(file), cancellationToken, false);
                 result.Add(header);
             }
-            catch (Exception) { /* ignore */ }
+            catch (Exception)
+            {
+                /* ignore */
+            }
         }
 
         return result;
@@ -46,12 +52,13 @@ public class AdminDataProvider : IAdminDataProvider
     {
         _fileHandler.DeleteConfiguration(id, permanent);
     }
+
     public async Task Insert(ConfigurationHeader header, CancellationToken cancellationToken)
     {
         await _fileHandler.WriteConfigurationContent(header.Id, JsonConvert.SerializeObject(header), cancellationToken);
     }
 
-    
+
     public async Task UpsertEnvironment(Environment environment, CancellationToken cancellationToken)
     {
         await _fileHandler.WriteEnvironmentContent(environment.Id, JsonConvert.SerializeObject(environment), cancellationToken);
@@ -63,7 +70,7 @@ public class AdminDataProvider : IAdminDataProvider
         return Task.CompletedTask;
     }
 
-    
+
     public async Task UpsertApplication(Application application, CancellationToken cancellationToken)
     {
         await _fileHandler.WriteApplicationContent(application.Id, JsonConvert.SerializeObject(application), cancellationToken);
@@ -78,6 +85,11 @@ public class AdminDataProvider : IAdminDataProvider
     public async Task<List<Application>> GetApplications(CancellationToken cancellationToken)
     {
         return await _applicationDataAccess.GetApplications(cancellationToken);
+    }
+
+    public async Task<Configuration> GetConfiguration(string name, string applicationId, string environment, CancellationToken cancellationToken)
+    {
+        return await _dataProvider.GetConfiguration(name, applicationId, environment, cancellationToken);
     }
 
     public async Task<List<Environment>> GetEnvironments(CancellationToken cancellationToken)

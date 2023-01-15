@@ -2,7 +2,7 @@
 
 namespace pote.Config.DataProvider.Interfaces;
 
-public interface IAdminDataProvider : IApplicationDataAccess, IEnvironmentDataAccess
+public interface IAdminDataProvider : IDataProvider
 {
     /// <summary>Returns all configurations (without history)</summary>
     Task<List<ConfigurationHeader>> GetAll(CancellationToken cancellationToken);

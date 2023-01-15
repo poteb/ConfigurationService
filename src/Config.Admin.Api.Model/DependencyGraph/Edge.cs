@@ -1,14 +1,6 @@
 ﻿namespace pote.Config.Admin.Api.Model.DependencyGraph;
 
-public class Edge
+public record Edge(string FromId, string ToId, string FromName, string ToName)
 {
     public string Id { get; } = Guid.NewGuid().ToString();
-    public string From { get; }
-    public string To { get; }
-    
-    public Edge(string from, string to)
-    {
-        From = from;
-        To = to;
-    }
 }

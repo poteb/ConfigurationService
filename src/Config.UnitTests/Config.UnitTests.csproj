@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Config.Admin.Api\Config.Admin.Api.csproj" />
     <ProjectReference Include="..\Config.DataProvider.File\Config.DataProvider.File.csproj" />
     <ProjectReference Include="..\Config.DbModel\Config.DbModel.csproj" />
     <ProjectReference Include="..\Config.Parser\Config.Parser.csproj" />

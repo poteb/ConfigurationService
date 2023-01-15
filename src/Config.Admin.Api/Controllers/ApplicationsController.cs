@@ -5,7 +5,6 @@ using pote.Config.Admin.Api.Mappers;
 using pote.Config.Admin.Api.Model.RequestResponse;
 using pote.Config.Admin.Api.Services;
 using pote.Config.DataProvider.Interfaces;
-using pote.Config.Shared;
 
 namespace pote.Config.Admin.Api.Controllers;
 

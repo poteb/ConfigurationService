@@ -1,9 +1,9 @@
-﻿using pote.Config.Admin.Api.Mappers;
+﻿using System.Text.RegularExpressions;
+using pote.Config.Admin.Api.Mappers;
 using pote.Config.Admin.Api.Model;
 using pote.Config.Admin.Api.Model.DependencyGraph;
 using pote.Config.Admin.Api.Model.RequestResponse;
 using pote.Config.DataProvider.Interfaces;
-using pote.Config.Shared;
 
 namespace pote.Config.Admin.Api.Services;
 
@@ -15,82 +15,111 @@ public interface IDependencyGraphService
 public class DependencyGraphService : IDependencyGraphService
 {
     private readonly IAdminDataProvider _adminDataProvider;
-    private readonly IDataProvider _dataProvider;
     public const string CacheName = "dependencyGraph";
+    private const string RefPattern = "\\$ref:(?<ref>[^#]*)#";
 
-    public DependencyGraphService(IAdminDataProvider adminDataProvider, IDataProvider dataProvider)
+    public DependencyGraphService(IAdminDataProvider adminDataProvider)
     {
         _adminDataProvider = adminDataProvider;
-        _dataProvider = dataProvider;
     }
 
     public async Task<DependencyGraphResponse> GetDependencyGraphAsync(CancellationToken cancellationToken)
     {
-        var parser = new Parser.Parser(_dataProvider);
+        var parser = new Parser.Parser(_adminDataProvider);
         var graph = new DependencyGraphResponse();
 
         var environments = await _adminDataProvider.GetEnvironments(cancellationToken);
         var applications = await _adminDataProvider.GetApplications(cancellationToken);
-        var configurationHeaders = await _adminDataProvider.GetAll(cancellationToken);
+        var configurationHeadersDb = await _adminDataProvider.GetAll(cancellationToken);
+        var configurationHeadersApi = ConfigurationMapper.ToApi(configurationHeadersDb, applications, environments);
 
         parser.TrackingAction = (from, to) =>
         {
-            var fromVertice = graph.Vertices.FirstOrDefault(v => v.Id == from);
-            var toVertice = graph.Vertices.FirstOrDefault(v => v.Id == to);
-            if (fromVertice != null && toVertice != null)
+            var fromVertex = graph.Vertices.FirstOrDefault(v => v.Id == from);
+            var toVertex = graph.Vertices.FirstOrDefault(v => v.Id == to);
+            if (fromVertex != null && toVertex != null)
             {
-                graph.Edges.Add(new Edge(fromVertice.Id, toVertice.Id));
+                graph.Edges.Add(new Edge(fromVertex.Id, toVertex.Id, fromVertex.Name, toVertex.Name));
             }
         };
 
+        var referenceMap = GetReferenceMap(configurationHeadersApi);
+
         foreach (var application in applications)
         {
-            graph.Vertices.Add(new Vertex<Application>(application.ToApi(), application.Name));
+            graph.Vertices.Add(new Vertex(application.ToApi().Id, application.Name, typeof(Application).ToString()));
         }
 
         foreach (var environment in environments)
         {
-            graph.Vertices.Add(new Vertex<Model.Environment>(environment.ToApi(), environment.Name));
+            graph.Vertices.Add(new Vertex(environment.ToApi().Id, environment.Name, typeof(Model.Environment).ToString()));
         }
 
-        foreach (var header in configurationHeaders)
+        foreach (var header in configurationHeadersDb)
         {
-            foreach (var configuration in header.Configurations)
+            var vertex = new Vertex(header.Id, header.Name, typeof(Configuration).ToString());
+            graph.Vertices.Add(vertex);
+
+            var headerApplications = header.Configurations.SelectMany(c => c.Applications).Distinct();
+            var headerEnvironments = header.Configurations.SelectMany(c => c.Environments).Distinct();
+
+            foreach (var headerApplication in headerApplications)
             {
-                var apiConfiguration = configuration.ToApi(applications, environments);
-                var vertex = new Vertex<Configuration>(apiConfiguration, header.Name);
-                graph.Vertices.Add(vertex);
-                
-                // Add applications to edges
-                foreach (var app in configuration.Applications)
-                {
-                    var toVertex = graph.Vertices.First(v => v.Id == app);
-                    var edge = new Edge(vertex.Id, toVertex.Id);
-                    vertex.Edges.Add(edge.Id);
-                    toVertex.Edges.Add(edge.Id);
-                    graph.Edges.Add(edge);
-                }
+                var toVertex = graph.Vertices.First(v => v.Id == headerApplication);
+                var edge = new Edge(vertex.Id, toVertex.Id, vertex.Name, toVertex.Name);
+                vertex.Edges.Add(edge.Id);
+                toVertex.Edges.Add(edge.Id);
+                graph.Edges.Add(edge);
+            }
+            
+            foreach (var headerEnvironment in headerEnvironments)
+            {
+                var toVertex = graph.Vertices.First(v => v.Id == headerEnvironment);
+                var edge = new Edge(vertex.Id, toVertex.Id, vertex.Name, toVertex.Name);
+                vertex.Edges.Add(edge.Id);
+                toVertex.Edges.Add(edge.Id);
+                graph.Edges.Add(edge);
+            }
+        }
 
-                // Add environments to edges
-                foreach (var env in configuration.Environments)
-                {
-                    var toVertex = graph.Vertices.First(v => v.Id == env);
-                    var edge = new Edge(vertex.Id, toVertex.Id);
-                    vertex.Edges.Add(edge.Id);
-                    toVertex.Edges.Add(edge.Id);
-                    graph.Edges.Add(new Edge(vertex.Id, toVertex.Id));
-                }
-
-                // foreach (var app in configuration.Applications)
-                // {
-                //     foreach (var env in configuration.Environments)
-                //     {
-                //         var _ = parser.Parse(configuration.Json, app, env, p => { }, cancellationToken, configuration.Id);
-                //     }
-                // }
+        // Has to loop again so that all vertices are added to the graph
+        foreach (var header in configurationHeadersDb)
+        {
+            var vertex = graph.Vertices.First(v => v.Id == header.Id);
+            
+            foreach (var pair in referenceMap.Where(r => r.Key.Id == header.Id))
+            {
+                var toVertex = graph.Vertices.First(v => v.Id == pair.Value.Id);
+                var edge = new Edge(vertex.Id, toVertex.Id, vertex.Name, toVertex.Name);
+                vertex.Edges.Add(edge.Id);
+                toVertex.Edges.Add(edge.Id);
+                graph.Edges.Add(edge);
             }
         }
 
         return graph;
+    }
+
+    /// <summary>Creates a list of key value pairs of configuration header and the configuration header it references.</summary>
+    public List<KeyValuePair<ConfigurationHeader, ConfigurationHeader>> GetReferenceMap(List<ConfigurationHeader> headers)
+    {
+        var pairs = new List<KeyValuePair<ConfigurationHeader, ConfigurationHeader>>();
+        foreach (var header in headers)
+        {
+            foreach (var configuration in header.Configurations)
+            {
+                var matches = Regex.Matches(configuration.Json, RefPattern).Cast<Match>();
+                foreach (var match in matches)
+                {
+                    var refName = match.Groups[1].Value;
+                    var targetHeader = headers.FirstOrDefault(h => h.Name == refName);
+                    if (targetHeader == null) continue;
+                    if (pairs.Any(p => p.Key.Id == header.Id && p.Value.Id == targetHeader.Id)) continue;
+                    pairs.Add(new KeyValuePair<ConfigurationHeader, ConfigurationHeader>(header, targetHeader));
+                }
+            }
+        }
+
+        return pairs;
     }
 }

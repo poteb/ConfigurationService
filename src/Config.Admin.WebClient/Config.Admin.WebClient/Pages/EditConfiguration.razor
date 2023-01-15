@@ -26,7 +26,7 @@
 
     <MudGrid Style="padding: 0;margin: 0;width: 99%" Spacing="2">
         <MudItem xs="4">
-            <MudGrid Style="padding: 0; margin: 0" Spacing="2">
+            <MudGrid Class="ma-0 pa-0" Spacing="2">
                 <MudItem xs="12">
                     <MudText Style="font-size: 8pt">ID: @Header.Id</MudText>
                     <MudText Style="font-size: 8pt">Created: @Header.CreatedUtc.ToLocalTime().ToString("M/d/yyyy H:mm:ss")</MudText>
@@ -41,8 +41,19 @@
             </MudGrid>
         </MudItem>
         <MudItem xs="8">
-            <MudText Style="font-size:10pt">Unhandled applications: @string.Join(", ", UnhandledApplications)</MudText>
-            <MudText Style="font-size:10pt">Unhandled environments: @string.Join(", ", UnhandledEnvironments)</MudText>
+            <MudGrid Class="ma-0 pa-0">
+                <MudItem xs="3" Class="ma-0 pa-0">Unhandled applications:</MudItem>
+                <MudItem xs="9" Class="ma-0 pa-0">@string.Join(", ", UnhandledApplications)</MudItem>
+                <MudItem xs="3" Class="ma-0 pa-0">Unhandled environments:</MudItem>
+                <MudItem xs="9" Class="ma-0 pa-0">@string.Join(", ", UnhandledEnvironments)</MudItem>
+                @if (!IsNew)
+                {
+                    <MudItem xs="3" Class="ma-0 pa-0">Usages:</MudItem>
+                    <MudItem xs="9" Class="ma-0 pa-0">
+                        <ConfigurationUsage HeaderId="@Header.Id"></ConfigurationUsage>
+                    </MudItem>
+                }
+            </MudGrid>
         </MudItem>
     </MudGrid>
 </MudForm>
@@ -71,7 +82,7 @@
 
 <MudGrid Style="padding: 0; margin: 0; width: 99%" Spacing="2">
     <MudItem xs="2">
-        
+
     </MudItem>
     <MudItem xs="6">
         <MudButton StartIcon="@Icons.Filled.AddCircle" Variant="Variant.Outlined" Color="Color.Success" OnClick="AddConfiguration">Add new configuration</MudButton>
@@ -84,4 +95,3 @@
 </MudGrid>
 
 <div id="bottom"></div>
-

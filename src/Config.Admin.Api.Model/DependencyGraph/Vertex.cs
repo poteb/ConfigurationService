@@ -1,17 +1,16 @@
 ﻿namespace pote.Config.Admin.Api.Model.DependencyGraph;
 
-public class Vertex<T> : IVertex where T : IIdentity
-{
-    public T Value { get; }
-
-    public string Id => Value.Id;
-
-    public List<string> Edges { get; } = new();
-    public string Name { get; }
-    
-    public Vertex(T value, string name)
-    {
-        Name = name;
-        Value = value;
-    }
-}
+public record Vertex(string Id, string Name, string Type)
+ {
+//     public string Id { get; set; }
+//     public string Type { get; set; }
+//
+     public List<string> Edges { get; } = new();
+//     public string Name { get; }
+//     
+//     public Vertex(string id, string name)
+//     {
+//         Name = name;
+//         Id = id;
+//     }
+ }

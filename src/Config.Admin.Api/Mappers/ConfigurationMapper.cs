@@ -41,7 +41,7 @@ public class ConfigurationMapper
             Id = apiConfiguration.Id,
             CreatedUtc = apiConfiguration.CreatedUtc,
             Json = apiConfiguration.Json,
-            Applications = JsonSerializer.Deserialize<List<Model.Application>>(apiConfiguration.Applications)?.Select(s => s.Id).ToList() ?? new List<string>(),
+            Applications = JsonSerializer.Deserialize<List<Application>>(apiConfiguration.Applications)?.Select(s => s.Id).ToList() ?? new List<string>(),
             Environments = JsonSerializer.Deserialize<List<Model.Environment>>(apiConfiguration.Environments)?.Select(s => s.Id).ToList() ?? new List<string>(),
             Deleted = apiConfiguration.Deleted,
             IsActive = apiConfiguration.IsActive,
@@ -102,7 +102,7 @@ public class ConfigurationMapper
 
 public static class ConfigurationMapperExtensions
 {
-    public static Model.Configuration ToApi(this DbModel.Configuration configuration, List<DbModel.Application> applications, List<DbModel.Environment> environments)
+    public static Configuration ToApi(this DbModel.Configuration configuration, List<DbModel.Application> applications, List<DbModel.Environment> environments)
     {
         return ConfigurationMapper.ToApi(configuration, applications, environments);
     }

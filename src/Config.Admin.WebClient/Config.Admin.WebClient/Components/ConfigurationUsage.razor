@@ -1,0 +1,51 @@
+﻿@using pote.Config.Admin.WebClient.Services
+@using pote.Config.Admin.WebClient.Model
+
+@if (!_loaded)
+{
+    <MudButton Class="ma-0 pa-0" Variant="Variant.Outlined" OnClick="Load">Load</MudButton>
+}
+else
+{
+    
+}
+
+@code {
+    private bool _loaded;
+    
+    [Parameter] public string HeaderId { get; set; }
+    [Inject] public IDependencyGraphApiService DependencyGraphApiService { get; set; } = null!;
+    [CascadingParameter] public PageError PageError { get; set; } = null!;
+
+    private async Task Load()
+    {
+        try
+        {
+            var callResponse = await DependencyGraphApiService.GetDependencyGraph();
+            
+            if (!callResponse.IsSuccess)
+            {
+                PageError.OnError(callResponse.GenerateErrorMessage(), new Exception());
+                return;
+            }
+
+            if (callResponse.Response is not {})
+            {
+                PageError.OnError("Response was empty", new Exception());
+                return;
+            }
+            
+            Console.WriteLine($"Header ID: {HeaderId}");
+            foreach (var edge in callResponse.Response.Edges.Where(e => e.To == HeaderId))
+            {
+                Console.WriteLine($"From {edge.From}");
+            }
+            
+        }
+        catch (Exception ex)
+        {
+            
+        }
+    }
+
+}
