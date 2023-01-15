@@ -24,5 +24,6 @@ builder.Services.AddMudServices();
 
 builder.Services.AddScoped<IAdminApiService, AdminApiService>();
 builder.Services.AddScoped<IApiService, ApiService>();
+builder.Services.AddScoped<IDependencyGraphApiService, DependencyGraphApiService>();
 
 await builder.Build().RunAsync(); 

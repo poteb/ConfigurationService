@@ -42,8 +42,9 @@ public partial class EditConfiguration : IDisposable
         set => _configurationContents.Add(value);
     }
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
+        if (Gid == Header.Id) return;
         await Load();
         _unsavedChangesTimer = new Timer(_ =>
         {
@@ -54,7 +55,6 @@ public partial class EditConfiguration : IDisposable
         }, new AutoResetEvent(false), 1000, 1000);
         await LoadAllHeaders();
     }
-
     private async Task Load()
     {
         if (IsNew)

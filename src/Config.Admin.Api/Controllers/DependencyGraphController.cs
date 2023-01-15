@@ -1,6 +1,4 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using pote.Config.Admin.Api.Model.RequestResponse;
 using pote.Config.Admin.Api.Services;
@@ -23,7 +21,7 @@ public class DependencyGraphController : ControllerBase
     }
     
     [HttpGet]
-    public async Task<IActionResult> Get(CancellationToken cancellationToken)
+    public async Task<ActionResult<DependencyGraphResponse>> Get(CancellationToken cancellationToken)
     {
         try
         {

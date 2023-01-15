@@ -1,10 +1,7 @@
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using NUnit.Framework;
-using pote.Config.DataProvider.Interfaces;
-using pote.Config.DbModel;
 using pote.Config.Shared;
 
 namespace pote.Config.UnitTests
@@ -50,35 +47,6 @@ namespace pote.Config.UnitTests
             var parser = new Parser.Parser(dataProvider);
             var response = await parser.Parse("{\"Wagga\":\"$ref:Circular#\"}", "unittest", "test", _ => { }, CancellationToken.None, "");
             var dyn = JsonConvert.DeserializeObject<dynamic>(response);
-        }
-    }
-
-    public class TestDataProvider : IDataProvider
-    {
-        public Task<Configuration> GetConfiguration(string name, string applicationId, string environment,
-            CancellationToken cancellationToken)
-        {
-            return name switch
-            {
-                "Wagga" => Task.FromResult(new Configuration { Json = "{\"Wagga\":\"Mama\"}" }),
-                "Wagga_nested" => Task.FromResult(new Configuration { Json = "{\"Wagga\":\"$ref:Super#\"}" }),
-                "Super" => Task.FromResult(new Configuration { Json = "{\"Super\":\"mule\"}" }),
-                "Circular" => Task.FromResult(new Configuration { Id="0dfa086a-da82-4ed4-916c-a604aed33fbf", Json = "{\"Wagga\":\"$ref:RefCircular#\"}" }),
-                "RefCircular" => Task.FromResult(new Configuration { Id="2b338c20-709e-4c56-a823-47fbdad051a8", Json = "{\"Dingo\":\"$ref:Circular#\"}" }),
-                _ => Task.FromResult(new Configuration())
-            };
-        }
-
-        public Task<List<Environment>> GetEnvironments(CancellationToken cancellationToken)
-        {
-            var list = new List<Environment> { new() { Id = "dild_id", Name = "test" } };
-            return Task.FromResult(list);
-        }
-
-        public Task<List<Application>> GetApplications(CancellationToken cancellationToken)
-        {
-            var list = new List<Application> { new() { Id = "dild_id", Name = "unittest" } };
-            return Task.FromResult(list);
         }
     }
 }
