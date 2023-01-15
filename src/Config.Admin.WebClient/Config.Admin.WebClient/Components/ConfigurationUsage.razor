@@ -3,26 +3,51 @@
 
 @if (!_loaded)
 {
-    <MudButton Class="ma-0 pa-0" Variant="Variant.Outlined" OnClick="Load">Load</MudButton>
+    <MudButton Class="ma-0 pt-0 pb-0" Variant="Variant.Outlined" OnClick="Load">Load usages</MudButton>
 }
 else
 {
-    
+    if (_usages.Count == 0)
+    {
+        <MudItem Class="ma-0 pa-0">No usages</MudItem>
+    }
+    else
+    {
+        foreach (var usage in _usages)
+        {
+            <MudLink OnClick="() => GoToUsage(usage.FromId)" Typo="Typo.body2" Class="ma-0 pt-0 pb-0 mr-5">@usage.FromName</MudLink>
+        }
+    }
 }
 
 @code {
     private bool _loaded;
-    
-    [Parameter] public string HeaderId { get; set; }
-    [Inject] public IDependencyGraphApiService DependencyGraphApiService { get; set; } = null!;
-    [CascadingParameter] public PageError PageError { get; set; } = null!;
+    private List<Config.Admin.Api.Model.DependencyGraph.Edge> _usages = new();
+
+    [Parameter]
+    public string HeaderId { get; set; } = "";
+
+    [Inject]
+    public IDependencyGraphApiService DependencyGraphApiService { get; set; } = null!;
+
+    [CascadingParameter]
+    public PageError PageError { get; set; } = null!;
+
+    [Inject]
+    public NavigationManager NavigationManager { get; set; } = null!;
+
+    protected override void OnParametersSet()
+    {
+        _loaded = false;
+        _usages.Clear();
+    }
 
     private async Task Load()
     {
         try
         {
             var callResponse = await DependencyGraphApiService.GetDependencyGraph();
-            
+
             if (!callResponse.IsSuccess)
             {
                 PageError.OnError(callResponse.GenerateErrorMessage(), new Exception());
@@ -34,18 +59,23 @@ else
                 PageError.OnError("Response was empty", new Exception());
                 return;
             }
-            
-            Console.WriteLine($"Header ID: {HeaderId}");
-            foreach (var edge in callResponse.Response.Edges.Where(e => e.To == HeaderId))
+
+            foreach (var edge in callResponse.Response.Edges.Where(e => e.ToId == HeaderId))
             {
-                Console.WriteLine($"From {edge.From}");
+                _usages.Add(edge);
             }
-            
+
+            _loaded = true;
         }
         catch (Exception ex)
         {
-            
+            PageError.OnError("Error loading usages", ex);
         }
+    }
+
+    private void GoToUsage(string id)
+    {
+        NavigationManager.NavigateTo($"EditConfiguration/{id}", new NavigationOptions() { ForceLoad = false });
     }
 
 }
