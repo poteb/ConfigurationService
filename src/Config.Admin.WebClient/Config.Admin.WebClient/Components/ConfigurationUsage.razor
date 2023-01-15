@@ -24,17 +24,10 @@ else
     private bool _loaded;
     private List<Config.Admin.Api.Model.DependencyGraph.Edge> _usages = new();
 
-    [Parameter]
-    public string HeaderId { get; set; } = "";
-
-    [Inject]
-    public IDependencyGraphApiService DependencyGraphApiService { get; set; } = null!;
-
-    [CascadingParameter]
-    public PageError PageError { get; set; } = null!;
-
-    [Inject]
-    public NavigationManager NavigationManager { get; set; } = null!;
+    [Parameter] public string HeaderId { get; set; } = "";
+    [Inject] public IDependencyGraphApiService DependencyGraphApiService { get; set; } = null!;
+    [CascadingParameter] public PageError PageError { get; set; } = null!;
+    [Inject] public NavigationManager NavigationManager { get; set; } = null!;
 
     protected override void OnParametersSet()
     {
@@ -75,7 +68,7 @@ else
 
     private void GoToUsage(string id)
     {
-        NavigationManager.NavigateTo($"EditConfiguration/{id}", new NavigationOptions() { ForceLoad = false });
+        NavigationManager.NavigateTo($"EditConfiguration/{id}", new NavigationOptions { ForceLoad = false });
     }
 
 }

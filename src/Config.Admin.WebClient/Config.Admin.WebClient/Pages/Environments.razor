@@ -21,14 +21,19 @@
     </MudItem>
 </MudGrid>
 
-<MudTable Items="@List" Dense="true" CanCancelEdit="true" Style="Width: 400px" Elevation="0">
+<MudTable Items="@List" Dense="true" CanCancelEdit="true" Elevation="0">
     <ColGroup>
-        <col style="width: 400px;" />
-        <col style="width: 30px;" />
+        <col style="width: 400px;"/>
+        <col style="width: 30px;"/>
     </ColGroup>
     <HeaderContent>
-        <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<ConfigEnvironment, object>(x=>x.Name)">Name</MudTableSortLabel></MudTh>
-        <MudTh Style="margin:0;padding:0"><MudIconButton Icon="@Icons.Filled.Add" Title="Add item" OnClick="AddItem" Color="Color.Success"></MudIconButton></MudTh>
+        <MudTh>
+            <MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<ConfigEnvironment, object>(x => x.Name)">Name</MudTableSortLabel>
+        </MudTh>
+        <MudTh Style="margin:0;padding:0">
+            <MudIconButton Icon="@Icons.Filled.Add" Title="Add item" OnClick="AddItem" Color="Color.Success"></MudIconButton>
+        </MudTh>
+        <MudTh Style="white-space: nowrap">Usage <MudButton Class="ma-0 pt-0 pb-0" Variant="Variant.Outlined" OnClick="LoadUsages">Load</MudButton></MudTh>
     </HeaderContent>
     <RowTemplate>
         <MudTd Style="border: 0">
@@ -43,11 +48,24 @@
         </MudTd>
         @if (!context.IsDeleted)
         {
-            <MudTd DataLabel="Delete" Style="padding-right: 0; border: 0"><MudIconButton Size="Size.Small" Icon="@Icons.Filled.Delete" Title="Delete item" OnClick="() => context.IsDeleted = true"></MudIconButton></MudTd>
+            <MudTd DataLabel="Delete" Style="padding-right: 0; border: 0">
+                <MudIconButton Size="Size.Small" Icon="@Icons.Filled.Delete" Title="Delete item" OnClick="() => context.IsDeleted = true"></MudIconButton>
+            </MudTd>
         }
         else
         {
-            <MudTd DataLabel="Undo" Style="padding-right: 0; border: 0"><MudIconButton Size="Size.Small" Icon="@Icons.Filled.Undo" Title="Undo" OnClick="() => context.IsDeleted = false"></MudIconButton></MudTd>
+            <MudTd DataLabel="Undo" Style="padding-right: 0; border: 0">
+                <MudIconButton Size="Size.Small" Icon="@Icons.Filled.Undo" Title="Undo" OnClick="() => context.IsDeleted = false"></MudIconButton>
+            </MudTd>
+        }
+        @if (_usageLoaded)
+        {
+            <MudTd DataLabel="Usage" Style="padding-right: 0; border: 0">
+                @foreach (var usage in context.Usages)
+                {
+                    <MudLink OnClick="() => GoToUsage(usage.FromId)" Typo="Typo.body2" Class="ma-0 pt-0 pb-0 mr-4">@usage.FromName</MudLink>
+                }
+            </MudTd>
         }
     </RowTemplate>
 </MudTable>
