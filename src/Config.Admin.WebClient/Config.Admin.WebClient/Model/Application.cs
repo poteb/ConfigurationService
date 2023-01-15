@@ -9,10 +9,12 @@ public class Application : IEquatable<Application>
 
     public bool IsSelected { get; set; }
 
+    public List<Config.Admin.Api.Model.DependencyGraph.Edge> Usages { get; } = new();
+
     public bool Equals(Application? other)
     {
-        if (object.ReferenceEquals(other, null)) return false;
-        if (object.ReferenceEquals(this, other)) return true;
+        if (ReferenceEquals(other, null)) return false;
+        if (ReferenceEquals(this, other)) return true;
         return Id.Equals(other.Id) && Name.Equals(other.Name);
     }
 
