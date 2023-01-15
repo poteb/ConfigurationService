@@ -7,6 +7,7 @@ public class ConfigEnvironment : IEquatable<ConfigEnvironment>
 
     public bool IsDeleted { get; set; }
     public bool IsSelected { get; set; }
+    public List<Config.Admin.Api.Model.DependencyGraph.Edge> Usages { get; } = new();
     
     public bool Equals(ConfigEnvironment? other)
     {
