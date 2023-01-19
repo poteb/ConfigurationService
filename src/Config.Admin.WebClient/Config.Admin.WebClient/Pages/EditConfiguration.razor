@@ -2,6 +2,8 @@
 @page "/EditConfiguration/{Gid}"
 @using pote.Config.Admin.WebClient.Components
 
+<NavigationLock ConfirmExternalNavigation OnBeforeInternalNavigation="@OnBeforeInternalNavigation" />
+
 <PageTitle>Edit configuration</PageTitle>
 
 <MudForm @ref="_form" @bind-IsValid="@_formIsValid">

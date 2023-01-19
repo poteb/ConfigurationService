@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.JSInterop;
 using MudBlazor;
 using pote.Config.Admin.WebClient.Components;
@@ -45,14 +46,17 @@ public partial class EditConfiguration : IDisposable
     {
         if (Gid == Header.Id) return;
         await Load();
-        _unsavedChangesTimer = new Timer(_ =>
-        {
-            var oldHasChanged = HasUnsavedChanges;
-            HasUnsavedChanges = !Header.Equals(OriginalHeader);
-            if (oldHasChanged != HasUnsavedChanges)
-                StateHasChanged();
+        _unsavedChangesTimer = new Timer(_ => {
+            UpdateHasUnsavedChanges();
         }, new AutoResetEvent(false), 1000, 1000);
         await LoadAllHeaders();
+    }
+    private void UpdateHasUnsavedChanges()
+    {
+        var oldHasChanged = HasUnsavedChanges;
+        HasUnsavedChanges = !Header.Equals(OriginalHeader);
+        if (oldHasChanged != HasUnsavedChanges)
+            StateHasChanged();
     }
     private async Task Load()
     {
@@ -249,5 +253,16 @@ public partial class EditConfiguration : IDisposable
         if (_headers.All(h => h.Name != Header.Name)) return null!;
         Console.WriteLine("Already exists");
         return "Already exists";
+    }
+    private async Task OnBeforeInternalNavigation(LocationChangingContext context)
+    {
+        UpdateHasUnsavedChanges();
+        if (!HasUnsavedChanges) return;
+        var isConfirmed = await JsRuntime.InvokeAsync<bool>("confirm", "You have unsaved changes. Click OK to lose the changes and continue. Click Cancel to stay on the page.");
+
+        if (!isConfirmed)
+        {
+            context.PreventNavigation();
+        }
     }
 }
