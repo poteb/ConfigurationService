@@ -6,7 +6,7 @@
 <MudExpansionPanels Style="padding-top:5px">
     <MudExpansionPanel @ref="_expansionPanel">
         <TitleContent>
-            <MudButton StartIcon="@Icons.Filled.Check" Variant="Variant.Outlined" Color="Color.Info" OnClick="RunTests" Disabled="@_runningTests">Run tests</MudButton>
+            <MudButton StartIcon="@Icons.Material.Filled.Check" Variant="Variant.Outlined" Color="Color.Info" OnClick="RunTests" Disabled="@_runningTests">Run tests</MudButton>
         </TitleContent>
         <ChildContent>
             <MudGrid>
@@ -38,7 +38,7 @@
                                 <MudItem xs="12" Style="padding: 0">
                                     @if (result.Problems.Any())
                                     {
-                                        <MudIcon Size="Size.Small" Icon="@Icons.Filled.ThumbDown" Color="Color.Error"/>
+                                        <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ThumbDown" Color="Color.Error"/>
                                         @foreach (var problem in result.Problems)
                                         {
                                             <MudItem Style="color: red">• @problem</MudItem>
@@ -46,7 +46,7 @@
                                     }
                                     else
                                     {
-                                        <MudIcon Size="Size.Small" Icon="@Icons.Filled.ThumbUp" Color="Color.Success"/>
+                                        <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ThumbUp" Color="Color.Success"/>
                                     }
                                 </MudItem>
                                 <MudItem xs="12" Style="padding: 0">
