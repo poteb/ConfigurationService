@@ -24,17 +24,17 @@
                 @if (!Configuration.Deleted)
                 {
                     <MudTooltip Text="Delete configuration section">
-                        <MudIconButton Icon="@Icons.Filled.Delete" Color="Color.Error" OnClick="() => DeleteConfiguration(true)"></MudIconButton>
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => DeleteConfiguration(true)"></MudIconButton>
                     </MudTooltip>
                 }
                 else
                 {
                     <MudTooltip Text="Undo delete">
-                        <MudIconButton Icon="@Icons.Filled.Delete" Color="Color.Error" OnClick="() => DeleteConfiguration(false)"></MudIconButton>
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => DeleteConfiguration(false)"></MudIconButton>
                     </MudTooltip>
                 }
                 <MudTooltip Text="Undo changes to configuration section">
-                    <MudIconButton Icon="@Icons.Filled.Undo" Color="Color.Warning" OnClick="UndoChanges"></MudIconButton>
+                    <MudIconButton Icon="@Icons.Material.Filled.Undo" Color="Color.Warning" OnClick="UndoChanges"></MudIconButton>
                 </MudTooltip>
             </MudItem>
         </MudGrid>
@@ -63,7 +63,7 @@
                 </MudItem>
             </MudGrid>
             <MudItem xs="12" Class="d-flex align-center" Style="padding-top:5px">
-                <MudButton Variant="Variant.Outlined" Style="background-color: white" OnClick="FormatJson" EndIcon="@Icons.Filled.FormatIndentIncrease">Format JSON</MudButton>
+                <MudButton Variant="Variant.Outlined" Style="background-color: white" OnClick="FormatJson" EndIcon="@Icons.Material.Filled.FormatIndentIncrease">Format JSON</MudButton>
                 <MudText Style="padding-left: 10px" Color="Color.Error">@_jsonValidationError</MudText>
             </MudItem>
             <MudTextField @bind-Text="Configuration.Json" T="string" Variant="Variant.Outlined" Lines="@_jsonLines" Style="background-color:#fff"></MudTextField>
@@ -85,13 +85,6 @@
 
     [Inject]
     IDialogService DialogService { get; set; } = null!;
-
-    [Parameter]
-    public int Index
-    {
-        get => _index;
-        set => _index = _index == -1 ? value : _index;
-    }
 
     [Inject]
     public IApiService ApiService { get; set; } = null!;
@@ -116,6 +109,13 @@
         }
     }
 
+#pragma warning disable BL0007
+    [Parameter]
+    public int Index
+    {
+        get => _index;
+        set => _index = _index == -1 ? value : _index;
+    }
 
     [Parameter]
     public List<ConfigEnvironment> AllEnvironments
@@ -130,6 +130,7 @@
         get => _allApplications;
         set => _allApplications = value.OrderBy(x => x.Name).ToList();
     }
+#pragma warning restore BL0007
 
     [Parameter]
     public Configuration Configuration { get; set; } = new();

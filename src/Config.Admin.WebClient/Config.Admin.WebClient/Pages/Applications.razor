@@ -11,10 +11,10 @@
         <MudGrid Justify="Justify.FlexEnd" Style="text-align: right">
             <MudItem xs="12">
                 <MudTooltip Text="Load from server, will undo changes">
-                    <MudIconButton Icon="@Icons.Filled.Refresh" Color="Color.Info" OnClick="Load" Title="Load from server, will undo changes"></MudIconButton>
+                    <MudIconButton Icon="@Icons.Material.Filled.Refresh" Color="Color.Info" OnClick="Load" Title="Load from server, will undo changes"></MudIconButton>
                 </MudTooltip>
                 <MudTooltip Text="Save changes">
-                    <MudIconButton Icon="@Icons.Filled.Save" Color="Color.Info" OnClick="Save" Title="Save changes"></MudIconButton>
+                    <MudIconButton Icon="@Icons.Material.Filled.Save" Color="Color.Info" OnClick="Save" Title="Save changes"></MudIconButton>
                 </MudTooltip>
             </MudItem>
         </MudGrid>
@@ -30,7 +30,7 @@
             <MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<Application, object>(x => x.Name)">Name</MudTableSortLabel>
         </MudTh>
         <MudTh Style="margin:0;padding:0">
-            <MudIconButton Icon="@Icons.Filled.Add" Title="Add item" OnClick="AddItem" Color="Color.Success"></MudIconButton>
+            <MudIconButton Icon="@Icons.Material.Filled.Add" Title="Add item" OnClick="AddItem" Color="Color.Success"></MudIconButton>
         </MudTh>
         <MudTh Style="white-space: nowrap">Usage <MudButton Class="ma-0 pt-0 pb-0" Variant="Variant.Outlined" OnClick="LoadUsages">Load</MudButton></MudTh>
     </HeaderContent>
@@ -50,13 +50,13 @@
         @if (!context.IsDeleted)
         {
             <MudTd DataLabel="Delete" Style="padding-right: 0; border: 0">
-                <MudIconButton Size="Size.Small" Icon="@Icons.Filled.Delete" Title="Delete item" OnClick="() => context.IsDeleted = true"></MudIconButton>
+                <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Delete" Title="Delete item" OnClick="() => context.IsDeleted = true"></MudIconButton>
             </MudTd>
         }
         else
         {
             <MudTd DataLabel="Undo" Style="padding-right: 0; border: 0">
-                <MudIconButton Size="Size.Small" Icon="@Icons.Filled.Undo" Title="Undo" OnClick="() => context.IsDeleted = false"></MudIconButton>
+                <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Undo" Title="Undo" OnClick="() => context.IsDeleted = false"></MudIconButton>
             </MudTd>
         }
         @if (_usageLoaded)

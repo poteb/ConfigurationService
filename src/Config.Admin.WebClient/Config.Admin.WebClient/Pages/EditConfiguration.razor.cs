@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using System.Reflection;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using MudBlazor;
@@ -21,7 +20,7 @@ public partial class EditConfiguration : IDisposable
     private bool _formIsValid;
 
     [Inject]
-    protected IJSRuntime JSRuntime { get; set; } = null!;
+    protected IJSRuntime JsRuntime { get; set; } = null!;
     [Parameter] public string Gid { get; set; } = string.Empty;
     private bool IsNew => string.IsNullOrWhiteSpace(Gid);
     private ConfigurationHeader Header { get; set; } = new();
@@ -88,8 +87,7 @@ public partial class EditConfiguration : IDisposable
     {
         var callResponse = await AdminApiService.GetConfigurations();
         if (callResponse is { IsSuccess: true, Response: { } })
-            _headers = ConfigurationMapper.ToClient(callResponse.Response.Configurations.Where(c => c.Id != Header?.Id)
-                .ToImmutableList());
+            _headers = ConfigurationMapper.ToClient(callResponse.Response.Configurations.Where(c => c.Id != Header?.Id).ToImmutableList());
     }
 
     private void UpdateConfigurationIndex()
@@ -179,7 +177,7 @@ public partial class EditConfiguration : IDisposable
         var options = new DialogOptions { CloseOnEscapeKey = true };
         var dialog = await DialogService.ShowAsync<DeleteConfigurationDialog>("Delete configuration?", options);
         var result = await dialog.Result;
-        if (result.Cancelled) return;
+        if (result.Canceled) return;
         var softDelete = (bool)result.Data;
 
         Header.Deleted = true;
@@ -192,7 +190,7 @@ public partial class EditConfiguration : IDisposable
 
     private string GetExpandAllConfigurationsButtonIcon()
     {
-        return !_allPanelsExpanded ? Icons.Filled.KeyboardDoubleArrowDown : Icons.Filled.KeyboardDoubleArrowUp;
+        return !_allPanelsExpanded ? Icons.Material.Filled.KeyboardDoubleArrowDown : Icons.Material.Filled.KeyboardDoubleArrowUp;
     }
 
     private string GetExpandAllConfigurationsButtonText()
@@ -214,7 +212,7 @@ public partial class EditConfiguration : IDisposable
     {
         Header.Configurations.Add(new Configuration { HeaderId = Header.Id, IsNew = true });
         UpdateConfigurationIndex();
-        await JSRuntime.InvokeVoidAsync("scrollIntoView", "bottom");
+        await JsRuntime.InvokeVoidAsync("scrollIntoView", "bottom");
     }
 
     private async Task TestAll()
@@ -232,10 +230,9 @@ public partial class EditConfiguration : IDisposable
         {
             { nameof(ReorderConfigurationsDialog.Configurations), list }
         };
-        var dialog =
-            await DialogService.ShowAsync<ReorderConfigurationsDialog>("Reorder configurations", dialogParameters);
+        var dialog = await DialogService.ShowAsync<ReorderConfigurationsDialog>("Reorder configurations", dialogParameters);
         var result = await dialog.Result;
-        if (result.Cancelled) return;
+        if (result.Canceled) return;
         foreach (var c in list.OrderBy(x => x.Index))
         {
             var found = Header.Configurations.First(d => d.Id == c.Id);

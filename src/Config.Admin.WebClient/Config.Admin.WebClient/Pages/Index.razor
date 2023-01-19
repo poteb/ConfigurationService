@@ -33,7 +33,7 @@
         </MudItem>
         <MudItem>
             <MudTooltip Text="Reset">
-                <MudIconButton Icon="@Icons.Filled.Close" Color="Color.Info" OnClick="ResetSearch"></MudIconButton>
+                <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Info" OnClick="ResetSearch"></MudIconButton>
             </MudTooltip>
         </MudItem>
     </MudItem>
@@ -41,10 +41,10 @@
         <MudGrid Justify="Justify.FlexEnd" Style="text-align: right">
             <MudItem xs="12">
                 <MudTooltip Text="New Configuration">
-                    <MudIconButton Icon="@Icons.Filled.Add" Color="Color.Info" OnClick="AddNewConfiguration"></MudIconButton>
+                    <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Info" OnClick="AddNewConfiguration"></MudIconButton>
                 </MudTooltip>
                 <MudTooltip Text="Refresh">
-                    <MudIconButton Icon="@Icons.Filled.Refresh" Color="Color.Info" OnClick="Load"></MudIconButton>
+                    <MudIconButton Icon="@Icons.Material.Filled.Refresh" Color="Color.Info" OnClick="Load"></MudIconButton>
                 </MudTooltip>
             </MudItem>
         </MudGrid>
@@ -67,7 +67,7 @@
         <MudTd>
             @if (!context.IsActive)
             {
-                <MudIcon Icon="@Icons.Filled.DoNotDisturb" Title="Inactive"></MudIcon>
+                <MudIcon Icon="@Icons.Material.Filled.DoNotDisturb" Title="Inactive"></MudIcon>
             }
         </MudTd>
     </RowTemplate>

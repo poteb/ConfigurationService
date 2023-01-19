@@ -13,11 +13,11 @@ builder.Services.AddSingleton<SearchCriteria>();
 
 builder.Services.AddHttpClient("AdminApi", client =>
 {
-    client.BaseAddress = new Uri(builder.Configuration.GetConnectionString("AdminApi"));
+    client.BaseAddress = new Uri(builder.Configuration.GetConnectionString("AdminApi")!);
 });
 builder.Services.AddHttpClient("Api", client =>
 {
-    client.BaseAddress = new Uri(builder.Configuration.GetConnectionString("Api"));
+    client.BaseAddress = new Uri(builder.Configuration.GetConnectionString("Api")!);
 });
 
 builder.Services.AddMudServices();
