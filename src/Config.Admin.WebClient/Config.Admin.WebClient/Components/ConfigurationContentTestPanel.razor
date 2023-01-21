@@ -70,31 +70,16 @@
     [Parameter] public List<Application> AllApplications { get; set; } = null!;
     [Parameter] public List<ConfigEnvironment> AllEnvironments { get; set; } = null!;
     [Inject] public IApiService ApiService { get; set; } = null!;
+    [Inject] public IConfigurationTestService ConfigurationTestService { get; set; } = null!;
 
     public async Task RunTests()
     {
         if (!_expansionPanel.IsExpanded)
             _expansionPanel.Expand();
         _runningTests = true;
-        List<ParseResponse> tempResults = new();
         try
         {
-            foreach (var application in Configuration.Applications)
-            {
-                foreach (var environment in Configuration.Environments)
-                {
-                    var response = await ApiService.TestConfiguration(Configuration.Json, application, environment);
-                    if (!response.IsSuccess || response.Response == null)
-                    {
-                        tempResults.Add(new ParseResponse
-                        {
-                            Problems = new List<string> { "Call to API failed" }
-                        });
-                        continue;
-                    }
-                    tempResults.Add(response.Response);
-                }
-            }
+            var tempResults = await ConfigurationTestService.RunTest(Configuration);
             _testResults.Clear();
             _testResults = tempResults;
         }

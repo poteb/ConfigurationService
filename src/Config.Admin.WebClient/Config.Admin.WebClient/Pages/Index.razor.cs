@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using pote.Config.Admin.WebClient.Mappers;
+using pote.Config.Admin.WebClient.Misc;
 using pote.Config.Admin.WebClient.Model;
 using pote.Config.Admin.WebClient.Services;
 
@@ -14,6 +15,7 @@ public partial class Index
     [Inject] public NavigationManager NavigationManager { get; set; } = null!;
     [CascadingParameter] public PageError PageError { get; set; } = null!;
     [Inject] public SearchCriteria SearchCriteria { get; set; } = null!;
+    [Inject] public IAllConfigurationsTestService AllConfigurationsTestService { get; set; } = null!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -104,5 +106,14 @@ public partial class Index
     {
         var environments = header.Configurations.SelectMany(c => c.Environments).Distinct().OrderBy(e => e.Name);
         return string.Join(", ", environments.Select(e => e.Name));
+    }
+    
+    private IHeaderTestContainer GetTestContainer(ConfigurationHeader header)
+    {
+        return AllConfigurationsTestService.CreateAndAddTestContainer(header);
+    }
+    private async Task TestAll()
+    {
+        await AllConfigurationsTestService.TestAll();
     }
 }
