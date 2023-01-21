@@ -25,5 +25,8 @@ builder.Services.AddMudServices();
 builder.Services.AddScoped<IAdminApiService, AdminApiService>();
 builder.Services.AddScoped<IApiService, ApiService>();
 builder.Services.AddScoped<IDependencyGraphApiService, DependencyGraphApiService>();
+builder.Services.AddScoped<IConfigurationTestService, ConfigurationTestService>();
+builder.Services.AddScoped<IAllConfigurationsTestService, AllConfigurationsTestService>();
+
 
 await builder.Build().RunAsync(); 

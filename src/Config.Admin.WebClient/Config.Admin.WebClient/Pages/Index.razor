@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using pote.Config.Admin.WebClient.Model
+@using pote.Config.Admin.WebClient.Components
 
 <PageTitle>Configurations</PageTitle>
 
@@ -10,7 +11,9 @@
     <MudItem sm="4" xs="12" Class="d-flex">
         <MudItem Style="Width:300px">
             <MudSelect @bind-Value="SearchCriteria.SelectedApplication" T="string" Label="Application" Variant="Variant.Outlined" Margin="Margin.Dense">
-                <MudSelectItem Value="string.Empty" T="string"><i>all</i></MudSelectItem>
+                <MudSelectItem Value="string.Empty" T="string">
+                    <i>all</i>
+                </MudSelectItem>
                 @foreach (var application in Applications.OrderBy(a => a.Name))
                 {
                     <MudSelectItem Value="application.Name" Style="white-space: nowrap !important">@application.Name</MudSelectItem>
@@ -19,7 +22,9 @@
         </MudItem>
         <MudItem Style="Width:300px;padding: 0 4px">
             <MudSelect @bind-Value="SearchCriteria.SelectedEnvironment" T="string" Label="Environments" Variant="Variant.Outlined" Margin="Margin.Dense">
-                <MudSelectItem Value="string.Empty" T="string"><i>all</i></MudSelectItem>
+                <MudSelectItem Value="string.Empty" T="string">
+                    <i>all</i>
+                </MudSelectItem>
                 @foreach (var environment in Environments)
                 {
                     <MudSelectItem Value="environment.Name" Style="white-space: nowrap !important">@environment.Name</MudSelectItem>
@@ -46,21 +51,29 @@
                 <MudTooltip Text="Refresh">
                     <MudIconButton Icon="@Icons.Material.Filled.Refresh" Color="Color.Info" OnClick="Load"></MudIconButton>
                 </MudTooltip>
+                <MudTooltip Text="Test all">
+                    <MudIconButton Icon="@Icons.Material.Filled.QuestionMark" Color="Color.Info" OnClick="TestAll"></MudIconButton>
+                </MudTooltip>
             </MudItem>
         </MudGrid>
     </MudItem>
 </MudGrid>
 
-<MudTable Items="@Headers" Dense="true" FixedHeader="true" Striped="true" Filter="new Func<ConfigurationHeader,bool>(FilterFunc)" Style="width: calc(100% - 15px)">
+<MudTable Items="@Headers" Dense="true" FixedHeader="true" Striped="true" Filter="new Func<ConfigurationHeader, bool>(FilterFunc)" Style="width: calc(100% - 15px)">
     <HeaderContent>
         <MudTh></MudTh>
-        <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<ConfigurationHeader, object>(x => x.Name)">Name</MudTableSortLabel></MudTh>
+        <MudTh>
+            <MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<ConfigurationHeader, object>(x => x.Name)">Name</MudTableSortLabel>
+        </MudTh>
         <MudTh>Applications</MudTh>
         <MudTh>Environments</MudTh>
         <MudTh></MudTh>
+        <MudTh></MudTh>
     </HeaderContent>
     <RowTemplate>
-        <MudTd><MudButton OnClick="() => EditConfiguration(context.Id)" Variant="Variant.Filled">Edit</MudButton></MudTd>
+        <MudTd>
+            <MudButton OnClick="() => EditConfiguration(context.Id)" Variant="Variant.Filled">Edit</MudButton>
+        </MudTd>
         <MudTd>@context.Name</MudTd>
         <MudTd Style="font-size:7pt">@GetConfigurationApplicationsAsString(context)</MudTd>
         <MudTd Style="font-size:7pt">@GetConfigurationEnvironmentsAsString(context)</MudTd>
@@ -69,6 +82,9 @@
             {
                 <MudIcon Icon="@Icons.Material.Filled.DoNotDisturb" Title="Inactive"></MudIcon>
             }
+        </MudTd>
+        <MudTd>
+            <ConfigurationTestComponent HeaderTestContainer="@GetTestContainer(context)"></ConfigurationTestComponent>
         </MudTd>
     </RowTemplate>
 </MudTable>

@@ -1,0 +1,53 @@
+﻿@using pote.Config.Admin.WebClient.Services
+@using pote.Config.Admin.WebClient.Misc
+@using System.Text
+@if (HeaderTestContainer == null! || HeaderTestContainer.TestStage == TestStages.NotStarted)
+{
+    <MudTooltip Text="Not tested, click to test">
+        <MudIconButton Icon="@Icons.Material.Filled.QuestionMark" Size="Size.Small" OnClick="Test"></MudIconButton>
+    </MudTooltip>
+}
+else if (HeaderTestContainer.TestStage == TestStages.InProgress)
+{
+    <MudProgressCircular Color="Color.Default" Indeterminate="true" Size="Size.Small"/>
+}
+else if (HeaderTestContainer.TestStage == TestStages.Complete)
+{
+    <MudTooltip Text="Success">
+        <MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Small"></MudIcon>
+    </MudTooltip>
+}
+else if (HeaderTestContainer.TestStage == TestStages.Failed)
+{
+    <MudTooltip Placement="Placement.Left">
+        <ChildContent>
+            <MudIcon Icon="@Icons.Material.Filled.ErrorOutline" Size="Size.Small" Color="Color.Error"></MudIcon>
+        </ChildContent>
+        <TooltipContent>
+            @foreach (var error in GetErrorText())
+            {
+                <MudText Style="white-space: nowrap;font-size: 8pt">@error</MudText>
+            }
+        </TooltipContent>
+    </MudTooltip>
+}
+
+@code {
+    private bool _popupIsOpen = false;
+
+    [Parameter] public IHeaderTestContainer HeaderTestContainer { get; set; } = null!;
+
+    private List<string> GetErrorText()
+    {
+        var list = new List<string>();
+        foreach (var response in HeaderTestContainer.ParseResponses.Values)
+            foreach (var r in response.Where(r => r.Problems.Any()))
+                list.AddRange(r.Problems);
+        return list;
+    }
+
+    private async Task Test()
+    {
+        await HeaderTestContainer.RunTests();
+    }
+}
