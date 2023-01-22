@@ -8,6 +8,7 @@ public interface IAdminDataProvider : IDataProvider
     Task<List<ConfigurationHeader>> GetAll(CancellationToken cancellationToken);
     /// <summary>Returns a configuration (with its history)</summary>
     Task<ConfigurationHeader> GetConfiguration(string id, CancellationToken cancellationToken, bool includeHistory = true);
+    Task<List<ConfigurationHeader>> GetConfigurationHistory(string id, int page, int pageSize, CancellationToken cancellationToken);
 
     void DeleteConfiguration(string id, bool permanent);
     Task Insert(ConfigurationHeader header, CancellationToken cancellationToken);

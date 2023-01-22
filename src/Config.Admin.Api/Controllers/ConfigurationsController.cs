@@ -74,6 +74,29 @@ public class ConfigurationsController : ControllerBase
         }
     }
 
+    [HttpPost("history")]
+    public async Task<ActionResult<ConfigurationHistoryResponse>> GetHistory(ConfigurationHistoryRequest request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var history = await _dataProvider.GetConfigurationHistory(request.Id, request.Page, request.PageSize, cancellationToken);
+            var applications = await _dataProvider.GetApplications(cancellationToken);
+            var environments = await _dataProvider.GetEnvironments(cancellationToken);
+            var apiHistory = ConfigurationMapper.ToApi(history, applications, environments);
+            var response = new ConfigurationHistoryResponse { History = apiHistory, Page = request.Page, PageSize = request.PageSize };
+            return Ok(response);
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting configuration history, id {Id}, page {Page}, pageSize {PageSize}", request.Id, request.Page, request.PageSize);
+            return Problem(ex.Message);
+        }
+    }
+
     [HttpPost]
     public async Task<ActionResult> Insert([FromBody] ConfigurationHeader header, CancellationToken cancellationToken)
     {

@@ -45,7 +45,7 @@ public static class ConfigurationMapper
             IsActive = configuration.IsActive,
             Applications = StringToList<Application>(configuration.Applications),
             Environments = StringToList<ConfigEnvironment>(configuration.Environments),
-            History = ToClient(configuration.History)
+            //History = ToClient(configuration.History)
         };
     }
 

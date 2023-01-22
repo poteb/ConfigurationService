@@ -50,6 +50,10 @@ public class TestDataProvider : IAdminDataProvider
             _ => Task.FromResult(new ConfigurationHeader())
         });
     }
+    public async Task<List<ConfigurationHeader>> GetConfigurationHistory(string id, int page, int pageSize, CancellationToken cancellationToken)
+    {
+        throw new System.NotImplementedException();
+    }
 
     public void DeleteConfiguration(string id, bool permanent)
     {

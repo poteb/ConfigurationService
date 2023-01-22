@@ -1,7 +1,4 @@
-﻿using pote.Config.DbModel;
-using Environment = System.Environment;
-
-namespace pote.Config.DataProvider.File;
+﻿namespace pote.Config.DataProvider.File;
 
 public class FileHandler : IFileHandler
 {
@@ -12,14 +9,11 @@ public class FileHandler : IFileHandler
     public FileHandler(string directory)
     {
         _configurationRootDir = Path.Combine(directory, "configurations");
-        //_configurationHistoryDir = Path.Combine(_configurationRootDir, "history");
         _environmentsDir = Path.Combine(directory, "environments");
         _applicationsDir = Path.Combine(directory, "applications");
-        
+
         if (!Directory.Exists(_configurationRootDir))
             Directory.CreateDirectory(_configurationRootDir);
-        //if (!Directory.Exists(_configurationHistoryDir))
-        //    Directory.CreateDirectory(_configurationHistoryDir);
         if (!Directory.Exists(_environmentsDir))
             Directory.CreateDirectory(_environmentsDir);
         if (!Directory.Exists(_applicationsDir))
@@ -37,7 +31,19 @@ public class FileHandler : IFileHandler
         if (!System.IO.File.Exists(file)) throw new FileNotFoundException();
         return await System.IO.File.ReadAllTextAsync(file, cancellationToken);
     }
-    
+
+    public async Task<List<string>> GetConfigurationHistory(string id, int page, int pageSize, CancellationToken cancellationToken)
+    {
+        var historyDir = Path.Combine(_configurationRootDir, id, "history");
+        if (!Directory.Exists(historyDir))
+            return new List<string>();
+        var files = Directory.GetFiles(historyDir).OrderBy(f => f).Skip((page - 1) * pageSize).Take(pageSize).ToList();
+        var result = new List<string>();
+        foreach (var file in files)
+            result.Add(await System.IO.File.ReadAllTextAsync(file, cancellationToken));
+        return result;
+    }
+
     public void DeleteConfiguration(string id, bool permanent)
     {
         var file = Path.ChangeExtension(Path.Combine(_configurationRootDir, id), ".txt");

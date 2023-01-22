@@ -265,4 +265,28 @@ public partial class EditConfiguration : IDisposable
             context.PreventNavigation();
         }
     }
+    private async Task LoadHistory()
+    {
+        foreach (var configuration in Header.Configurations) 
+            configuration.History.Clear();
+
+        var callResponse = await AdminApiService.GetConfigurationHistory(Header.Id, 1, 10);
+        if (callResponse is { IsSuccess: true, Response: {} })
+        {
+            var response = callResponse.Response;
+            foreach (var historyHeader in response.History)
+            {
+                foreach (var historyConfiguration in historyHeader.Configurations)
+                {
+                    var configuration = Header.Configurations.FirstOrDefault(c => c.Id == historyConfiguration.Id);
+                    if (configuration == null) continue;
+                    var uiHistoryConfiguration = ConfigurationMapper.ToClient(historyConfiguration);
+                    Console.WriteLine(uiHistoryConfiguration.Applications.Count);
+                    configuration.History.Add(uiHistoryConfiguration);
+                }
+            }
+        }
+        else
+            PageError.OnError(callResponse.GenerateErrorMessage(), new Exception());
+    }
 }

@@ -1,0 +1,48 @@
+﻿@using pote.Config.Admin.WebClient.Model
+@using pote.Config.Admin.WebClient.Services
+@using pote.Config.Admin.WebClient.Misc
+<MudExpansionPanels Style="padding-top:5px">
+    <MudExpansionPanel @ref="_expansionPanel">
+        <TitleContent>
+            @* <MudButton StartIcon="@Icons.Material.Filled.Check" Variant="Variant.Outlined" Color="Color.Info" OnClick="RunTests" Disabled="@_runningTests">Run tests</MudButton> *@
+            <MudText><h3>History</h3></MudText>
+        </TitleContent>
+        <ChildContent>
+            <MudGrid>
+                <MudItem xs="12" Style="padding-left: 30px">
+                    @* <MudItem xs="12" Style="border-left: 10px solid #FFA726; padding-left: 30px"> *@
+                    @foreach (var configuration in Configuration.History)
+                    {
+                        var lines = configuration.Json.Split('\n').Length;
+                        var jsonLines = lines < 3 ? 3 : lines > 10 ? 10 : lines;
+                        <MudItem xs="12" Style="margin-bottom:20px">
+                            <MudGrid Style="padding: 0;margin:0">
+                                <MudItem xs="12" Style="padding: 0">
+                                    Created: @configuration.CreatedUtc.ToLocalTime().ToString("dd/MM-yy HH:mm:ss")
+                                </MudItem>
+                                <MudItem xs="12" Style="padding: 0">
+                                    Application: @configuration.ApplicationsAsText
+                                </MudItem>
+                                <MudItem xs="12" Style="padding: 0">
+                                    Environment: @configuration.EnvironmentsAsText
+                                </MudItem>
+                                <MudItem xs="12" Style="padding: 0">
+                                    <MudTextField ReadOnly="true" T="string" Text="@FormatJsonHelper.FormatJson(configuration.Json)" Variant="Variant.Outlined" Lines="@jsonLines" Style="width: calc(100% - 25px)"></MudTextField>
+                                </MudItem>
+                            </MudGrid>
+                        </MudItem>
+                    }
+                </MudItem>
+            </MudGrid>
+        </ChildContent>
+    </MudExpansionPanel>
+</MudExpansionPanels>
+
+@code {
+    private MudExpansionPanel _expansionPanel = null!;
+
+    [Parameter] public Configuration Configuration { get; set; } = null!;
+    [Parameter] public List<Application> AllApplications { get; set; } = null!;
+    [Parameter] public List<ConfigEnvironment> AllEnvironments { get; set; } = null!;
+    [Inject] public IAdminApiService AdminApiService { get; set; } = null!;
+}

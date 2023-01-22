@@ -10,5 +10,5 @@ public class Configuration
     public List<string> Applications { get; set; } = new();
     public List<string> Environments { get; set; } = new();
     public bool Deleted { get; set; }
-    public List<Configuration> History { get; set; } = new();
+    //public List<Configuration> History { get; set; } = new();
 }
