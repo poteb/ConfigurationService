@@ -12,9 +12,9 @@
             <MudTooltip Text="Save">
                 <MudButton StartIcon="@Icons.Material.Filled.Save" Variant="Variant.Outlined" Color="Color.Info" OnClick="Save" Disabled="!HasUnsavedChanges || !_formIsValid">Save</MudButton>
             </MudTooltip>
-            <MudTooltip Text="Load History">
-                <MudButton StartIcon="@Icons.Material.Filled.History" Variant="Variant.Outlined" Color="Color.Info" OnClick="LoadHistory" Disabled="_loadingHistory" Style="margin-left:20px">Load History</MudButton>
-            </MudTooltip>
+            @* <MudTooltip Text="Load History"> *@
+            @*     <MudButton StartIcon="@Icons.Material.Filled.History" Variant="Variant.Outlined" Color="Color.Info" OnClick="LoadHistory" Disabled="_loadingHistory" Style="margin-left:20px">Load History</MudButton> *@
+            @* </MudTooltip> *@
             @* <MudItem Style="margin-left:50px"> *@
             @*     <MudTooltip Text="Duplicate"> *@
             @*         <MudButton StartIcon="@Icons.Material.Filled.FileCopy" Variant="Variant.Outlined" Color="Color.Warning" OnClick="Duplicate">Duplicate</MudButton> *@
@@ -67,12 +67,16 @@
     <MudItem xs="2">
         <MudText Class="Headline" Style="padding-left:16px">Configurations</MudText>
     </MudItem>
-    <MudItem xs="6">
+    <MudItem xs="8">
         <MudButton StartIcon="@Icons.Material.Filled.AddCircle" Variant="Variant.Outlined" Color="Color.Success" OnClick="AddConfiguration">Add new configuration</MudButton>
         <MudButton StartIcon="@Icons.Material.Filled.Check" OnClick="TestAll" Variant="Variant.Outlined" Color="Color.Info">Test all</MudButton>
-        <MudButton StartIcon="@Icons.Material.Filled.SwapVert" OnClick="ShowReorderConfigurations" Variant="Variant.Outlined" Color="Color.Dark">Reorder</MudButton>
+        <MudButton StartIcon="@Icons.Material.Filled.History" Variant="Variant.Outlined" Color="Color.Info" OnClick="LoadHistory" Disabled="_loadingHistory">Load History</MudButton>
+        @if (Header.Configurations.Count > 1)
+        {
+            <MudButton StartIcon="@Icons.Material.Filled.SwapVert" OnClick="ShowReorderConfigurations" Variant="Variant.Outlined" Color="Color.Dark">Reorder</MudButton>
+        }
     </MudItem>
-    <MudItem xs="4" Class="d-flex justify-end">
+    <MudItem xs="2" Class="d-flex justify-end">
         <MudButton EndIcon="@GetExpandAllConfigurationsButtonIcon()" OnClick="ExpandAllConfigurations">@GetExpandAllConfigurationsButtonText()</MudButton>
     </MudItem>
 </MudGrid>
@@ -89,12 +93,16 @@
     <MudItem xs="2">
 
     </MudItem>
-    <MudItem xs="6">
+    <MudItem xs="8">
         <MudButton StartIcon="@Icons.Material.Filled.AddCircle" Variant="Variant.Outlined" Color="Color.Success" OnClick="AddConfiguration">Add new configuration</MudButton>
         <MudButton StartIcon="@Icons.Material.Filled.Check" OnClick="TestAll" Variant="Variant.Outlined" Color="Color.Info">Test all</MudButton>
-        <MudButton StartIcon="@Icons.Material.Filled.SwapVert" OnClick="ShowReorderConfigurations" Variant="Variant.Outlined" Color="Color.Dark">Reorder</MudButton>
+        <MudButton StartIcon="@Icons.Material.Filled.History" Variant="Variant.Outlined" Color="Color.Info" OnClick="LoadHistory" Disabled="_loadingHistory">Load History</MudButton>
+        @if (Header.Configurations.Count > 1)
+        {
+            <MudButton StartIcon="@Icons.Material.Filled.SwapVert" OnClick="ShowReorderConfigurations" Variant="Variant.Outlined" Color="Color.Dark">Reorder</MudButton>
+        }
     </MudItem>
-    <MudItem xs="4" Class="d-flex justify-end">
+    <MudItem xs="2" Class="d-flex justify-end">
         <MudButton EndIcon="@GetExpandAllConfigurationsButtonIcon()" OnClick="ExpandAllConfigurations">@GetExpandAllConfigurationsButtonText()</MudButton>
     </MudItem>
 </MudGrid>
