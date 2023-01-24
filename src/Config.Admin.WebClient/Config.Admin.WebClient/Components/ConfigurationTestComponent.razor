@@ -33,8 +33,6 @@ else if (HeaderTestContainer.TestStage == TestStages.Failed)
 }
 
 @code {
-    private bool _popupIsOpen = false;
-
     [Parameter] public IHeaderTestContainer HeaderTestContainer { get; set; } = null!;
 
     private List<string> GetErrorText()

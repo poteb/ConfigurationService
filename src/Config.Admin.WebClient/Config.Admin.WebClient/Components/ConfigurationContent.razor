@@ -69,6 +69,8 @@
             <MudTextField @bind-Text="Configuration.Json" T="string" Variant="Variant.Outlined" Lines="@_jsonLines" Style="background-color:#fff"></MudTextField>
 
             <ConfigurationContentTestPanel @ref="_testPanel" AllEnvironments="_allEnvironments" AllApplications="_allApplications" Configuration="Configuration"></ConfigurationContentTestPanel>
+            
+            <ConfigurationContentHistory AllEnvironments="_allEnvironments" AllApplications="_allApplications" Configuration="Configuration"></ConfigurationContentHistory>
         }
     </ChildContent>
 </MudExpansionPanel>

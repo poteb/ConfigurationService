@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using pote.Config.DataProvider.Interfaces;
 using pote.Config.DbModel;
-using Environment = pote.Config.DbModel.Environment;
+using Environment=pote.Config.DbModel.Environment;
 
 namespace pote.Config.DataProvider.File;
 
@@ -46,6 +46,33 @@ public class AdminDataProvider : IAdminDataProvider
         var header = JsonConvert.DeserializeObject<ConfigurationHeader>(await _fileHandler.GetConfigurationContent(id, cancellationToken));
         if (header == null) throw new KeyNotFoundException($"Could not read json from file {id}");
         return header;
+    }
+
+    public async Task<List<ConfigurationHeader>> GetHeaderHistory(string id, int page, int pageSize, CancellationToken cancellationToken)
+    {
+        var historyJson = await _fileHandler.GetHeaderHistory(id, page, pageSize, cancellationToken);
+        var result = new List<ConfigurationHeader>();
+        foreach (var json in historyJson)
+        {
+            var configuration = JsonConvert.DeserializeObject<ConfigurationHeader>(json) 
+                                ?? new ConfigurationHeader { Id = Guid.Empty.ToString(), Name = "Unable to read json"};
+            result.Add(configuration);
+        }
+        return result;
+    }
+    
+    public async Task<List<Configuration>> GetConfigurationHistory(string headerId, string id, int page, int pageSize, CancellationToken cancellationToken)
+    {
+        var historyJson = await _fileHandler.GetHeaderHistory(headerId, page, pageSize, cancellationToken);
+        var result = new List<Configuration>();
+        foreach (var json in historyJson)
+        {
+            var header = JsonConvert.DeserializeObject<ConfigurationHeader>(json);
+            var configuration = header?.Configurations.FirstOrDefault(c => c.Id == id);
+            if (configuration == null) continue;
+            result.Add(configuration);
+        }
+        return result;
     }
 
     public void DeleteConfiguration(string id, bool permanent)

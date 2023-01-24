@@ -1,4 +1,5 @@
 ﻿@using Newtonsoft.Json
+@using pote.Config.Admin.WebClient.Misc
 @using pote.Config.Admin.WebClient.Model
 @using pote.Config.Admin.WebClient.Services
 @using pote.Config.Shared
@@ -6,14 +7,23 @@
 <MudExpansionPanels Style="padding-top:5px">
     <MudExpansionPanel @ref="_expansionPanel">
         <TitleContent>
-            <MudButton StartIcon="@Icons.Material.Filled.Check" Variant="Variant.Outlined" Color="Color.Info" OnClick="RunTests" Disabled="@_runningTests">Run tests</MudButton>
+            <MudGrid>
+                <MudItem xs="1">
+                    <MudText>
+                        <h3>Tests</h3>
+                    </MudText>
+                </MudItem>
+                <MudItem xs="11">
+                    <MudButton StartIcon="@Icons.Material.Filled.Check" Variant="Variant.Outlined" Color="Color.Info" OnClick="RunTests" Disabled="@_runningTests">Run tests</MudButton>
+                </MudItem>
+            </MudGrid>
         </TitleContent>
         <ChildContent>
             <MudGrid>
                 <MudItem xs="12">
                     @if (_runningTests)
                     {
-                         <MudProgressLinear Color="Color.Primary" Indeterminate="true" />
+                        <MudProgressLinear Color="Color.Primary" Indeterminate="true"/>
                     }
                     else
                     {
@@ -50,7 +60,7 @@
                                     }
                                 </MudItem>
                                 <MudItem xs="12" Style="padding: 0">
-                                    <MudTextField ReadOnly="true" T="string" Text="@FormatJson(json)" Variant="Variant.Outlined" Lines="@jsonLines" Style="width: calc(100% - 25px)"></MudTextField>
+                                    <MudTextField ReadOnly="true" T="string" Text="@FormatJsonHelper.FormatJson(json)" Variant="Variant.Outlined" Lines="@jsonLines" Style="width: calc(100% - 25px)"></MudTextField>
                                 </MudItem>
                             </MudGrid>
                         </MudItem>
@@ -93,19 +103,4 @@
             _runningTests = false;
         }
     }
-
-    private string FormatJson(string json)
-    {
-        try
-        {
-            dynamic parsedJson = JsonConvert.DeserializeObject(json)!;
-            if (parsedJson == null) return "Unable to parse json";
-            return JsonConvert.SerializeObject(parsedJson, Formatting.Indented);
-        }
-        catch (Exception ex)
-        {
-            return ex.Message;
-        }
-    }
-
 }

@@ -19,6 +19,7 @@ public partial class EditConfiguration : IDisposable
     private IReadOnlyList<ConfigurationHeader> _headers = new List<ConfigurationHeader>();
     private MudForm _form = null!;
     private bool _formIsValid;
+    private bool _loadingHistory;
 
     [Inject]
     protected IJSRuntime JsRuntime { get; set; } = null!;
@@ -264,5 +265,31 @@ public partial class EditConfiguration : IDisposable
         {
             context.PreventNavigation();
         }
+    }
+    private async Task LoadHistory()
+    {
+        _loadingHistory = true;
+        foreach (var configuration in Header.Configurations) 
+            configuration.History.Clear();
+
+        var callResponse = await AdminApiService.GetHeaderHistory(Header.Id, 1, 10);
+        if (callResponse is { IsSuccess: true, Response: {} })
+        {
+            var response = callResponse.Response;
+            foreach (var historyHeader in response.History)
+            {
+                foreach (var historyConfiguration in historyHeader.Configurations)
+                {
+                    var configuration = Header.Configurations.FirstOrDefault(c => c.Id == historyConfiguration.Id);
+                    if (configuration == null) continue;
+                    var uiHistoryConfiguration = ConfigurationMapper.ToClient(historyConfiguration);
+                    configuration.History.Add(uiHistoryConfiguration);
+                }
+            }
+        }
+        else
+            PageError.OnError(callResponse.GenerateErrorMessage(), new Exception());
+        
+        _loadingHistory = false;
     }
 }

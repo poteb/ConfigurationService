@@ -2,7 +2,7 @@
 @page "/EditConfiguration/{Gid}"
 @using pote.Config.Admin.WebClient.Components
 
-<NavigationLock ConfirmExternalNavigation OnBeforeInternalNavigation="@OnBeforeInternalNavigation" />
+<NavigationLock ConfirmExternalNavigation OnBeforeInternalNavigation="@OnBeforeInternalNavigation"/>
 
 <PageTitle>Edit configuration</PageTitle>
 
@@ -11,6 +11,9 @@
         <MudItem xs="6" Class="d-flex">
             <MudTooltip Text="Save">
                 <MudButton StartIcon="@Icons.Material.Filled.Save" Variant="Variant.Outlined" Color="Color.Info" OnClick="Save" Disabled="!HasUnsavedChanges || !_formIsValid">Save</MudButton>
+            </MudTooltip>
+            <MudTooltip Text="Load History">
+                <MudButton StartIcon="@Icons.Material.Filled.History" Variant="Variant.Outlined" Color="Color.Info" OnClick="LoadHistory" Disabled="_loadingHistory" Style="margin-left:20px">Load History</MudButton>
             </MudTooltip>
             @* <MudItem Style="margin-left:50px"> *@
             @*     <MudTooltip Text="Duplicate"> *@
