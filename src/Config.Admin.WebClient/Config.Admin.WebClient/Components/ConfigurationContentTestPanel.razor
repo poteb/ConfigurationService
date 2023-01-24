@@ -76,16 +76,11 @@
     private List<ParseResponse> _testResults = new();
     private MudExpansionPanel _expansionPanel = null!;
 
-    [Parameter]
-    public Configuration Configuration { get; set; } = null!;
-    [Parameter]
-    public List<Application> AllApplications { get; set; } = null!;
-    [Parameter]
-    public List<ConfigEnvironment> AllEnvironments { get; set; } = null!;
-    [Inject]
-    public IApiService ApiService { get; set; } = null!;
-    [Inject]
-    public IConfigurationTestService ConfigurationTestService { get; set; } = null!;
+    [Parameter] public Configuration Configuration { get; set; } = null!;
+    [Parameter] public List<Application> AllApplications { get; set; } = null!;
+    [Parameter] public List<ConfigEnvironment> AllEnvironments { get; set; } = null!;
+    [Inject] public IApiService ApiService { get; set; } = null!;
+    [Inject] public IConfigurationTestService ConfigurationTestService { get; set; } = null!;
 
     public async Task RunTests()
     {

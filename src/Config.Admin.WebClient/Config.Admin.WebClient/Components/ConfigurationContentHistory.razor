@@ -1,11 +1,22 @@
 ﻿@using pote.Config.Admin.WebClient.Model
 @using pote.Config.Admin.WebClient.Services
 @using pote.Config.Admin.WebClient.Misc
+@using pote.Config.Admin.WebClient.Mappers
+@using MudBlazor
 <MudExpansionPanels Style="padding-top:5px">
     <MudExpansionPanel @ref="_expansionPanel">
         <TitleContent>
+            <MudGrid>
+                        <MudItem xs="1">
+                            <MudText>
+                                <h3>History</h3>
+                            </MudText>
+                        </MudItem>
+                <MudItem xs="11">
+                    <MudButton StartIcon="@Icons.Material.Filled.Check" Variant="Variant.Outlined" Color="Color.Info" OnClick="LoadHistory" Disabled="@_loadingHistory">Load history</MudButton>
+                </MudItem>
+                    </MudGrid>
             @* <MudButton StartIcon="@Icons.Material.Filled.Check" Variant="Variant.Outlined" Color="Color.Info" OnClick="RunTests" Disabled="@_runningTests">Run tests</MudButton> *@
-            <MudText><h3>History</h3></MudText>
         </TitleContent>
         <ChildContent>
             <MudGrid>
@@ -40,9 +51,35 @@
 
 @code {
     private MudExpansionPanel _expansionPanel = null!;
+    private bool _loadingHistory;
 
     [Parameter] public Configuration Configuration { get; set; } = null!;
     [Parameter] public List<Application> AllApplications { get; set; } = null!;
     [Parameter] public List<ConfigEnvironment> AllEnvironments { get; set; } = null!;
     [Inject] public IAdminApiService AdminApiService { get; set; } = null!;
+    [CascadingParameter] public PageError PageError { get; set; } = null!;
+
+    private async Task LoadHistory()
+    {
+        Configuration.History.Clear();
+        _loadingHistory = true;
+        var callResponse = await AdminApiService.GetConfigurationHistory(Configuration.HeaderId, Configuration.Id, 1, 10);
+
+        if (callResponse is { IsSuccess: true, Response: {} })
+        {
+            var response = callResponse.Response;
+            foreach (var historyConfiguration in response.History)
+            {
+                var uiHistoryConfiguration = ConfigurationMapper.ToClient(historyConfiguration);
+                Configuration.History.Add(uiHistoryConfiguration);
+            }
+        }
+        else
+            PageError.OnError(callResponse.GenerateErrorMessage(), new Exception());
+        
+        if (!_expansionPanel.IsExpanded)
+            _expansionPanel.Expand();
+        
+        _loadingHistory = false;
+    }
 }

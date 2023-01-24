@@ -48,14 +48,28 @@ public class AdminDataProvider : IAdminDataProvider
         return header;
     }
 
-    public async Task<List<ConfigurationHeader>> GetConfigurationHistory(string id, int page, int pageSize, CancellationToken cancellationToken)
+    public async Task<List<ConfigurationHeader>> GetHeaderHistory(string id, int page, int pageSize, CancellationToken cancellationToken)
     {
-        var historyJson = await _fileHandler.GetConfigurationHistory(id, page, pageSize, cancellationToken);
+        var historyJson = await _fileHandler.GetHeaderHistory(id, page, pageSize, cancellationToken);
         var result = new List<ConfigurationHeader>();
         foreach (var json in historyJson)
         {
             var configuration = JsonConvert.DeserializeObject<ConfigurationHeader>(json) 
                                 ?? new ConfigurationHeader { Id = Guid.Empty.ToString(), Name = "Unable to read json"};
+            result.Add(configuration);
+        }
+        return result;
+    }
+    
+    public async Task<List<Configuration>> GetConfigurationHistory(string headerId, string id, int page, int pageSize, CancellationToken cancellationToken)
+    {
+        var historyJson = await _fileHandler.GetHeaderHistory(headerId, page, pageSize, cancellationToken);
+        var result = new List<Configuration>();
+        foreach (var json in historyJson)
+        {
+            var header = JsonConvert.DeserializeObject<ConfigurationHeader>(json);
+            var configuration = header?.Configurations.FirstOrDefault(c => c.Id == id);
+            if (configuration == null) continue;
             result.Add(configuration);
         }
         return result;

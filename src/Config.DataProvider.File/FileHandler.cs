@@ -32,7 +32,7 @@ public class FileHandler : IFileHandler
         return await System.IO.File.ReadAllTextAsync(file, cancellationToken);
     }
 
-    public async Task<List<string>> GetConfigurationHistory(string id, int page, int pageSize, CancellationToken cancellationToken)
+    public async Task<List<string>> GetHeaderHistory(string id, int page, int pageSize, CancellationToken cancellationToken)
     {
         var historyDir = Path.Combine(_configurationRootDir, id, "history");
         if (!Directory.Exists(historyDir))

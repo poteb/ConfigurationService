@@ -8,7 +8,8 @@ namespace pote.Config.Admin.WebClient.Services
     {
         Task<ApiCallResponse<ConfigurationResponse>> GetConfiguration(string gid);
         Task<ApiCallResponse<ConfigurationsResponse>> GetConfigurations();
-        Task<ApiCallResponse<ConfigurationHistoryResponse>> GetConfigurationHistory(string gid, int page, int pageSize);
+        Task<ApiCallResponse<HeaderHistoryResponse>> GetHeaderHistory(string gid, int page, int pageSize);
+        Task<ApiCallResponse<ConfigurationHistoryResponse>> GetConfigurationHistory(string headerId, string gid, int page, int pageSize);
         Task<ApiCallResponse<EnvironmentsResponse>> GetEnvironments();
         Task<ApiCallResponse<ApplicationsResponse>> GetApplications();
         Task<ApiCallResponse<object>> SaveEnvironments(List<ConfigEnvironment> environments);
@@ -66,11 +67,32 @@ namespace pote.Config.Admin.WebClient.Services
             }
         }
 
-        public async Task<ApiCallResponse<ConfigurationHistoryResponse>> GetConfigurationHistory(string gid, int page, int pageSize)
+        public async Task<ApiCallResponse<HeaderHistoryResponse>> GetHeaderHistory(string gid, int page, int pageSize)
         {
             try
             {
-                var request = new ConfigurationHistoryRequest { Id = gid, Page = page, PageSize = pageSize };
+                var request = new HeaderHistoryRequest { Id = gid, Page = page, PageSize = pageSize };
+                using var client = _clientFactory.CreateClient("AdminApi");
+                var response = await client.PostAsJsonAsync("Configurations/HeaderHistory", request);
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadFromJsonAsync<HeaderHistoryResponse>() ?? new HeaderHistoryResponse();
+                    return new ApiCallResponse<HeaderHistoryResponse> { IsSuccess = true, Response = content };
+                }
+                
+                return DefaultUnsuccessfulResponse(new HeaderHistoryResponse(), (int)response.StatusCode);
+            }
+            catch (Exception ex)
+            {
+                return DefaultExceptionResponse(new HeaderHistoryResponse(), "Error getting data from API", ex);
+            }
+        }
+        
+        public async Task<ApiCallResponse<ConfigurationHistoryResponse>> GetConfigurationHistory(string headerId, string gid, int page, int pageSize)
+        {
+            try
+            {
+                var request = new ConfigurationHistoryRequest { HeaderId = headerId, Id = gid, Page = page, PageSize = pageSize };
                 using var client = _clientFactory.CreateClient("AdminApi");
                 var response = await client.PostAsJsonAsync("Configurations/History", request);
                 if (response.IsSuccessStatusCode)

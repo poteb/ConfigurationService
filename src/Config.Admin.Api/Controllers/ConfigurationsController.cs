@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using pote.Config.Admin.Api.Helpers;
@@ -7,7 +6,6 @@ using pote.Config.Admin.Api.Model;
 using pote.Config.Admin.Api.Model.RequestResponse;
 using pote.Config.Admin.Api.Services;
 using pote.Config.DataProvider.Interfaces;
-using pote.Config.Shared;
 
 namespace pote.Config.Admin.Api.Controllers;
 
@@ -74,12 +72,35 @@ public class ConfigurationsController : ControllerBase
         }
     }
 
+    [HttpPost("headerhistory")]
+    public async Task<ActionResult<HeaderHistoryResponse>> GetHistory(HeaderHistoryRequest request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var history = await _dataProvider.GetHeaderHistory(request.Id, request.Page, request.PageSize, cancellationToken);
+            var applications = await _dataProvider.GetApplications(cancellationToken);
+            var environments = await _dataProvider.GetEnvironments(cancellationToken);
+            var apiHistory = ConfigurationMapper.ToApi(history, applications, environments);
+            var response = new HeaderHistoryResponse { History = apiHistory, Page = request.Page, PageSize = request.PageSize };
+            return Ok(response);
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting configuration history, id {Id}, page {Page}, pageSize {PageSize}", request.Id, request.Page, request.PageSize);
+            return Problem(ex.Message);
+        }
+    }
+
     [HttpPost("history")]
     public async Task<ActionResult<ConfigurationHistoryResponse>> GetHistory(ConfigurationHistoryRequest request, CancellationToken cancellationToken)
     {
         try
         {
-            var history = await _dataProvider.GetConfigurationHistory(request.Id, request.Page, request.PageSize, cancellationToken);
+            var history = await _dataProvider.GetConfigurationHistory(request.HeaderId, request.Id, request.Page, request.PageSize, cancellationToken);
             var applications = await _dataProvider.GetApplications(cancellationToken);
             var environments = await _dataProvider.GetEnvironments(cancellationToken);
             var apiHistory = ConfigurationMapper.ToApi(history, applications, environments);

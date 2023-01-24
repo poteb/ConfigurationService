@@ -4,7 +4,7 @@ public interface IFileHandler
 {
     string[] GetConfigurationFiles();
     Task<string> GetConfigurationContent(string id, CancellationToken cancellationToken);
-    Task<List<string>> GetConfigurationHistory(string id, int page, int pageSize, CancellationToken cancellationToken);
+    Task<List<string>> GetHeaderHistory(string id, int page, int pageSize, CancellationToken cancellationToken);
     Task WriteConfigurationContent(string id, string content, CancellationToken cancellationToken);
     string[] GetEnvironmentFiles();
     Task<string> GetEnvironmentContentAbsolutePath(string file, CancellationToken cancellationToken);
