@@ -13,9 +13,15 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddCors(p => p.AddPolicy("allowall", builder =>
+builder.Services.AddCors(p => p.AddPolicy("allowall", policy =>
 {
-    builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+    var origins = builder.Configuration.GetSection("WithOrigins").Get<string[]>();
+    if (origins == null)
+    {
+        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+        return;
+    }
+    policy.WithOrigins(origins).AllowAnyMethod().AllowAnyHeader();
 }));
 
 var fileDb = builder.Configuration.GetSection("FileDatabase").GetSection("Directory").Value;
