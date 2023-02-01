@@ -14,7 +14,7 @@ public static class ExtensionMethods
             var response = await apiCommunication.GetConfiguration(new ParseRequest(configuration.Application, configuration.Environment, inputJson));
             if (response == null)  throw new InvalidDataException("Reponse from API was empty.");
             var json = response.GetJson();
-            await File.WriteAllTextAsync(parsedJsonFile, json);
+            File.WriteAllText(parsedJsonFile, json);
             return builder.AddJsonFile(parsedJsonFile, false, false);
         }
         catch (Exception ex)
@@ -30,4 +30,6 @@ public static class ExtensionMethods
             throw new FileNotFoundException($"An old parsed configuration not found, file: {file}");
         return builder.AddJsonFile(file, false, true);
     }
+    
+    
 }
