@@ -22,8 +22,7 @@ public partial class EditConfiguration : IDisposable
     private bool _loadingHistory;
     private bool _disableReorderButtons => Header.Configurations.Count <= 1;
 
-    [Inject]
-    protected IJSRuntime JsRuntime { get; set; } = null!;
+    [Inject] protected IJSRuntime JsRuntime { get; set; } = null!;
     [Parameter] public string Gid { get; set; } = string.Empty;
     private bool IsNew => string.IsNullOrWhiteSpace(Gid);
     private ConfigurationHeader Header { get; set; } = new();
@@ -38,6 +37,7 @@ public partial class EditConfiguration : IDisposable
     private List<ConfigEnvironment> UnhandledEnvironments { get; set; } = new();
     [Inject] public NavigationManager NavigationManager { get; set; } = null!;
     private bool HasUnsavedChanges { get; set; }
+    [Inject] public ISnackbar SnackbarService { get; set; } = null!;
 
     private ConfigurationContent ConfigurationContentRef
     {
@@ -48,11 +48,10 @@ public partial class EditConfiguration : IDisposable
     {
         if (Gid == Header.Id) return;
         await Load();
-        _unsavedChangesTimer = new Timer(_ => {
-            UpdateHasUnsavedChanges();
-        }, new AutoResetEvent(false), 1000, 1000);
+        _unsavedChangesTimer = new Timer(_ => { UpdateHasUnsavedChanges(); }, new AutoResetEvent(false), 1000, 1000);
         await LoadAllHeaders();
     }
+
     private void UpdateHasUnsavedChanges()
     {
         var oldHasChanged = HasUnsavedChanges;
@@ -60,6 +59,7 @@ public partial class EditConfiguration : IDisposable
         if (oldHasChanged != HasUnsavedChanges)
             StateHasChanged();
     }
+
     private async Task Load()
     {
         if (IsNew)
@@ -70,7 +70,7 @@ public partial class EditConfiguration : IDisposable
         else
         {
             var callResponse = await AdminApiService.GetConfiguration(Gid);
-            if (callResponse is { IsSuccess: true, Response: { } })
+            if (callResponse is {IsSuccess: true, Response: { }})
             {
                 Header = ConfigurationMapper.ToClient(callResponse.Response.Configuration);
                 OriginalHeader = ConfigurationMapper.Copy(Header);
@@ -92,7 +92,7 @@ public partial class EditConfiguration : IDisposable
     private async Task LoadAllHeaders()
     {
         var callResponse = await AdminApiService.GetConfigurations();
-        if (callResponse is { IsSuccess: true, Response: { } })
+        if (callResponse is {IsSuccess: true, Response: { }})
             _headers = ConfigurationMapper.ToClient(callResponse.Response.Configurations.Where(c => c.Id != Header?.Id).ToImmutableList());
     }
 
@@ -173,20 +173,43 @@ public partial class EditConfiguration : IDisposable
         return false;
     }
 
-    // private void Duplicate()
-    // {
-    //     //var _ = ConfigurationMapper.Copy(Configuration);
-    // }
+    private async Task Duplicate()
+    {
+        var dialogParameters = new DialogParameters
+        {
+            {nameof(DuplicateHeaderDialog.NewHeaderName), $"{Header.Name} COPY"}
+        };
+        var dialog = await DialogService.ShowAsync<DuplicateHeaderDialog>("Duplicate Header", dialogParameters);
+        var result = await dialog.Result;
+        if (result.Canceled) return;
+        var copy = ConfigurationMapper.Copy(Header, true);
+        copy.Name = (string) result.Data;
+        var callResponse = await AdminApiService.SaveConfiguration(copy);
+        if (callResponse.IsSuccess)
+        {
+            SnackbarService.Add("Header duplicated. Click to open it.", Severity.Success, config =>
+            {
+                config.Onclick = _ =>
+                {
+                    NavigationManager.NavigateTo($"EditConfiguration/{copy.Id}", new NavigationOptions { ForceLoad = false });
+                    return Task.CompletedTask;
+                };
+            });
+            return;
+        }
+
+        PageError.OnError(callResponse.GenerateErrorMessage(), new Exception());
+    }
 
     private async Task Delete()
     {
-        var options = new DialogOptions { CloseOnEscapeKey = true };
+        var options = new DialogOptions {CloseOnEscapeKey = true};
         var dialog = await DialogService.ShowAsync<DeleteConfigurationDialog>("Delete configuration?", options);
         var result = await dialog.Result;
         if (result.Canceled) return;
-        var softDelete = (bool)result.Data;
+        var softDelete = (bool) result.Data;
 
-        Header.Deleted = true;
+        //Header.Deleted = true;
         PageError.Reset();
         var callResponse = await AdminApiService.DeleteConfiguration(Gid, !softDelete);
         if (!callResponse.IsSuccess)
@@ -216,7 +239,7 @@ public partial class EditConfiguration : IDisposable
 
     private async Task AddConfiguration()
     {
-        Header.Configurations.Add(new Configuration { HeaderId = Header.Id, IsNew = true });
+        Header.Configurations.Add(new Configuration {HeaderId = Header.Id, IsNew = true});
         UpdateConfigurationIndex();
         await JsRuntime.InvokeVoidAsync("scrollIntoView", "bottom");
     }
@@ -234,7 +257,7 @@ public partial class EditConfiguration : IDisposable
         var list = new List<Configuration>(Header.Configurations);
         var dialogParameters = new DialogParameters
         {
-            { nameof(ReorderConfigurationsDialog.Configurations), list }
+            {nameof(ReorderConfigurationsDialog.Configurations), list}
         };
         var dialog = await DialogService.ShowAsync<ReorderConfigurationsDialog>("Reorder configurations", dialogParameters);
         var result = await dialog.Result;
@@ -256,6 +279,7 @@ public partial class EditConfiguration : IDisposable
         Console.WriteLine("Already exists");
         return "Already exists";
     }
+
     private async Task OnBeforeInternalNavigation(LocationChangingContext context)
     {
         UpdateHasUnsavedChanges();
@@ -267,14 +291,15 @@ public partial class EditConfiguration : IDisposable
             context.PreventNavigation();
         }
     }
+
     private async Task LoadHistory()
     {
         _loadingHistory = true;
-        foreach (var configuration in Header.Configurations) 
+        foreach (var configuration in Header.Configurations)
             configuration.History.Clear();
 
         var callResponse = await AdminApiService.GetHeaderHistory(Header.Id, 1, 10);
-        if (callResponse is { IsSuccess: true, Response: {} })
+        if (callResponse is {IsSuccess: true, Response: { }})
         {
             var response = callResponse.Response;
             foreach (var historyHeader in response.History)
@@ -290,7 +315,7 @@ public partial class EditConfiguration : IDisposable
         }
         else
             PageError.OnError(callResponse.GenerateErrorMessage(), new Exception());
-        
+
         _loadingHistory = false;
     }
 }

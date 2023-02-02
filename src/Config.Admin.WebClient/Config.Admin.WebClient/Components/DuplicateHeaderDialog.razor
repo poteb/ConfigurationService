@@ -1,0 +1,23 @@
+@using pote.Config.Admin.WebClient.Model
+<MudDialog>
+    <DialogContent>
+        <MudText>@ContentText</MudText>
+        <MudItem>
+            <MudTextField @bind-Text="@NewHeaderName" Label="New Header Name" T="string" Variant="Variant.Outlined"></MudTextField>
+        </MudItem>
+    </DialogContent>
+    <DialogActions>
+        
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Variant="Variant.Filled" OnClick="Submit">Duplicate</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public string ContentText { get; set; } = "This will make a copy of the header with all its configurations. Do you want to continue?";
+    [Parameter] public string NewHeaderName { get; set; } = "";
+    
+    void Submit() => MudDialog.Close(DialogResult.Ok(NewHeaderName));
+    void Cancel() => MudDialog.Cancel();
+}
