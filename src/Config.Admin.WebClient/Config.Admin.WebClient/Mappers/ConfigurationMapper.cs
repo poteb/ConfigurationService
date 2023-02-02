@@ -95,33 +95,33 @@ public static class ConfigurationMapper
     }
 
     /// <summary>Creates a copy of given <see cref="Configuration"/> except the HeaderId property</summary>
-    public static Configuration Copy(Configuration configuration)
+    public static Configuration Copy(Configuration configuration, bool generateNewId = false)
     {
         var newConfig = new Configuration
         {
-            Id = configuration.Id,
+            Id = generateNewId ? Guid.NewGuid().ToString() : configuration.Id,
             CreatedUtc = configuration.CreatedUtc,
             Json = configuration.Json,
             Deleted = false,
             IsActive = configuration.IsActive,
             Applications = StringToList<Application>(ListToString(configuration.Applications)),
             Environments = StringToList<ConfigEnvironment>(ListToString(configuration.Environments)), 
-            Index =configuration.Index 
+            Index = configuration.Index 
         };
         return newConfig;
     }
 
-    public static ConfigurationHeader Copy(ConfigurationHeader header)
+    public static ConfigurationHeader Copy(ConfigurationHeader header, bool generateNewId = false)
     {
         return new ConfigurationHeader
         {
-            Id = header.Id,
+            Id = generateNewId ? Guid.NewGuid().ToString() : header.Id,
             Name = header.Name,
             CreatedUtc = header.CreatedUtc,
             UpdateUtc = header.UpdateUtc,
             Deleted = header.Deleted,
             IsActive = header.IsActive,
-            Configurations = header.Configurations.Select(Copy).ToList()
+            Configurations = header.Configurations.Select(c => Copy(c, generateNewId)).ToList()
         };
     }
 

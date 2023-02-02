@@ -32,11 +32,8 @@
 @code {
     private MudDropContainer<Configuration> _container = null!;
 
-    [Parameter]
-    public List<Configuration> Configurations { get; set; } = new();
-
-    [CascadingParameter]
-    MudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public List<Configuration> Configurations { get; set; } = new();
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
 
     private void ItemDropped(MudItemDropInfo<Configuration> dropItem)
     {
