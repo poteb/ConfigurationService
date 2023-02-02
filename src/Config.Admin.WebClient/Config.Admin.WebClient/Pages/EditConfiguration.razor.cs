@@ -20,6 +20,7 @@ public partial class EditConfiguration : IDisposable
     private MudForm _form = null!;
     private bool _formIsValid;
     private bool _loadingHistory;
+    private bool _disableReorderButtons => Header.Configurations.Count <= 1;
 
     [Inject]
     protected IJSRuntime JsRuntime { get; set; } = null!;

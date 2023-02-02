@@ -69,12 +69,9 @@
     </MudItem>
     <MudItem xs="8">
         <MudButton StartIcon="@Icons.Material.Filled.AddCircle" Variant="Variant.Outlined" Color="Color.Success" OnClick="AddConfiguration">Add new configuration</MudButton>
-        <MudButton StartIcon="@Icons.Material.Filled.Check" OnClick="TestAll" Variant="Variant.Outlined" Color="Color.Info">Test all</MudButton>
+        <MudButton StartIcon="@Icons.Material.Filled.Check" Variant="Variant.Outlined" Color="Color.Info" OnClick="TestAll">Test all</MudButton>
         <MudButton StartIcon="@Icons.Material.Filled.History" Variant="Variant.Outlined" Color="Color.Info" OnClick="LoadHistory" Disabled="_loadingHistory">Load History</MudButton>
-        @if (Header.Configurations.Count > 1)
-        {
-            <MudButton StartIcon="@Icons.Material.Filled.SwapVert" OnClick="ShowReorderConfigurations" Variant="Variant.Outlined" Color="Color.Dark">Reorder</MudButton>
-        }
+        <MudButton StartIcon="@Icons.Material.Filled.SwapVert" Variant="Variant.Outlined" Color="Color.Dark" OnClick="ShowReorderConfigurations" Disabled="_disableReorderButtons">Reorder</MudButton>
     </MudItem>
     <MudItem xs="2" Class="d-flex justify-end">
         <MudButton EndIcon="@GetExpandAllConfigurationsButtonIcon()" OnClick="ExpandAllConfigurations">@GetExpandAllConfigurationsButtonText()</MudButton>
@@ -97,10 +94,7 @@
         <MudButton StartIcon="@Icons.Material.Filled.AddCircle" Variant="Variant.Outlined" Color="Color.Success" OnClick="AddConfiguration">Add new configuration</MudButton>
         <MudButton StartIcon="@Icons.Material.Filled.Check" OnClick="TestAll" Variant="Variant.Outlined" Color="Color.Info">Test all</MudButton>
         <MudButton StartIcon="@Icons.Material.Filled.History" Variant="Variant.Outlined" Color="Color.Info" OnClick="LoadHistory" Disabled="_loadingHistory">Load History</MudButton>
-        @if (Header.Configurations.Count > 1)
-        {
-            <MudButton StartIcon="@Icons.Material.Filled.SwapVert" OnClick="ShowReorderConfigurations" Variant="Variant.Outlined" Color="Color.Dark">Reorder</MudButton>
-        }
+        <MudButton StartIcon="@Icons.Material.Filled.SwapVert" Variant="Variant.Outlined" Color="Color.Dark" OnClick="ShowReorderConfigurations" Disabled="_disableReorderButtons">Reorder</MudButton>
     </MudItem>
     <MudItem xs="2" Class="d-flex justify-end">
         <MudButton EndIcon="@GetExpandAllConfigurationsButtonIcon()" OnClick="ExpandAllConfigurations">@GetExpandAllConfigurationsButtonText()</MudButton>
