@@ -55,6 +55,11 @@ public class TestDataProvider : IAdminDataProvider
         throw new System.NotImplementedException();
     }
 
+    public Task<List<Configuration>> GetConfigurationHistory(string headerId, string id, int page, int pageSize, CancellationToken cancellationToken)
+    {
+        throw new System.NotImplementedException();
+    }
+
     public void DeleteConfiguration(string id, bool permanent)
     {
         throw new System.NotImplementedException();
