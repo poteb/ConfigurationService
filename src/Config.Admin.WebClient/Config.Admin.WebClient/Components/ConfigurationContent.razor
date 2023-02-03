@@ -5,8 +5,10 @@
 @using pote.Config.Admin.WebClient.Services
 @using pote.Config.Shared
 @using System.Collections.ObjectModel
-<MudExpansionPanel Style="@($"background-color:{(Index % 2 == 0 ? Colors.Indigo.Lighten5 : Colors.Teal.Lighten5)}")" Disabled="@Configuration.Deleted" @ref="_expansionPanel">
+@using pote.Config.Admin.WebClient.Misc
+<MudExpansionPanel Style="@($"background-color:{(Configuration.Index % 2 == 0 ? Colors.Indigo.Lighten5 : Colors.Teal.Lighten5)}")" Disabled="@Configuration.Deleted" @ref="_expansionPanel">
     <TitleContent>
+        <MudText>@Configuration.Index</MudText>
         <MudGrid Style="padding: 0; margin: 0; width: 99%">
             <MudItem xs="10" Style="padding-bottom: 0">
                 <MudGrid Style="padding: 0; margin: 0; width: 99%">
@@ -21,6 +23,9 @@
                 </MudGrid>
             </MudItem>
             <MudItem xs="2">
+                <MudTooltip Text="Duplicate configuration section">
+                    <MudIconButton Icon="@Icons.Material.Filled.FileCopy" Color="Color.Warning" OnClick="() => DuplicateConfiguration()"></MudIconButton>
+                </MudTooltip>
                 @if (!Configuration.Deleted)
                 {
                     <MudTooltip Text="Delete configuration section">
@@ -82,14 +87,11 @@
     private string _jsonValidationError = string.Empty;
     private List<Application> _allApplications = new();
     private List<ConfigEnvironment> _allEnvironments = new();
-    private int _index = -1;
     private Configuration _originalConfiguration = new();
 
-    [Inject]
-    IDialogService DialogService { get; set; } = null!;
-
-    [Inject]
-    public IApiService ApiService { get; set; } = null!;
+    [Inject] IDialogService DialogService { get; set; } = null!;
+    [Inject] IApiService ApiService { get; set; } = null!;
+    [Parameter] public IConfigurationActions ConfigurationActions { get; set; } = null!;
 
     private IEnumerable<ConfigEnvironment> SelectedEnvironments
     {
@@ -112,13 +114,6 @@
     }
 
 #pragma warning disable BL0007
-    [Parameter]
-    public int Index
-    {
-        get => _index;
-        set => _index = _index == -1 ? value : _index;
-    }
-
     [Parameter]
     public List<ConfigEnvironment> AllEnvironments
     {
@@ -181,5 +176,10 @@
     {
         _originalConfiguration.CopyTo(Configuration);
         StateHasChanged();
+    }
+
+    private void DuplicateConfiguration()
+    {
+        ConfigurationActions.DuplicateConfiguration(Configuration);
     }
 }

@@ -74,11 +74,10 @@
     </MudItem>
 </MudGrid>
 
-
 <MudExpansionPanels MultiExpansion="true" Elevation="3" Style="width: calc(100% - 15px);margin-bottom: 30px" @ref="_expansionPanels">
     @foreach (var configuration in Header.Configurations)
     {
-        <ConfigurationContent @ref="ConfigurationContentRef" Index="@(configuration.Index)" Configuration="configuration" AllEnvironments="Environments" AllApplications="Applications"></ConfigurationContent>
+        <ConfigurationContent @ref="ConfigurationContentRef" Configuration="configuration" ConfigurationActions="@this" AllEnvironments="Environments" AllApplications="Applications"></ConfigurationContent>
     }
 </MudExpansionPanels>
 
