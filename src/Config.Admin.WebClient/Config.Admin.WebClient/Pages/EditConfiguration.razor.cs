@@ -5,12 +5,13 @@ using Microsoft.JSInterop;
 using MudBlazor;
 using pote.Config.Admin.WebClient.Components;
 using pote.Config.Admin.WebClient.Mappers;
+using pote.Config.Admin.WebClient.Misc;
 using pote.Config.Admin.WebClient.Model;
 using pote.Config.Admin.WebClient.Services;
 
 namespace pote.Config.Admin.WebClient.Pages;
 
-public partial class EditConfiguration : IDisposable
+public partial class EditConfiguration : IDisposable, IConfigurationActions
 {
     private MudExpansionPanels _expansionPanels = null!;
     private bool _allPanelsExpanded;
@@ -199,6 +200,17 @@ public partial class EditConfiguration : IDisposable
         }
 
         PageError.OnError(callResponse.GenerateErrorMessage(), new Exception());
+    }
+
+    public void DuplicateConfiguration(Configuration configuration)
+    {
+        var copy = ConfigurationMapper.Copy(configuration, true);
+        foreach (var c in Header.Configurations.Where(c => c.Index > configuration.Index)) 
+            c.Index++;
+        copy.Index = configuration.Index + 1;
+        var realIndex = Header.Configurations.IndexOf(configuration) + 1;
+        Header.Configurations.Insert(realIndex, copy);
+        StateHasChanged();
     }
 
     private async Task Delete()
