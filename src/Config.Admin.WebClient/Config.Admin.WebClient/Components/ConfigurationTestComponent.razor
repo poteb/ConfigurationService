@@ -1,6 +1,7 @@
 ﻿@using pote.Config.Admin.WebClient.Services
 @using pote.Config.Admin.WebClient.Misc
 @using System.Text
+@if (1 == 2) { /* This component is used to display test result as icons. */ }
 @if (HeaderTestContainer == null! || HeaderTestContainer.TestStage == TestStages.NotStarted)
 {
     <MudTooltip Text="Not tested, click to test">
