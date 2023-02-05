@@ -8,7 +8,6 @@
 @using pote.Config.Admin.WebClient.Misc
 <MudExpansionPanel Style="@($"background-color:{(Configuration.Index % 2 == 0 ? Colors.Indigo.Lighten5 : Colors.Teal.Lighten5)}")" Disabled="@Configuration.Deleted" @ref="_expansionPanel">
     <TitleContent>
-        <MudText>@Configuration.Index</MudText>
         <MudGrid Style="padding: 0; margin: 0; width: 99%">
             <MudItem xs="10" Style="padding-bottom: 0">
                 <MudGrid Style="padding: 0; margin: 0; width: 99%">
