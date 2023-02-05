@@ -3,6 +3,8 @@
 
 # ConfigurationService
 
+Application configuration taken to the next level.
+
 Centralize application-configuration and fetch through an API.
 Frontend Blazor app to manage the configurations.
 
@@ -16,6 +18,9 @@ I've so far created everything here myself. But I'd be happy to get your (yes yo
 It can at first be hard to wrap your head around the concepts described below. Here you'll see that configuration isn't static anymore. IT'S ALIVE!
 
 ## But wait! There's more!
+
+It's all about reusability and having a great overwiew of your application configuration.
+
 Administering the configurations is now a whole lot easier with the power of JSON ref.
 Let's look at an example.
 Our application *Super Goofy's Super Goobers* has a standard configuration that needs a SQL Server connection string and some RabbitMQ server settings:
