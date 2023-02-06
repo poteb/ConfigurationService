@@ -5,10 +5,16 @@ using pote.Config.DataProvider.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddCors(c =>
+builder.Services.AddCors(p => p.AddPolicy("allowall", policy =>
 {
-    c.AddPolicy("AllowOrigin", options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
-});
+    var origins = builder.Configuration.GetSection("WithOrigins").Get<string[]>();
+    if (origins == null)
+    {
+        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+        return;
+    }
+    policy.WithOrigins(origins).AllowAnyMethod().AllowAnyHeader();
+}));
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -31,7 +37,7 @@ var app = builder.Build();
 //}
 
 //app.UseHttpsRedirection();
-app.UseCors("AllowOrigin");
+app.UseCors("allowall");
 //app.UseAuthorization();
 
 app.MapControllers();
