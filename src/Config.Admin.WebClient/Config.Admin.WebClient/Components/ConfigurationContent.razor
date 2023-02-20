@@ -49,7 +49,7 @@
             <MudGrid Style="padding: 0; margin: 0; width: 99%" Spacing="2">
                 <MudItem xs="12" Class="d-flex align-center" Style="padding:0">
                     <MudItem xs="3" Style="padding-right:8px">
-                        <MudSelect T="ConfigEnvironment" Style="background-color: white" Variant="Variant.Outlined" Margin="Margin.Dense" Label="Environments" MultiSelection="true" @bind-SelectedValues="SelectedEnvironments" SelectAll="true">
+                        <MudSelect T="ConfigEnvironment" Style="background-color: white" Dense="true" Variant="Variant.Outlined" Margin="Margin.Dense" Label="Environments" MultiSelection="true" @bind-SelectedValues="SelectedEnvironments" SelectAll="true" AnchorOrigin="Origin.BottomCenter">
                             @foreach (var environment in AllEnvironments)
                             {
                                 <MudSelectItem T="ConfigEnvironment" Value="environment" Style="white-space: nowrap !important">@environment.Name</MudSelectItem>
@@ -57,7 +57,7 @@
                         </MudSelect>
                     </MudItem>
                     <MudItem xs="3">
-                        <MudSelect T="Application" Style="background-color: white" Variant="Variant.Outlined" Margin="Margin.Dense" Label="Applications" MultiSelection="true" @bind-SelectedValues="SelectedApplications" SelectAll="true">
+                        <MudSelect T="Application" Style="background-color: white" Dense="true" Variant="Variant.Outlined" Margin="Margin.Dense" Label="Applications" MultiSelection="true" @bind-SelectedValues="SelectedApplications" SelectAll="true" AnchorOrigin="Origin.BottomCenter">
                             @foreach (var application in AllApplications)
                             {
                                 <MudSelectItem T="Application" Value="application" Style="white-space: nowrap !important">@application.Name</MudSelectItem>

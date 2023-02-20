@@ -10,7 +10,7 @@
     </MudItem>
     <MudItem sm="4" xs="12" Class="d-flex">
         <MudItem Style="Width:300px">
-            <MudSelect @bind-Value="SearchCriteria.SelectedApplication" T="string" Label="Application" Variant="Variant.Outlined" Margin="Margin.Dense">
+            <MudSelect @bind-Value="SearchCriteria.SelectedApplication" Dense="true" T="string" Label="Application" Variant="Variant.Outlined" Margin="Margin.Dense" AnchorOrigin="Origin.BottomCenter">
                 <MudSelectItem Value="string.Empty" T="string">
                     <i>all</i>
                 </MudSelectItem>
@@ -21,7 +21,7 @@
             </MudSelect>
         </MudItem>
         <MudItem Style="Width:300px;padding: 0 4px">
-            <MudSelect @bind-Value="SearchCriteria.SelectedEnvironment" T="string" Label="Environments" Variant="Variant.Outlined" Margin="Margin.Dense">
+            <MudSelect @bind-Value="SearchCriteria.SelectedEnvironment" Dense="true" T="string" Label="Environments" Variant="Variant.Outlined" Margin="Margin.Dense" AnchorOrigin="Origin.BottomCenter">
                 <MudSelectItem Value="string.Empty" T="string">
                     <i>all</i>
                 </MudSelectItem>
