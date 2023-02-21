@@ -1,11 +1,12 @@
 ﻿@using pote.Config.Admin.WebClient.Services
 @using pote.Config.Admin.WebClient.Misc
 @using System.Text
+
 @if (1 == 2) { /* This component is used to display test result as icons. */ }
 @if (HeaderTestContainer == null! || HeaderTestContainer.TestStage == TestStages.NotStarted)
 {
     <MudTooltip Text="Not tested, click to test">
-        <MudIconButton Icon="@Icons.Material.Filled.QuestionMark" Size="Size.Small" OnClick="Test"></MudIconButton>
+        <MudIconButton Icon="@Icons.Material.Filled.Check" Size="Size.Small" Style="@($"color:{Colors.Grey.Lighten2}")" OnClick="Test"></MudIconButton>
     </MudTooltip>
 }
 else if (HeaderTestContainer.TestStage == TestStages.InProgress)
@@ -15,14 +16,14 @@ else if (HeaderTestContainer.TestStage == TestStages.InProgress)
 else if (HeaderTestContainer.TestStage == TestStages.Complete)
 {
     <MudTooltip Text="Success">
-        <MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Small"></MudIcon>
+        <MudIconButton Icon="@Icons.Material.Filled.Check" Size="Size.Small" OnClick="Test"></MudIconButton>
     </MudTooltip>
 }
 else if (HeaderTestContainer.TestStage == TestStages.Failed)
 {
     <MudTooltip Placement="Placement.Left">
         <ChildContent>
-            <MudIcon Icon="@Icons.Material.Filled.ErrorOutline" Size="Size.Small" Color="Color.Error"></MudIcon>
+            <MudIconButton Icon="@Icons.Material.Filled.ErrorOutline" Size="Size.Small" Color="Color.Error" OnClick="Test"></MudIconButton>
         </ChildContent>
         <TooltipContent>
             @foreach (var error in GetErrorText())
