@@ -6,12 +6,12 @@ namespace pote.Config.Middleware;
 
 public static class ExtensionMethods
 {
-    public static async Task<WebApplicationBuilder> AddConfigurationFromApi(this WebApplicationBuilder builder, BuilderConfiguration configuration, string inputJson, Action<string, Exception> errorOutput = null!)
+    public static async Task<WebApplicationBuilder> AddConfigurationFromApi(this WebApplicationBuilder builder, BuilderConfiguration configuration, string inputJson, Func<HttpClient> clientProvider, Action<string, Exception> errorOutput = null!)
     {
         var parsedJsonFile = Path.Combine(configuration.WorkingDirectory, $"appsettings.{configuration.Environment}.Parsed.json");
         try
         {
-            var apiCommunication = new ApiCommunication(configuration.ApiUri);
+            var apiCommunication = new ApiCommunication(configuration.ApiUri, clientProvider);
             var response = await apiCommunication.GetConfiguration(new ParseRequest(configuration.Application, configuration.Environment, inputJson));
             if (response == null)  throw new InvalidDataException("Response from API was empty.");
             var json = response.GetJson();
