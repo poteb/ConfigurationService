@@ -12,7 +12,7 @@ builder.Host.ConfigureAppConfiguration((host, configurationBuilder) =>
         WorkingDirectory = ""
     };
     var environmentSettingsJsonContent = File.ReadAllText($"appsettings.{configSettings.Environment}.json");
-    var _ = builder.AddConfigurationFromApi(configSettings, environmentSettingsJsonContent, (s, ex) => { }).Result;
+    var _ = builder.AddConfigurationFromApi(configSettings, environmentSettingsJsonContent, () => new HttpClient(), (s, ex) => { }).Result;
 });
 
 // Add services to the container.
