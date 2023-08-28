@@ -1,11 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
-using Moq;
+using NSubstitute;
 using NUnit.Framework;
 using pote.Config.DataProvider.File;
 using pote.Config.DataProvider.Interfaces;
-using pote.Config.Shared;
 
 namespace pote.Config.UnitTests;
 
@@ -19,16 +17,16 @@ public class FileAdminDataProviderTests
     [Test]
     public async Task GetEnvironmentsTest()
     {
-        var moq = Mock.Of<IFileHandler>(fh =>
-            fh.GetEnvironmentFiles() == new[]{"file1","file2","file3"} &&
-            fh.GetEnvironmentContentAbsolutePath("file1", CancellationToken.None) == Task.FromResult(Environment1) &&
-            fh.GetEnvironmentContentAbsolutePath("file2", CancellationToken.None) == Task.FromResult(Environment2) &&
-            fh.GetEnvironmentContentAbsolutePath("file3", CancellationToken.None) == Task.FromResult(Environment3) 
-            );
+        var fileHandler = Substitute.For<IFileHandler>();
+        fileHandler.GetEnvironmentFiles().Returns(new[]{"file1","file2","file3"});
+        fileHandler.GetEnvironmentContentAbsolutePath("file1", CancellationToken.None).Returns(Task.FromResult(Environment1));
+        fileHandler.GetEnvironmentContentAbsolutePath("file2", CancellationToken.None).Returns(Task.FromResult(Environment2));
+        fileHandler.GetEnvironmentContentAbsolutePath("file3", CancellationToken.None).Returns(Task.FromResult(Environment3));
         
-        var applicationMoq = Mock.Of<IApplicationDataAccess>();
-        var environmentAccess = new EnvironmentDataAccess(moq);
-        var provider = new AdminDataProvider(moq, applicationMoq, environmentAccess);
+        var applicationDataAccess = Substitute.For<IApplicationDataAccess>();
+        
+        var environmentAccess = new EnvironmentDataAccess(fileHandler);
+        var provider = new AdminDataProvider(fileHandler, applicationDataAccess, environmentAccess);
         var files = await provider.GetEnvironments(CancellationToken.None);
 
         Assert.AreEqual(3, files.Count);

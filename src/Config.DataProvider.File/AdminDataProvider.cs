@@ -72,7 +72,7 @@ public class AdminDataProvider : IAdminDataProvider
             if (configuration == null) continue;
             result.Add(configuration);
         }
-        return result;
+        return result.OrderByDescending(c => c.CreatedUtc).ToList();
     }
 
     public void DeleteConfiguration(string id, bool permanent)
@@ -82,6 +82,7 @@ public class AdminDataProvider : IAdminDataProvider
 
     public async Task Insert(ConfigurationHeader header, CancellationToken cancellationToken)
     {
+        header.Configurations.ForEach(c => c.CreatedUtc = header.CreatedUtc);
         await _fileHandler.WriteConfigurationContent(header.Id, JsonConvert.SerializeObject(header), cancellationToken);
     }
 
