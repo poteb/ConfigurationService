@@ -45,6 +45,18 @@ public class ParserTests
         var dataProvider = new TestDataProvider();
         var parser = new Parser.Parser(dataProvider);
         var response = await parser.Parse("{\"Wagga\":\"$ref:Circular#\"}", "unittest", "test", _ => { }, CancellationToken.None, "");
-        var dyn = JsonConvert.DeserializeObject<dynamic>(response);
+        var _ = JsonConvert.DeserializeObject<dynamic>(response);
+    }
+
+    [Test]
+    public async Task SectionAlreadyInInput_Should_Overwrite()
+    {
+        var dataProvider = new TestDataProvider();
+        var parser = new Parser.Parser(dataProvider);
+        var response = await parser.Parse("{\"Base\":\"$ref:ExistingSection#\",\"Wagga\":\"Mama\",\"Foo\":{\"Baa\":true}}", "unittest", "test", _ => { }, CancellationToken.None, "");
+        var obj = JsonConvert.DeserializeObject<dynamic>(response);
+        Assert.AreEqual("TheRealMama", obj?.Wagga.ToString());
+        Assert.IsTrue(bool.TryParse(obj?.Foo.Baa.ToString(), out bool baa));
+        Assert.AreEqual(false, baa);
     }
 }
