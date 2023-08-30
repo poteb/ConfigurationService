@@ -12,25 +12,26 @@ public class TestDataProvider : IAdminDataProvider
     {
         return name switch
         {
-            "Wagga" => Task.FromResult(new Configuration { Json = "{\"Wagga\":\"Mama\"}" }),
-            "Wagga_nested" => Task.FromResult(new Configuration { Json = "{\"Wagga\":\"$ref:Super#\"}" }),
-            "Super" => Task.FromResult(new Configuration { Json = "{\"Super\":\"mule\",\"Super2\":\"mule2\"}" }),
-            "Circular" => Task.FromResult(new Configuration { Id = "0dfa086a-da82-4ed4-916c-a604aed33fbf", Json = "{\"Wagga\":\"$ref:RefCircular#\"}" }),
-            "RefCircular" => Task.FromResult(new Configuration { Id = "2b338c20-709e-4c56-a823-47fbdad051a8", Json = "{\"Dingo\":\"$ref:Circular#\"}" }),
-            "MultiRef" => Task.FromResult(new Configuration { Json = "{\"Wagga\":\"$ref:Wagga#\",\"Super\":\"$ref:Super#Super\",\"Super\":\"$ref:Super#Super2\"}", Applications = new List<string> { "AppId1" }, Environments = new List<string> { "EnvId1" } }),
+            "Wagga" => Task.FromResult(new Configuration {Json = "{\"Wagga\":\"Mama\"}"}),
+            "Wagga_nested" => Task.FromResult(new Configuration {Json = "{\"Wagga\":\"$ref:Super#\"}"}),
+            "Super" => Task.FromResult(new Configuration {Json = "{\"Super\":\"mule\",\"Super2\":\"mule2\"}"}),
+            "Circular" => Task.FromResult(new Configuration {Id = "0dfa086a-da82-4ed4-916c-a604aed33fbf", Json = "{\"Wagga\":\"$ref:RefCircular#\"}"}),
+            "RefCircular" => Task.FromResult(new Configuration {Id = "2b338c20-709e-4c56-a823-47fbdad051a8", Json = "{\"Dingo\":\"$ref:Circular#\"}"}),
+            "MultiRef" => Task.FromResult(new Configuration {Json = "{\"Wagga\":\"$ref:Wagga#\",\"Super\":\"$ref:Super#Super\",\"Super\":\"$ref:Super#Super2\"}", Applications = new List<string> {"AppId1"}, Environments = new List<string> {"EnvId1"}}),
+            "ExistingSection" => Task.FromResult(new Configuration {Json = "{\"Wagga\":\"TheRealMama\",\"Foo\":{\"Baa\":false}}" }),
             _ => Task.FromResult(new Configuration())
         };
     }
 
     public Task<List<Environment>> GetEnvironments(CancellationToken cancellationToken)
     {
-        var list = new List<Environment> { new() { Id = "EnvId1", Name = "test" } };
+        var list = new List<Environment> {new() {Id = "EnvId1", Name = "test"}};
         return Task.FromResult(list);
     }
 
     public Task<List<Application>> GetApplications(CancellationToken cancellationToken)
     {
-        var list = new List<Application> { new() { Id = "AppId1", Name = "unittest" } };
+        var list = new List<Application> {new() {Id = "AppId1", Name = "unittest"}};
         return Task.FromResult(list);
     }
 
@@ -45,11 +46,12 @@ public class TestDataProvider : IAdminDataProvider
         {
             "HeaderId1" => Task.FromResult(new ConfigurationHeader
             {
-                Id = id, Configurations = new List<Configuration> { GetConfiguration("MultiRef", "", "", CancellationToken.None).Result }
+                Id = id, Configurations = new List<Configuration> {GetConfiguration("MultiRef", "", "", CancellationToken.None).Result}
             }),
             _ => Task.FromResult(new ConfigurationHeader())
         });
     }
+
     public async Task<List<ConfigurationHeader>> GetHeaderHistory(string id, int page, int pageSize, CancellationToken cancellationToken)
     {
         throw new System.NotImplementedException();
