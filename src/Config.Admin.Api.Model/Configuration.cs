@@ -10,5 +10,5 @@ public class Configuration : IIdentity
     public string Applications { get; set; } = string.Empty;
     public string Environments { get; set; } = string.Empty;
     public bool Deleted { get; set; }
-    //public List<Configuration> History { get; set; } = new();
+    public bool IsJsonEncrypted { get; set; }
 }

@@ -8,11 +8,13 @@ public class ConfigurationController : ControllerBase
 {
     private readonly ILogger<ConfigurationController> _logger;
     private readonly IParser _parser;
+    private readonly EncryptionSettings _encryptionSettings;
 
-    public ConfigurationController(ILogger<ConfigurationController> logger, IParser parser)
+    public ConfigurationController(ILogger<ConfigurationController> logger, IParser parser, EncryptionSettings encryptionSettings)
     {
         _logger = logger;
         _parser = parser;
+        _encryptionSettings = encryptionSettings;
     }
 
     [HttpPost]
@@ -21,7 +23,7 @@ public class ConfigurationController : ControllerBase
         try
         {
             var response = new ParseResponse { Application = request.Application, Environment = request.Environment };
-            var config = await _parser.Parse(request.AsJson(), request.Application, request.Environment, response.AddProblem, CancellationToken.None);
+            var config = await _parser.Parse(request.AsJson(), request.Application, request.Environment, response.AddProblem, CancellationToken.None, _encryptionSettings.JsonEncryptionKey);
             response.FromJson(config);
             return Ok(response);
         }

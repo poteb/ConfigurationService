@@ -1,6 +1,8 @@
 ﻿using Newtonsoft.Json;
 using pote.Config.DataProvider.Interfaces;
 using pote.Config.DbModel;
+using pote.Config.Encryption;
+using pote.Config.Shared;
 using Environment=pote.Config.DbModel.Environment;
 
 namespace pote.Config.DataProvider.File;
@@ -10,13 +12,15 @@ public class AdminDataProvider : IAdminDataProvider
     private readonly IFileHandler _fileHandler;
     private readonly IApplicationDataAccess _applicationDataAccess;
     private readonly IEnvironmentDataAccess _environmentDataAccess;
+    private readonly EncryptionSettings _encryptionSettings;
     private readonly DataProvider _dataProvider;
 
-    public AdminDataProvider(IFileHandler fileHandler, IApplicationDataAccess applicationDataAccess, IEnvironmentDataAccess environmentDataAccess)
+    public AdminDataProvider(IFileHandler fileHandler, IApplicationDataAccess applicationDataAccess, IEnvironmentDataAccess environmentDataAccess, EncryptionSettings encryptionSettings)
     {
         _fileHandler = fileHandler;
         _applicationDataAccess = applicationDataAccess;
         _environmentDataAccess = environmentDataAccess;
+        _encryptionSettings = encryptionSettings;
 
         _dataProvider = new DataProvider(fileHandler, environmentDataAccess, applicationDataAccess);
     }
@@ -45,7 +49,15 @@ public class AdminDataProvider : IAdminDataProvider
     {
         var header = JsonConvert.DeserializeObject<ConfigurationHeader>(await _fileHandler.GetConfigurationContent(id, cancellationToken));
         if (header == null) throw new KeyNotFoundException($"Could not read json from file {id}");
+        EncryptionHandler.Decrypt(header.Configurations, _encryptionSettings.JsonEncryptionKey);
         return header;
+    }
+
+    public async Task<Configuration> GetConfiguration(string name, string applicationId, string environment, CancellationToken cancellationToken)
+    {
+        var configuration = await _dataProvider.GetConfiguration(name, applicationId, environment, cancellationToken);
+        EncryptionHandler.Decrypt(configuration, _encryptionSettings.JsonEncryptionKey);
+        return configuration;
     }
 
     public async Task<List<ConfigurationHeader>> GetHeaderHistory(string id, int page, int pageSize, CancellationToken cancellationToken)
@@ -54,9 +66,10 @@ public class AdminDataProvider : IAdminDataProvider
         var result = new List<ConfigurationHeader>();
         foreach (var json in historyJson)
         {
-            var configuration = JsonConvert.DeserializeObject<ConfigurationHeader>(json) 
+            var header = JsonConvert.DeserializeObject<ConfigurationHeader>(json) 
                                 ?? new ConfigurationHeader { Id = Guid.Empty.ToString(), Name = "Unable to read json"};
-            result.Add(configuration);
+            EncryptionHandler.Decrypt(header.Configurations, _encryptionSettings.JsonEncryptionKey);
+            result.Add(header);
         }
         return result;
     }
@@ -70,6 +83,7 @@ public class AdminDataProvider : IAdminDataProvider
             var header = JsonConvert.DeserializeObject<ConfigurationHeader>(json);
             var configuration = header?.Configurations.FirstOrDefault(c => c.Id == id);
             if (configuration == null) continue;
+            EncryptionHandler.Decrypt(configuration, _encryptionSettings.JsonEncryptionKey);
             result.Add(configuration);
         }
         return result.OrderByDescending(c => c.CreatedUtc).ToList();
@@ -82,11 +96,15 @@ public class AdminDataProvider : IAdminDataProvider
 
     public async Task Insert(ConfigurationHeader header, CancellationToken cancellationToken)
     {
-        header.Configurations.ForEach(c => c.CreatedUtc = header.CreatedUtc);
+        header.Configurations.ForEach(c =>
+        {
+            c.CreatedUtc = header.CreatedUtc;
+            EncryptionHandler.Encrypt(c, _encryptionSettings.JsonEncryptionKey);
+        });
         await _fileHandler.WriteConfigurationContent(header.Id, JsonConvert.SerializeObject(header), cancellationToken);
     }
 
-
+    
     public async Task UpsertEnvironment(Environment environment, CancellationToken cancellationToken)
     {
         await _fileHandler.WriteEnvironmentContent(environment.Id, JsonConvert.SerializeObject(environment), cancellationToken);
@@ -113,11 +131,6 @@ public class AdminDataProvider : IAdminDataProvider
     public async Task<List<Application>> GetApplications(CancellationToken cancellationToken)
     {
         return await _applicationDataAccess.GetApplications(cancellationToken);
-    }
-
-    public async Task<Configuration> GetConfiguration(string name, string applicationId, string environment, CancellationToken cancellationToken)
-    {
-        return await _dataProvider.GetConfiguration(name, applicationId, environment, cancellationToken);
     }
 
     public async Task<List<Environment>> GetEnvironments(CancellationToken cancellationToken)

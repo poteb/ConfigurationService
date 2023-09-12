@@ -2,6 +2,7 @@
 using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
 using pote.Config.DataProvider.Interfaces;
+using pote.Config.Encryption;
 using pote.Config.Shared;
 
 namespace pote.Config.Parser;
@@ -23,7 +24,7 @@ public class Parser : IParser
 
     /// <summary>Parses the specified configuration. Will do some pre- and post-processing.</summary>
     public async Task<string> Parse(string json, string application, string environment, Action<string> problems,
-        CancellationToken cancellationToken, string rootId)
+        CancellationToken cancellationToken, string encryptionKey, string rootId = "")
     {
         // Pre process
         if (string.IsNullOrWhiteSpace(json))
@@ -52,7 +53,7 @@ public class Parser : IParser
         }
 
         // Process
-        await HandleToken(root, dbApplication.Id, dbEnvironment.Id, problems, cancellationToken, rootId, new List<KeyValuePair<string, string>>());
+        await HandleToken(root, dbApplication.Id, dbEnvironment.Id, problems, cancellationToken, rootId, new List<KeyValuePair<string, string>>(), encryptionKey);
 
         // Post process
         MoveBaseChildrenToRoot(root);
@@ -63,14 +64,14 @@ public class Parser : IParser
     /// <summary>Method for recursively handling the tokens in the json</summary>
     /// <param name="sourceConfigurationId">Used to track what's happening.</param>
     [SuppressMessage("ReSharper", "InvalidXmlDocComment")]
-    private async Task HandleToken(JToken token, string application, string environment, Action<string> problems, CancellationToken cancellationToken, string sourceConfigurationId, List<KeyValuePair<string, string>> fetchedConfigurations)
+    private async Task HandleToken(JToken token, string application, string environment, Action<string> problems, CancellationToken cancellationToken, string sourceConfigurationId, List<KeyValuePair<string, string>> fetchedConfigurations, string encryptionKey)
     {
         while (true)
         {
             // Recurse into children
             if (token.HasValues)
                 foreach (var child in token.Children())
-                    await HandleToken(child, application, environment, problems, cancellationToken, sourceConfigurationId, fetchedConfigurations);
+                    await HandleToken(child, application, environment, problems, cancellationToken, sourceConfigurationId, fetchedConfigurations, encryptionKey);
 
             // Check token for different types
             if (token.Type != JTokenType.Property) return;
@@ -98,14 +99,18 @@ public class Parser : IParser
                 return;
             }
 
+            // Decrypt the value if needed
+            if (configuration.IsJsonEncrypted) 
+                configuration.Json = EncryptionHandler.Decrypt(configuration.Json, encryptionKey);
+            
             var refO = JObject.Parse(configuration.Json);
             var refField = match.Groups["field"];
             var refToken = refO.SelectToken(refField.Value);
             if (refToken == null) return;
-
+            
             // Replace the value with the value from the database.
             jProp.Value = refToken;
-
+            
             TrackingAction(sourceConfigurationId, configuration.HeaderId);
             sourceConfigurationId = configuration.HeaderId;
 
