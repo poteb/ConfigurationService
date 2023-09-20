@@ -65,7 +65,8 @@ public class DependencyGraphService : IDependencyGraphService
 
             foreach (var headerApplication in headerApplications)
             {
-                var toVertex = graph.Vertices.First(v => v.Id == headerApplication);
+                var toVertex = graph.Vertices.FirstOrDefault(v => v.Id == headerApplication);
+                if (toVertex == null) continue;
                 var edge = new Edge(vertex.Id, toVertex.Id, vertex.Name, toVertex.Name);
                 vertex.Edges.Add(edge.Id);
                 toVertex.Edges.Add(edge.Id);
@@ -74,7 +75,8 @@ public class DependencyGraphService : IDependencyGraphService
             
             foreach (var headerEnvironment in headerEnvironments)
             {
-                var toVertex = graph.Vertices.First(v => v.Id == headerEnvironment);
+                var toVertex = graph.Vertices.FirstOrDefault(v => v.Id == headerEnvironment);
+                if (toVertex == null) continue;
                 var edge = new Edge(vertex.Id, toVertex.Id, vertex.Name, toVertex.Name);
                 vertex.Edges.Add(edge.Id);
                 toVertex.Edges.Add(edge.Id);
