@@ -45,7 +45,7 @@ public class ConfigurationMapper
             Environments = JsonSerializer.Deserialize<List<Model.Environment>>(apiConfiguration.Environments)?.Select(s => s.Id).ToList() ?? new List<string>(),
             Deleted = apiConfiguration.Deleted,
             IsActive = apiConfiguration.IsActive,
-            //History = ToDb(apiConfiguration.History)
+            IsJsonEncrypted = apiConfiguration.IsJsonEncrypted
         };
     }
 
@@ -61,7 +61,7 @@ public class ConfigurationMapper
             Environments = GetFullEnvironments(dbConfiguration, environments),
             Deleted = dbConfiguration.Deleted,
             IsActive = dbConfiguration.IsActive,
-            //History = ToApi(dbConfiguration.History, applications, environments)
+            IsJsonEncrypted = dbConfiguration.IsJsonEncrypted
         };
     }
 

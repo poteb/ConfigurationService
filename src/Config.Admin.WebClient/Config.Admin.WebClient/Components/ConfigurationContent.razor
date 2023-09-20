@@ -67,7 +67,12 @@
                 </MudItem>
             </MudGrid>
             <MudItem xs="12" Class="d-flex align-center" Style="padding-top:5px">
-                <MudButton Variant="Variant.Outlined" Style="background-color: white" OnClick="FormatJson" EndIcon="@Icons.Material.Filled.FormatIndentIncrease">Format JSON</MudButton>
+                <MudTooltip Text="Format JSON">
+                    <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.FormatIndentIncrease" Color="Color.Info" OnClick="FormatJson"></MudIconButton>
+                </MudTooltip>
+                <MudTooltip Text="Encrypt JSON">
+                    <MudCheckBox Size="Size.Small" @bind-Checked="@Configuration.IsJsonEncrypted" Color="Color.Info" CheckedIcon="@Icons.Material.Filled.Shield" UncheckedIcon="@Icons.Material.Outlined.Shield"></MudCheckBox>
+                </MudTooltip>
                 <MudText Style="padding-left: 10px" Color="Color.Error">@_jsonValidationError</MudText>
             </MudItem>
             <MudTextField @bind-Text="Configuration.Json" T="string" Variant="Variant.Outlined" Lines="@_jsonLines" Style="background-color:#fff"></MudTextField>

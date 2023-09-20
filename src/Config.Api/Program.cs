@@ -1,5 +1,6 @@
 global using pote.Config.Parser;
 global using pote.Config.Shared;
+using Df.ServiceControllerExtensions;
 using pote.Config.DataProvider.File;
 using pote.Config.DataProvider.Interfaces;
 
@@ -15,6 +16,8 @@ builder.Services.AddCors(p => p.AddPolicy("allowall", policy =>
     }
     policy.WithOrigins(origins).AllowAnyMethod().AllowAnyHeader();
 }));
+
+builder.Services.AddConfiguration<EncryptionSettings>(builder.Configuration);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

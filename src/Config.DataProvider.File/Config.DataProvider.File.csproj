@@ -16,6 +16,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Config.DataProvider.Interfaces\Config.DataProvider.Interfaces.csproj" />
     <ProjectReference Include="..\Config.DbModel\Config.DbModel.csproj" />
+    <ProjectReference Include="..\Config.Encryption\Config.Encryption.csproj" />
     <ProjectReference Include="..\Config.Shared\Config.Shared.csproj" />
   </ItemGroup>
 

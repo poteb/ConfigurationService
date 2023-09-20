@@ -8,6 +8,7 @@ public class Configuration : IEquatable<Configuration>, IComparable<Configuratio
     public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
     public bool IsActive { get; set; } = true;
     public bool Deleted { get; set; }
+    public bool IsJsonEncrypted { get; set; }
 
     public List<ConfigEnvironment> Environments { get; set; } = new();
     public List<Application> Applications { get; set; } = new();
@@ -27,6 +28,7 @@ public class Configuration : IEquatable<Configuration>, IComparable<Configuratio
         if (!CreatedUtc.Equals(other.CreatedUtc)) return false;
         if (!IsActive == other.IsActive) return false;
         if (!Deleted == other.Deleted) return false;
+        if (!IsJsonEncrypted == other.IsJsonEncrypted) return false;
 
         if (!Applications.Count.Equals(other.Applications.Count)) return false;
         foreach (var application in Applications)

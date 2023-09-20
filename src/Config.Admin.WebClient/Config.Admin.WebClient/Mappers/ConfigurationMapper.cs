@@ -43,6 +43,7 @@ public static class ConfigurationMapper
             Json = configuration.Json,
             Deleted = configuration.Deleted,
             IsActive = configuration.IsActive,
+            IsJsonEncrypted = configuration.IsJsonEncrypted,
             Applications = StringToList<Application>(configuration.Applications),
             Environments = StringToList<ConfigEnvironment>(configuration.Environments),
             //History = ToClient(configuration.History)
@@ -64,6 +65,7 @@ public static class ConfigurationMapper
             Json = configuration.Json,
             Deleted = configuration.Deleted,
             IsActive = configuration.IsActive,
+            IsJsonEncrypted = configuration.IsJsonEncrypted,
             Applications = ListToString(configuration.Applications),
             Environments = ListToString(configuration.Environments)
         };
@@ -104,6 +106,7 @@ public static class ConfigurationMapper
             Json = configuration.Json,
             Deleted = false,
             IsActive = configuration.IsActive,
+            IsJsonEncrypted = configuration.IsJsonEncrypted,
             Applications = StringToList<Application>(ListToString(configuration.Applications)),
             Environments = StringToList<ConfigEnvironment>(ListToString(configuration.Environments)), 
             Index = configuration.Index 
@@ -133,6 +136,7 @@ public static class ConfigurationMapper
         to.Json = from.Json;
         to.Deleted = false;
         to.IsActive = from.IsActive;
+        to.IsJsonEncrypted = from.IsJsonEncrypted;
         to.Applications = StringToList<Application>(ListToString(from.Applications));
         to.Environments = StringToList<ConfigEnvironment>(ListToString(from.Environments));
         to.Index = from.Index;

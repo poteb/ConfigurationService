@@ -21,6 +21,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Config.DataProvider.File", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Config.DataProvider.Interfaces", "Config.DataProvider.Interfaces\Config.DataProvider.Interfaces.csproj", "{15CD8B6B-41FC-405D-808C-F0B32573140D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Config.Encryption", "Config.Encryption\Config.Encryption.csproj", "{10E10BC9-B4F8-4A20-AE59-A1AA3467DD38}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +65,10 @@ Global
 		{15CD8B6B-41FC-405D-808C-F0B32573140D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{15CD8B6B-41FC-405D-808C-F0B32573140D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{15CD8B6B-41FC-405D-808C-F0B32573140D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10E10BC9-B4F8-4A20-AE59-A1AA3467DD38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10E10BC9-B4F8-4A20-AE59-A1AA3467DD38}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10E10BC9-B4F8-4A20-AE59-A1AA3467DD38}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10E10BC9-B4F8-4A20-AE59-A1AA3467DD38}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

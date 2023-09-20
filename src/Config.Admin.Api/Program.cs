@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Df.ServiceControllerExtensions;
 using Microsoft.AspNetCore.Http.Json;
 using pote.Config.Admin.Api.Services;
 using pote.Config.DataProvider.File;
@@ -23,6 +24,8 @@ builder.Services.AddCors(p => p.AddPolicy("allowall", policy =>
     }
     policy.WithOrigins(origins).AllowAnyMethod().AllowAnyHeader();
 }));
+
+builder.Services.AddConfiguration<EncryptionSettings>(builder.Configuration);
 
 var fileDb = builder.Configuration.GetSection("FileDatabase").GetSection("Directory").Value;
 builder.Services.AddScoped<IFileHandler>(_ => new FileHandler(fileDb));

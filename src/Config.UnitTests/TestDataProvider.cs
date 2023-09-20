@@ -19,6 +19,8 @@ public class TestDataProvider : IAdminDataProvider
             "RefCircular" => Task.FromResult(new Configuration {Id = "2b338c20-709e-4c56-a823-47fbdad051a8", Json = "{\"Dingo\":\"$ref:Circular#\"}"}),
             "MultiRef" => Task.FromResult(new Configuration {Json = "{\"Wagga\":\"$ref:Wagga#\",\"Super\":\"$ref:Super#Super\",\"Super\":\"$ref:Super#Super2\"}", Applications = new List<string> {"AppId1"}, Environments = new List<string> {"EnvId1"}}),
             "ExistingSection" => Task.FromResult(new Configuration {Json = "{\"Wagga\":\"TheRealMama\",\"Foo\":{\"Baa\":false}}" }),
+            "EncryptedSimple" => Task.FromResult(new Configuration {Json = "ddiWml5jx2W7XivdnZ+uiVG8Ok2PJ+CJh+q60CY7rKA=", IsJsonEncrypted = true}),
+            "EncryptedButNot" => Task.FromResult(new Configuration {Json = "{\"Wagga\":\"Mama\"}", IsJsonEncrypted = true}),
             _ => Task.FromResult(new Configuration())
         };
     }
