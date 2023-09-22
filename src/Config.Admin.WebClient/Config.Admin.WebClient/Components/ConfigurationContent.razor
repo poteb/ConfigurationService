@@ -70,8 +70,8 @@
                 <MudTooltip Text="Format JSON">
                     <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.FormatIndentIncrease" Color="Color.Info" OnClick="FormatJson"></MudIconButton>
                 </MudTooltip>
-                <MudTooltip Text="Encrypt JSON">
-                    <MudCheckBox Size="Size.Small" @bind-Checked="@Configuration.IsJsonEncrypted" Color="Color.Info" CheckedIcon="@Icons.Material.Filled.Shield" UncheckedIcon="@Icons.Material.Outlined.Shield"></MudCheckBox>
+                <MudTooltip Text="@IsJsonEncryptedCheckboxText()">
+                    <MudCheckBox Size="Size.Small" @bind-Checked="@Configuration.IsJsonEncrypted" Disabled="@Configuration.IsJsonEncryptedForced" Color="Color.Info" CheckedIcon="@Icons.Material.Filled.Shield" UncheckedIcon="@Icons.Material.Outlined.Shield"></MudCheckBox>
                 </MudTooltip>
                 <MudText Style="padding-left: 10px" Color="Color.Error">@_jsonValidationError</MudText>
             </MudItem>
@@ -185,5 +185,10 @@
     private void DuplicateConfiguration()
     {
         ConfigurationActions.DuplicateConfiguration(Configuration);
+    }
+    
+    private string IsJsonEncryptedCheckboxText()
+    {
+        return Configuration.IsJsonEncrypted ? "Encrypt (ON)" : "Encrypt (OFF)";
     }
 }

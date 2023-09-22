@@ -15,7 +15,8 @@ public static class ConfigurationMapper
             UpdateUtc = header.UpdateUtc,
             Deleted = header.Deleted,
             IsActive = header.IsActive,
-            Configurations = ToClient(header.Configurations)
+            Configurations = ToClient(header.Configurations),
+            IsJsonEncrypted = header.IsJsonEncrypted
         };
     }
 
@@ -29,7 +30,8 @@ public static class ConfigurationMapper
             UpdateUtc = header.UpdateUtc,
             Deleted = header.Deleted,
             IsActive = header.IsActive,
-            Configurations = ToApi(header.Configurations)
+            Configurations = ToApi(header.Configurations),
+            IsJsonEncrypted = header.IsJsonEncrypted
         };
     }
 
@@ -46,7 +48,6 @@ public static class ConfigurationMapper
             IsJsonEncrypted = configuration.IsJsonEncrypted,
             Applications = StringToList<Application>(configuration.Applications),
             Environments = StringToList<ConfigEnvironment>(configuration.Environments),
-            //History = ToClient(configuration.History)
         };
     }
 
@@ -124,7 +125,8 @@ public static class ConfigurationMapper
             UpdateUtc = header.UpdateUtc,
             Deleted = header.Deleted,
             IsActive = header.IsActive,
-            Configurations = header.Configurations.Select(c => Copy(c, generateNewId)).ToList()
+            Configurations = header.Configurations.Select(c => Copy(c, generateNewId)).ToList(),
+            IsJsonEncrypted = header.IsJsonEncrypted
         };
     }
 

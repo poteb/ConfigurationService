@@ -29,15 +29,19 @@
         <MudItem xs="4">
             <MudGrid Class="ma-0 pa-0" Spacing="2">
                 <MudItem xs="12">
-                    <MudText Style="font-size: 8pt">ID: @Header.Id</MudText>
-                    <MudText Style="font-size: 8pt">Created: @Header.CreatedUtc.ToLocalTime().ToString("M/d/yyyy H:mm:ss")</MudText>
-                </MudItem>
-                <MudItem xs="12">
                     <MudTextField Variant="Variant.Outlined" Label="Name" @bind-Value="@Header.Name" Validation="@(new Func<string, string>(ValidateHeaderName))" Immediate="true"></MudTextField>
                     @* <MudTextField Variant="Variant.Outlined" Label="Name" @bind-Value="@Header.Name" Validation="@(new Func<string, string>(ValidateHeaderName))" Immediate="true" OnKeyUp="NameChanged"></MudTextField> *@
                 </MudItem>
+                <MudItem xs="12">
+                    <MudText Style="font-size: 8pt">Created: @Header.CreatedUtc.ToLocalTime().ToString("M/d/yyyy H:mm:ss")</MudText>
+                </MudItem>
                 <MudItem xs="4">
                     <MudCheckBox Label="Active" @bind-checked="Header.IsActive" T="bool"></MudCheckBox>
+                </MudItem>
+                <MudItem xs="4">
+                    <MudTooltip Text="@IsJsonEncryptedCheckboxText()">
+                        <MudCheckBox Label="Encrypt" Size="Size.Medium" Checked="@Header.IsJsonEncrypted" CheckedChanged="@(e => IsJsonEncryptedCheck((bool)e))" Color="Color.Info" CheckedIcon="@Icons.Material.Filled.Shield" UncheckedIcon="@Icons.Material.Outlined.Shield" T="bool"></MudCheckBox>
+                    </MudTooltip>
                 </MudItem>
             </MudGrid>
         </MudItem>
