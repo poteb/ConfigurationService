@@ -88,6 +88,9 @@ public partial class EditConfiguration : IDisposable, IConfigurationActions
         await UpdateEnvironments();
         UpdateUnhandledApplications();
         UpdateUnhandledEnvironments();
+
+        if (Header.IsJsonEncrypted)
+            IsJsonEncryptedCheck(Header.IsJsonEncrypted);
     }
 
     private async Task LoadAllHeaders()
@@ -329,5 +332,20 @@ public partial class EditConfiguration : IDisposable, IConfigurationActions
             PageError.OnError(callResponse.GenerateErrorMessage(), new Exception());
 
         _loadingHistory = false;
+    }
+    
+    private string IsJsonEncryptedCheckboxText()
+    {
+        return Header.IsJsonEncrypted ? "Encrypt (ON)" : "Encrypt (OFF)";
+    }
+
+    private void IsJsonEncryptedCheck(bool b)
+    {
+        Header.IsJsonEncrypted = b;
+        foreach (var c in Header.Configurations)
+        {
+            c.IsJsonEncrypted = Header.IsJsonEncrypted;
+            c.IsJsonEncryptedForced = Header.IsJsonEncrypted;
+        }
     }
 }

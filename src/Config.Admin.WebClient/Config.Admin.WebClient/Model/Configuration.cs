@@ -19,6 +19,8 @@ public class Configuration : IEquatable<Configuration>, IComparable<Configuratio
     public string EnvironmentsAsText => string.Join(", ", Environments.OrderBy(x => x.Name));
     public string ApplicationsAsText => string.Join(", ", Applications.OrderBy(x => x.Name));
 
+    internal bool IsJsonEncryptedForced { get; set; }
+
 
     public bool Equals(Configuration? other)
     {

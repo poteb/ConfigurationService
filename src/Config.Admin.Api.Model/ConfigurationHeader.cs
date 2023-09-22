@@ -9,4 +9,5 @@ public class ConfigurationHeader : IIdentity
     public bool Deleted { get; set; }
     public bool IsActive { get; set; }
     public List<Configuration> Configurations { get; set; } = new();
+    public bool IsJsonEncrypted { get; set; }
 }

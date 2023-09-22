@@ -99,6 +99,7 @@ public class AdminDataProvider : IAdminDataProvider
         header.Configurations.ForEach(c =>
         {
             c.CreatedUtc = header.CreatedUtc;
+            c.IsJsonEncrypted = c.IsJsonEncrypted || header.IsJsonEncrypted;
             EncryptionHandler.Encrypt(c, _encryptionSettings.JsonEncryptionKey);
         });
         await _fileHandler.WriteConfigurationContent(header.Id, JsonConvert.SerializeObject(header), cancellationToken);

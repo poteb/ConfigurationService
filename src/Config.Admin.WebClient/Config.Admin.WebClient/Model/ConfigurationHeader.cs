@@ -9,6 +9,7 @@ public class ConfigurationHeader : IEquatable<ConfigurationHeader>
     public bool Deleted { get; set; }
     public bool IsActive { get; set; } = true;
     public List<Configuration> Configurations { get; set; } = new();
+    public bool IsJsonEncrypted { get; set; }
 
     public bool Equals(ConfigurationHeader? other)
     {
@@ -20,11 +21,12 @@ public class ConfigurationHeader : IEquatable<ConfigurationHeader>
         if (!Deleted.Equals(other.Deleted)) return false;
         if (!IsActive.Equals(other.IsActive)) return false;
         if (Configurations.Count != other.Configurations.Count) return false;
-        for (int i = 0; i < Configurations.Count; i++)
+        for (var i = 0; i < Configurations.Count; i++)
         {
             var me = Configurations[i];
             if (!me.Equals(other.Configurations[i])) return false;
         }
+        if (!IsJsonEncrypted.Equals(other.IsJsonEncrypted)) return false;
 
         return true;
     }

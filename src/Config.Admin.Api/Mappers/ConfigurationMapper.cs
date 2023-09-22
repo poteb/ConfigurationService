@@ -15,7 +15,8 @@ public class ConfigurationMapper
             UpdateUtc = apiHeader.UpdateUtc,
             Deleted = apiHeader.Deleted,
             IsActive = apiHeader.IsActive,
-            Configurations = ToDb(apiHeader.Configurations)
+            Configurations = ToDb(apiHeader.Configurations),
+            IsJsonEncrypted = apiHeader.IsJsonEncrypted
         };
     }
 
@@ -29,7 +30,8 @@ public class ConfigurationMapper
             UpdateUtc = dbHeader.UpdateUtc,
             Deleted = dbHeader.Deleted,
             IsActive = dbHeader.IsActive,
-            Configurations = ToApi(dbHeader.Configurations, applications, environments)
+            Configurations = ToApi(dbHeader.Configurations, applications, environments),
+            IsJsonEncrypted = dbHeader.IsJsonEncrypted
         };
     }
 
