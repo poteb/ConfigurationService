@@ -1,3 +1,5 @@
+using pote.Config.DbModel;
+
 namespace pote.Config.DataProvider.File;
 
 public interface IFileHandler
@@ -21,4 +23,8 @@ public interface IFileHandler
     Task AuditLogConfiguration(string id, string content);
     Task AuditLogEnvironment(string id, string content);
     Task AuditLogApplication(string id, string content);
+    Task AuditLogSettings(string content);
+    
+    Task<string> GetSettings(CancellationToken cancellationToken);
+    Task SaveSettings(string settings, CancellationToken cancellationToken);
 }

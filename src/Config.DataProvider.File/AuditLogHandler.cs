@@ -25,4 +25,9 @@ public class AuditLogHandler : IAuditLogHandler
     {
         await _fileHandler.AuditLogApplication(id, $"{callerIp}{Environment.NewLine}{content}");
     }
+    
+    public async Task AuditLogSettings(string id, string callerIp, string content)
+    {
+        await _fileHandler.AuditLogSettings($"{callerIp}{Environment.NewLine}{content}");
+    }
 }

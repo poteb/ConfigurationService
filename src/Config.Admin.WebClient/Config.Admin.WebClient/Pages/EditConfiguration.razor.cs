@@ -22,6 +22,7 @@ public partial class EditConfiguration : IDisposable, IConfigurationActions
     private bool _formIsValid;
     private bool _loadingHistory;
     private bool _disableReorderButtons => Header.Configurations.Count <= 1;
+    private Settings _settings = new();
 
     [Inject] protected IJSRuntime JsRuntime { get; set; } = null!;
     [Parameter] public string Gid { get; set; } = string.Empty;
@@ -30,6 +31,7 @@ public partial class EditConfiguration : IDisposable, IConfigurationActions
     private ConfigurationHeader OriginalHeader { get; set; } = null!;
     [Inject] public IAdminApiService AdminApiService { get; set; } = null!;
     [Inject] public IApiService ApiService { get; set; } = null!;
+    [Inject] public ISettingsService SettingsService { get; set; } = null!;
     [Inject] public IDialogService DialogService { get; set; } = null!;
     [CascadingParameter] public PageError PageError { get; set; } = null!;
     private List<Application> Applications { get; set; } = new();
@@ -63,6 +65,8 @@ public partial class EditConfiguration : IDisposable, IConfigurationActions
 
     private async Task Load()
     {
+        await LoadSettings();
+        
         if (IsNew)
         {
             Header = new();
@@ -88,9 +92,9 @@ public partial class EditConfiguration : IDisposable, IConfigurationActions
         await UpdateEnvironments();
         UpdateUnhandledApplications();
         UpdateUnhandledEnvironments();
-
-        if (Header.IsJsonEncrypted)
-            IsJsonEncryptedCheck(Header.IsJsonEncrypted);
+        
+        if (Header.IsJsonEncrypted || _settings.EncryptAllJson)
+            IsJsonEncryptedCheck(Header.IsJsonEncrypted || _settings.EncryptAllJson);
     }
 
     private async Task LoadAllHeaders()
@@ -98,6 +102,17 @@ public partial class EditConfiguration : IDisposable, IConfigurationActions
         var callResponse = await AdminApiService.GetConfigurations();
         if (callResponse is {IsSuccess: true, Response: { }})
             _headers = ConfigurationMapper.ToClient(callResponse.Response.Configurations.Where(c => c.Id != Header?.Id).ToImmutableList());
+    }
+
+    private async Task LoadSettings()
+    {
+        var callResponse = await SettingsService.GetSettings();
+        if (callResponse is {IsSuccess: true, Response: not null})
+        {
+            _settings = SettingsMapper.ToClient(callResponse.Response.Settings);
+        }
+        else
+            PageError.OnError(callResponse.GenerateErrorMessage(), new Exception());
     }
 
     private void UpdateConfigurationIndex()
@@ -129,7 +144,7 @@ public partial class EditConfiguration : IDisposable, IConfigurationActions
     private async Task UpdateApplications()
     {
         var callResponse = await AdminApiService.GetApplications();
-        if (callResponse.IsSuccess && callResponse.Response != null)
+        if (callResponse is {IsSuccess: true, Response: not null})
         {
             Applications = ApplicationMapper.ToClient(callResponse.Response.Applications);
         }
@@ -140,7 +155,7 @@ public partial class EditConfiguration : IDisposable, IConfigurationActions
     private async Task UpdateEnvironments()
     {
         var callResponse = await AdminApiService.GetEnvironments();
-        if (callResponse.IsSuccess && callResponse.Response != null)
+        if (callResponse is {IsSuccess: true, Response: not null})
             Environments = EnvironmentMapper.ToClient(callResponse.Response.Environments);
         else
             PageError.OnError(callResponse.GenerateErrorMessage(), new Exception());
@@ -167,7 +182,6 @@ public partial class EditConfiguration : IDisposable, IConfigurationActions
             else
             {
                 OriginalHeader = ConfigurationMapper.Copy(Header);
-                Console.WriteLine("Update original header");
             }
 
             return true;
@@ -291,7 +305,6 @@ public partial class EditConfiguration : IDisposable, IConfigurationActions
     {
         if (string.IsNullOrWhiteSpace(Header.Name)) return "Name is empty";
         if (_headers.All(h => h.Name != Header.Name)) return null!;
-        Console.WriteLine("Already exists");
         return "Already exists";
     }
 
@@ -336,16 +349,17 @@ public partial class EditConfiguration : IDisposable, IConfigurationActions
     
     private string IsJsonEncryptedCheckboxText()
     {
-        return Header.IsJsonEncrypted ? "Encrypt (ON)" : "Encrypt (OFF)";
+        return Header.IsJsonEncrypted ? "Encryption (ON)" : "Encryption (OFF)";
     }
 
     private void IsJsonEncryptedCheck(bool b)
     {
         Header.IsJsonEncrypted = b;
+        Header.IsJsonEncryptedForced = _settings.EncryptAllJson;
         foreach (var c in Header.Configurations)
         {
             c.IsJsonEncrypted = Header.IsJsonEncrypted;
-            c.IsJsonEncryptedForced = Header.IsJsonEncrypted;
+            c.IsJsonEncryptedForced = Header.IsJsonEncrypted || _settings.EncryptAllJson;
         }
     }
 }

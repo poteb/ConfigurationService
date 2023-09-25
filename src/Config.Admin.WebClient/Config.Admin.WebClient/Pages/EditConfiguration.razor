@@ -40,7 +40,7 @@
                 </MudItem>
                 <MudItem xs="4">
                     <MudTooltip Text="@IsJsonEncryptedCheckboxText()">
-                        <MudCheckBox Label="Encrypt" Size="Size.Medium" Checked="@Header.IsJsonEncrypted" CheckedChanged="@(e => IsJsonEncryptedCheck((bool)e))" Color="Color.Info" CheckedIcon="@Icons.Material.Filled.Shield" UncheckedIcon="@Icons.Material.Outlined.Shield" T="bool"></MudCheckBox>
+                        <MudCheckBox Label="Encryption" Size="Size.Medium" Checked="@Header.IsJsonEncrypted" Disabled="@Header.IsJsonEncryptedForced" CheckedChanged="@(e => IsJsonEncryptedCheck((bool)e))" Color="Color.Info" CheckedIcon="@Icons.Material.Filled.Shield" UncheckedIcon="@Icons.Material.Outlined.Shield" T="bool"></MudCheckBox>
                     </MudTooltip>
                 </MudItem>
             </MudGrid>
