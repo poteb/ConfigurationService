@@ -5,12 +5,14 @@ public class FileHandler : IFileHandler
     private readonly string _configurationRootDir;
     private readonly string _environmentsDir;
     private readonly string _applicationsDir;
+    private readonly string _settingsDir;
 
     public FileHandler(string directory)
     {
         _configurationRootDir = Path.Combine(directory, "configurations");
         _environmentsDir = Path.Combine(directory, "environments");
         _applicationsDir = Path.Combine(directory, "applications");
+        _settingsDir = Path.Combine(directory, "settings");
 
         if (!Directory.Exists(_configurationRootDir))
             Directory.CreateDirectory(_configurationRootDir);
@@ -18,6 +20,8 @@ public class FileHandler : IFileHandler
             Directory.CreateDirectory(_environmentsDir);
         if (!Directory.Exists(_applicationsDir))
             Directory.CreateDirectory(_applicationsDir);
+        if (!Directory.Exists(_settingsDir))
+            Directory.CreateDirectory(_settingsDir);
     }
 
     public string[] GetConfigurationFiles()
@@ -133,15 +137,31 @@ public class FileHandler : IFileHandler
     {
         await WriteAuditLog(Path.Combine(_configurationRootDir, id, "AuditLog"), content);
     }
-
     public async Task AuditLogEnvironment(string id, string content)
     {
         await WriteAuditLog(Path.Combine(_environmentsDir, "AuditLog", id), content);
     }
-
     public async Task AuditLogApplication(string id, string content)
     {
         await WriteAuditLog(Path.Combine(_applicationsDir, "AuditLog", id), content);
+    }
+    public async Task AuditLogSettings(string content)
+    {
+        await WriteAuditLog(Path.Combine(_settingsDir, "AuditLog"), content);
+    }
+
+    public async Task<string> GetSettings(CancellationToken cancellationToken)
+    {
+        var file = Path.Combine(_settingsDir, "settings.json");
+        if (!System.IO.File.Exists(file))
+            return "{}";
+        return await System.IO.File.ReadAllTextAsync(file, cancellationToken);
+    }
+
+    public async Task SaveSettings(string settings, CancellationToken cancellationToken)
+    {
+        var file = Path.Combine(_settingsDir, "settings.json");
+        await System.IO.File.WriteAllTextAsync(file, settings, cancellationToken);
     }
 
     private async Task WriteAuditLog(string dir, string content)

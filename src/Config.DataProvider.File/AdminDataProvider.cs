@@ -96,10 +96,11 @@ public class AdminDataProvider : IAdminDataProvider
 
     public async Task Insert(ConfigurationHeader header, CancellationToken cancellationToken)
     {
+        var settings = await GetSettings(cancellationToken);
         header.Configurations.ForEach(c =>
         {
             c.CreatedUtc = header.CreatedUtc;
-            c.IsJsonEncrypted = c.IsJsonEncrypted || header.IsJsonEncrypted;
+            c.IsJsonEncrypted = c.IsJsonEncrypted || header.IsJsonEncrypted || settings.EncryptAllJson;
             EncryptionHandler.Encrypt(c, _encryptionSettings.JsonEncryptionKey);
         });
         await _fileHandler.WriteConfigurationContent(header.Id, JsonConvert.SerializeObject(header), cancellationToken);
@@ -137,5 +138,18 @@ public class AdminDataProvider : IAdminDataProvider
     public async Task<List<Environment>> GetEnvironments(CancellationToken cancellationToken)
     {
         return await _environmentDataAccess.GetEnvironments(cancellationToken);
+    }
+    
+
+    public async Task<Settings> GetSettings(CancellationToken cancellationToken)
+    {
+        var json = await _fileHandler.GetSettings(cancellationToken);
+        if (string.IsNullOrWhiteSpace(json)) return new Settings();
+        return JsonConvert.DeserializeObject<Settings>(json) ?? new Settings();
+    }
+
+    public async Task SaveSettings(Settings settings, CancellationToken cancellationToken)
+    {
+        await _fileHandler.SaveSettings(JsonConvert.SerializeObject(settings), cancellationToken);
     }
 }

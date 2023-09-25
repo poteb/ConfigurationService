@@ -21,4 +21,7 @@ public interface IAdminDataProvider : IDataProvider
     
     Task UpsertApplication(DbModel.Application application, CancellationToken cancellationToken);
     Task DeleteApplication(string id, CancellationToken cancellationToken);
+    
+    Task<Settings> GetSettings(CancellationToken cancellationToken);
+    Task SaveSettings(Settings settings, CancellationToken cancellationToken);
 }

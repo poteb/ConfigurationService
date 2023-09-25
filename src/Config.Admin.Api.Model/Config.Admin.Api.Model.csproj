@@ -9,8 +9,5 @@
     <IsPackable>true</IsPackable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Folder Include="RequestResponse\" />
-  </ItemGroup>
 
 </Project>

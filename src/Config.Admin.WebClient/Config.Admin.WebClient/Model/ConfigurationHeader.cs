@@ -10,6 +10,8 @@ public class ConfigurationHeader : IEquatable<ConfigurationHeader>
     public bool IsActive { get; set; } = true;
     public List<Configuration> Configurations { get; set; } = new();
     public bool IsJsonEncrypted { get; set; }
+    
+    internal bool IsJsonEncryptedForced { get; set; }
 
     public bool Equals(ConfigurationHeader? other)
     {

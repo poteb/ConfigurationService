@@ -93,4 +93,14 @@ public class TestDataProvider : IAdminDataProvider
     {
         throw new System.NotImplementedException();
     }
+
+    public Task<Settings> GetSettings(CancellationToken cancellationToken)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public Task SaveSettings(Settings settings, CancellationToken cancellationToken)
+    {
+        throw new System.NotImplementedException();
+    }
 }

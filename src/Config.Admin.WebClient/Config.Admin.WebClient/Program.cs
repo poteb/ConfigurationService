@@ -28,6 +28,7 @@ builder.Services.AddScoped<IApiService, ApiService>();
 builder.Services.AddScoped<IDependencyGraphApiService, DependencyGraphApiService>();
 builder.Services.AddScoped<IConfigurationTestService, ConfigurationTestService>();
 builder.Services.AddScoped<IAllConfigurationsTestService, AllConfigurationsTestService>();
+builder.Services.AddScoped<ISettingsService, SettingsService>();
 
 
 await builder.Build().RunAsync(); 
