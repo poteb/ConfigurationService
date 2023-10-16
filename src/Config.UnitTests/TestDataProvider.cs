@@ -25,6 +25,11 @@ public class TestDataProvider : IAdminDataProvider
         };
     }
 
+    public Task<ApiKeys> GetApiKeys(CancellationToken cancellationToken)
+    {
+        return Task.FromResult(new ApiKeys());
+    }
+
     public Task<List<Environment>> GetEnvironments(CancellationToken cancellationToken)
     {
         var list = new List<Environment> {new() {Id = "EnvId1", Name = "test"}};

@@ -153,8 +153,7 @@ public class FileHandler : IFileHandler
     public async Task<string> GetSettings(CancellationToken cancellationToken)
     {
         var file = Path.Combine(_settingsDir, "settings.json");
-        if (!System.IO.File.Exists(file))
-            return "{}";
+        if (!System.IO.File.Exists(file)) return "{}";
         return await System.IO.File.ReadAllTextAsync(file, cancellationToken);
     }
 
@@ -162,6 +161,13 @@ public class FileHandler : IFileHandler
     {
         var file = Path.Combine(_settingsDir, "settings.json");
         await System.IO.File.WriteAllTextAsync(file, settings, cancellationToken);
+    }
+
+    public async Task<string> GetApiKeys(CancellationToken cancellationToken)
+    {
+        var file = Path.Combine(_settingsDir, "apikeys.json");
+        if (!System.IO.File.Exists(file)) return string.Empty;
+        return await System.IO.File.ReadAllTextAsync(file, cancellationToken);
     }
 
     private async Task WriteAuditLog(string dir, string content)

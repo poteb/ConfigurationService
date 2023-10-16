@@ -60,6 +60,13 @@ public class AdminDataProvider : IAdminDataProvider
         return configuration;
     }
 
+    public async Task<ApiKeys> GetApiKeys(CancellationToken cancellationToken)
+    {
+        var apiKeyString = await _fileHandler.GetApiKeys(cancellationToken);
+        var apiKeys = JsonConvert.DeserializeObject<ApiKeys>(apiKeyString);
+        return apiKeys ?? new ApiKeys();
+    }
+
     public async Task<List<ConfigurationHeader>> GetHeaderHistory(string id, int page, int pageSize, CancellationToken cancellationToken)
     {
         var historyJson = await _fileHandler.GetHeaderHistory(id, page, pageSize, cancellationToken);

@@ -1,6 +1,7 @@
 global using pote.Config.Parser;
 global using pote.Config.Shared;
 using Df.ServiceControllerExtensions;
+using pote.Config.Api.Authentication;
 using pote.Config.DataProvider.File;
 using pote.Config.DataProvider.Interfaces;
 
@@ -29,6 +30,9 @@ builder.Services.AddScoped<IFileHandler>(_ => new FileHandler(fileDb));
 builder.Services.AddScoped<IDataProvider, DataProvider>();
 builder.Services.AddScoped<IApplicationDataAccess, ApplicationDataAccess>();
 builder.Services.AddScoped<IEnvironmentDataAccess, EnvironmentDataAccess>();
+
+builder.Services.AddTransient<IApiKeyValidation, ApiKeyValidation>();
+builder.Services.AddScoped<ApiKeyAuthenticationFilter>();
 
 var app = builder.Build();
 

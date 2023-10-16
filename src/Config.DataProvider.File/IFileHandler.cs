@@ -27,4 +27,5 @@ public interface IFileHandler
     
     Task<string> GetSettings(CancellationToken cancellationToken);
     Task SaveSettings(string settings, CancellationToken cancellationToken);
+    Task<string> GetApiKeys(CancellationToken cancellationToken);
 }
