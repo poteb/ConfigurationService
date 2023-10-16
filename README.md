@@ -5,8 +5,9 @@
 
 Application configuration taken to the next level.
 
-Centralize application-configuration and fetch through an API.
-Frontend Blazor app to manage the configurations.
+- Centralized and shared application configuration.
+- Fetch configuration through an API.
+- Frontend Blazor app to manage the configurations.
 
 ### The reason behind it
 I don't like configuration-as-code. I should never be forced to release my application to make a change to a setting. Not even if the changes to settings is done in the release pipeline, i.e. Octopus Deploy or Azure DevOps. I just don't like it.
@@ -15,15 +16,20 @@ I prefer a system where I can make the changes on the fly, test them and still h
 ### Creator's note
 I've so far created everything here myself. But I'd be happy to get your (yes you!) view on this.
 
-It can at first be hard to wrap your head around the concepts described below. Here you'll see that configuration isn't static anymore. IT'S ALIVE!
+It can at first be hard to wrap your head around the concepts described below. Here you'll see that configuration isn't static anymore.
 
-## But wait! There's more!
+## Reusability
 
-It's all about reusability and having a great overwiew of your application configuration.
+It's all about reusability and having a great overview of your application configuration.
 
-![Basic usage](https://raw.githubusercontent.com/poteb/ConfigurationService/main/documentation/BasicOverview.png)
+The configurations are split into smaller parts and linked together. This makes it possible to reuse the same configuration across multiple applications. It also makes it easier to manage the configurations.
 
-Administering the configurations is now a whole lot easier with the power of JSON ref.
+![Basic usage](/documentation/BasicOverview.png)
+
+## JSON Reference ($ref)
+The configurations are stored as JSON files. The JSON reference syntax is used to link the configurations together. 
+The reference syntax is `$ref:<path>#<json-property>`. The path is relative to the current configuration file. The json-property is optional and if omitted the entire content of the referenced configuration is used.
+
 Let's look at an example.
 Our application *Super Goofy's Super Goobers* has a standard configuration that needs a SQL Server connection string and some RabbitMQ server settings:
 
@@ -228,6 +234,18 @@ which results in
 The *base* key is gone from the original *appsettings.json* and replaced with the result of the reference.
 This works because the name of the json property is *base* or *Base*.
 
+## Admin UI
+![Basic usage](/documentation/AdminUi1.png)
+Here is an example of a configuration in the Admin UI.
+
+A configuration has a name which is also it's key. It's used to reference the configuration from other configurations. A configuration can have multiple sections, where each section is for one or more environment and applications.
+
+The blue box shows the configuration for the *Development* environment and several applications.
+
+The green box shows the configuration for the *Test02* environment and the same applications.
+
+There is not reference in this example, but it's referenced by another configuration, the *Base-DeliveryNotesApi* configuration. You can see this to the right of the name field.
+
 ## Storage
 The underlying storage is abstracted away from the JSON parser and admin API, which means it's relatively easy to change it. For now you'll find a working file storage data provider and an incomplete SQL Server data provider. Changing the file location is done in *Config.Api/appsettings.Development.json* and *Config.Admin.Api/appsettings.Development.json*.
 
@@ -238,6 +256,8 @@ If the call to the API fails it will try to load a previously generated configur
 
 ## Security
 None. So don't expose the APIs outside your network.
+
+There are two issues that will add api-key security. [#125](https://github.com/poteb/ConfigurationService/issues/125) and [#126](https://github.com/poteb/ConfigurationService/issues/126).
 
 ## Build
 There is no build pipeline set up for this repository. This is because it's not just a nuget package but multiple full-blown applications.
