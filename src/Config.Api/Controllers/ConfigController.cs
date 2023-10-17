@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using pote.Config.Api.Authentication;
+using pote.Config.Auth;
 
 namespace pote.Config.Api.Controllers;
 

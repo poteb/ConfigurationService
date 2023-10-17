@@ -1,10 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace pote.Config.Api.Authentication;
+namespace pote.Config.Auth;
 
-
-internal class ApiKeyAuthenticationFilter : IAsyncAuthorizationFilter
+public class ApiKeyAuthenticationFilter : IAsyncAuthorizationFilter
 {
     private const string ApiKeyHeaderName = "X-API-Key";
     private readonly IApiKeyValidation _apiKeyValidation;
@@ -20,7 +19,7 @@ internal class ApiKeyAuthenticationFilter : IAsyncAuthorizationFilter
 
         if (string.IsNullOrWhiteSpace(userApiKey))
         {
-            context.Result = new BadRequestResult();
+            context.Result = new UnauthorizedResult();
             return;
         }
 

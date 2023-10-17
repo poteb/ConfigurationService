@@ -1,4 +1,4 @@
-namespace pote.Config.Api.Authentication;
+namespace pote.Config.Auth;
 
 public interface IApiKeyValidation
 {
