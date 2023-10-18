@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using Df.ServiceControllerExtensions;
 using Microsoft.AspNetCore.Http.Json;
 using pote.Config.Admin.Api.Services;
+using pote.Config.Auth;
 using pote.Config.DataProvider.File;
 using pote.Config.DataProvider.Interfaces;
 using pote.Config.Parser;
@@ -37,6 +38,9 @@ builder.Services.AddScoped<IAuditLogHandler, AuditLogHandler>();
 
 builder.Services.AddScoped<IDataProvider, DataProvider>();
 builder.Services.AddScoped<IParser, Parser>();
+
+builder.Services.AddScoped<IApiKeyValidation, ApiKeyValidation>();
+builder.Services.AddScoped<ApiKeyAuthenticationFilter>();
 
 builder.Services.Configure<JsonOptions>(options =>
 {

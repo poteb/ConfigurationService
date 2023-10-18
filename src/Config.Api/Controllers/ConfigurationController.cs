@@ -1,17 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using pote.Config.Auth;
 
 namespace pote.Config.Api.Controllers;
-
-[ApiController]
-[Route("V2/[controller]")]
-[ApiKey]
-public class ConfigurationV2Controller : ConfigurationController
-{
-    public ConfigurationV2Controller(ILogger<ConfigurationController> logger, IParser parser, EncryptionSettings encryptionSettings) : base(logger, parser, encryptionSettings)
-    {
-    }
-}
 
 [ApiController]
 [Route("[controller]")]
@@ -31,6 +20,7 @@ public class ConfigurationController : ControllerBase
     [HttpGet]
     public ActionResult Get()
     {
+        _logger.LogInformation(nameof(Get));
         return Ok("Wagga");
     }
 
@@ -39,6 +29,7 @@ public class ConfigurationController : ControllerBase
     {
         try
         {
+            _logger.LogInformation("Method {Controller}{Method} called from application {Application}", nameof(ConfigurationController), nameof(Parse), request.Application);
             var response = new ParseResponse { Application = request.Application, Environment = request.Environment };
             var config = await _parser.Parse(request.AsJson(), request.Application, request.Environment, response.AddProblem, CancellationToken.None, _encryptionSettings.JsonEncryptionKey);
             response.FromJson(config);
