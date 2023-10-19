@@ -21,6 +21,7 @@ public class TestDataProvider : IAdminDataProvider
             "ExistingSection" => Task.FromResult(new Configuration {Json = "{\"Wagga\":\"TheRealMama\",\"Foo\":{\"Baa\":false}}" }),
             "EncryptedSimple" => Task.FromResult(new Configuration {Json = "ddiWml5jx2W7XivdnZ+uiVG8Ok2PJ+CJh+q60CY7rKA=", IsJsonEncrypted = true}),
             "EncryptedButNot" => Task.FromResult(new Configuration {Json = "{\"Wagga\":\"Mama\"}", IsJsonEncrypted = true}),
+            "Deep" => Task.FromResult(new Configuration {Json = "{\"Deep\":{\"Foo\":\"Baa\"}}"}),
             _ => Task.FromResult(new Configuration())
         };
     }

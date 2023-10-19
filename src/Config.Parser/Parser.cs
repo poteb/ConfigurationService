@@ -12,6 +12,7 @@ public class Parser : IParser
     private readonly IDataProvider _dataProvider;
 
     private const string RefPattern = "\\$ref:(?<ref>[^#]*)#(?<field>[^\"]*)";
+    private const string RefPatternParentheses = "\\(\\$ref:(?<ref>[^#]*)#(?<field>[^\\)]*)";
     //private const string NamePattern = "(?<name>[^.]*).?(?<application>[^.]*).?(?<environment>[^.]*)";
 
     /// <summary>Add your own value to gather tracking data</summary>
@@ -81,8 +82,13 @@ public class Parser : IParser
             if (value == null) return;
 
             // Check if the value is a reference
-            var match = Regex.Match(value, RefPattern);
-            if (!match.Success) return;
+            var match = Regex.Match(value, RefPatternParentheses);
+            if (!match.Success)
+            {
+                match = Regex.Match(value, RefPattern);
+                if (!match.Success)
+                    return;
+            }
 
             // A match is found, now get the value from the database.
             var configurationName = match.Groups[1].Value;
