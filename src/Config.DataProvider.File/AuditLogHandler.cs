@@ -30,4 +30,9 @@ public class AuditLogHandler : IAuditLogHandler
     {
         await _fileHandler.AuditLogSettings($"{callerIp}{Environment.NewLine}{content}");
     }
+
+    public async Task AuditLogApiKeys(string id, string callerIp, string content)
+    {
+        await _fileHandler.AuditLogApiKeys($"{callerIp}{Environment.NewLine}{content}");
+    }
 }

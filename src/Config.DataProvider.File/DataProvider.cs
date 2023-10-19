@@ -56,6 +56,13 @@ public class DataProvider : IDataProvider
         return new Configuration { Id = string.Empty };
     }
 
+    public async Task<ApiKeys> GetApiKeys(CancellationToken cancellationToken)
+    {
+        var apiKeyString = await _fileHandler.GetApiKeys(cancellationToken);
+        var apiKeys = JsonConvert.DeserializeObject<ApiKeys>(apiKeyString);
+        return apiKeys ?? new ApiKeys();
+    }
+
     public async Task<List<Application>> GetApplications(CancellationToken cancellationToken)
     {
         return await _applicationDataAccess.GetApplications(cancellationToken);

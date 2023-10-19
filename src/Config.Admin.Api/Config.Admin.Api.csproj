@@ -12,11 +12,13 @@
   <ItemGroup>
     <PackageReference Include="Df.ServiceControllerExtensions" Version="1.0.0.2" />
     <PackageReference Include="newtonsoft.json" Version="13.0.2" />
+    <PackageReference Include="Serilog.AspNetCore" Version="7.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Config.Admin.Api.Model\Config.Admin.Api.Model.csproj" />
+    <ProjectReference Include="..\Config.Auth\Config.Auth.csproj" />
     <ProjectReference Include="..\Config.DataProvider.File\Config.DataProvider.File.csproj" />
     <ProjectReference Include="..\Config.Parser\Config.Parser.csproj" />
     <ProjectReference Include="..\Config.Shared\Config.Shared.csproj" />

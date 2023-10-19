@@ -147,14 +147,18 @@ public class FileHandler : IFileHandler
     }
     public async Task AuditLogSettings(string content)
     {
+        await WriteAuditLog(Path.Combine(_settingsDir, "AuditLogApiKeys"), content);
+    }
+
+    public async Task AuditLogApiKeys(string content)
+    {
         await WriteAuditLog(Path.Combine(_settingsDir, "AuditLog"), content);
     }
 
     public async Task<string> GetSettings(CancellationToken cancellationToken)
     {
         var file = Path.Combine(_settingsDir, "settings.json");
-        if (!System.IO.File.Exists(file))
-            return "{}";
+        if (!System.IO.File.Exists(file)) return "{}";
         return await System.IO.File.ReadAllTextAsync(file, cancellationToken);
     }
 
@@ -162,6 +166,19 @@ public class FileHandler : IFileHandler
     {
         var file = Path.Combine(_settingsDir, "settings.json");
         await System.IO.File.WriteAllTextAsync(file, settings, cancellationToken);
+    }
+
+    public async Task<string> GetApiKeys(CancellationToken cancellationToken)
+    {
+        var file = Path.Combine(_settingsDir, "apikeys.json");
+        if (!System.IO.File.Exists(file)) return string.Empty;
+        return await System.IO.File.ReadAllTextAsync(file, cancellationToken);
+    }
+    
+    public async Task SaveApiKeys(string apiKeys, CancellationToken cancellationToken)
+    {
+        var file = Path.Combine(_settingsDir, "apikeys.json");
+        await System.IO.File.WriteAllTextAsync(file, apiKeys, cancellationToken);
     }
 
     private async Task WriteAuditLog(string dir, string content)

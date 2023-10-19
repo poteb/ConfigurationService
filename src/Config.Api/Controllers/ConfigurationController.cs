@@ -17,11 +17,19 @@ public class ConfigurationController : ControllerBase
         _encryptionSettings = encryptionSettings;
     }
 
+    [HttpGet]
+    public ActionResult Get()
+    {
+        _logger.LogInformation(nameof(Get));
+        return Ok("Wagga");
+    }
+
     [HttpPost]
     public async Task<ActionResult> Parse([FromBody] ParseRequest request)
     {
         try
         {
+            _logger.LogInformation("Method {Controller}{Method} called from application {Application}", nameof(ConfigurationController), nameof(Parse), request.Application);
             var response = new ParseResponse { Application = request.Application, Environment = request.Environment };
             var config = await _parser.Parse(request.AsJson(), request.Application, request.Environment, response.AddProblem, CancellationToken.None, _encryptionSettings.JsonEncryptionKey);
             response.FromJson(config);

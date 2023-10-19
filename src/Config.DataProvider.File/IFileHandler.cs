@@ -24,7 +24,10 @@ public interface IFileHandler
     Task AuditLogEnvironment(string id, string content);
     Task AuditLogApplication(string id, string content);
     Task AuditLogSettings(string content);
+    Task AuditLogApiKeys(string content);
     
     Task<string> GetSettings(CancellationToken cancellationToken);
     Task SaveSettings(string settings, CancellationToken cancellationToken);
+    Task<string> GetApiKeys(CancellationToken cancellationToken);
+    Task SaveApiKeys(string apiKeys, CancellationToken cancellationToken);
 }

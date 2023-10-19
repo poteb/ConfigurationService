@@ -26,6 +26,11 @@ public class TestDataProvider : IAdminDataProvider
         };
     }
 
+    public Task<ApiKeys> GetApiKeys(CancellationToken cancellationToken)
+    {
+        return Task.FromResult(new ApiKeys());
+    }
+
     public Task<List<Environment>> GetEnvironments(CancellationToken cancellationToken)
     {
         var list = new List<Environment> {new() {Id = "EnvId1", Name = "test"}};
@@ -101,6 +106,11 @@ public class TestDataProvider : IAdminDataProvider
     }
 
     public Task SaveSettings(Settings settings, CancellationToken cancellationToken)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public Task SaveApiKeys(ApiKeys apiKeys, CancellationToken cancellationToken)
     {
         throw new System.NotImplementedException();
     }

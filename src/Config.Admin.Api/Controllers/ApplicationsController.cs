@@ -4,12 +4,14 @@ using pote.Config.Admin.Api.Helpers;
 using pote.Config.Admin.Api.Mappers;
 using pote.Config.Admin.Api.Model.RequestResponse;
 using pote.Config.Admin.Api.Services;
+using pote.Config.Auth;
 using pote.Config.DataProvider.Interfaces;
 
 namespace pote.Config.Admin.Api.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+[ApiKey]
 public class ApplicationsController : ControllerBase
 {
     private readonly ILogger<ApplicationsController> _logger;

@@ -1,10 +1,19 @@
 global using pote.Config.Parser;
 global using pote.Config.Shared;
 using Df.ServiceControllerExtensions;
+using pote.Config.Auth;
 using pote.Config.DataProvider.File;
 using pote.Config.DataProvider.Interfaces;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateBootstrapLogger();
+
+builder.Host.UseSerilog((context ,services, configuration) => configuration
+    .ReadFrom.Configuration(context.Configuration)
+    .ReadFrom.Services(services).WriteTo.Console()
+);
 
 builder.Services.AddCors(p => p.AddPolicy("allowall", policy =>
 {
@@ -29,6 +38,9 @@ builder.Services.AddScoped<IFileHandler>(_ => new FileHandler(fileDb));
 builder.Services.AddScoped<IDataProvider, DataProvider>();
 builder.Services.AddScoped<IApplicationDataAccess, ApplicationDataAccess>();
 builder.Services.AddScoped<IEnvironmentDataAccess, EnvironmentDataAccess>();
+
+builder.Services.AddScoped<IApiKeyValidation, ApiKeyValidation>();
+builder.Services.AddScoped<ApiKeyAuthenticationFilter>();
 
 var app = builder.Build();
 

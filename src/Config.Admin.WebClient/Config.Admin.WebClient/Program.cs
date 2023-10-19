@@ -15,10 +15,12 @@ builder.Services.AddSingleton<SearchCriteria>();
 builder.Services.AddHttpClient("AdminApi", client =>
 {
     client.BaseAddress = new Uri(builder.Configuration.GetConnectionString("AdminApi")!);
+    client.DefaultRequestHeaders.Add("X-API-Key", builder.Configuration.GetSection("ApiKey").Value!);
 });
 builder.Services.AddHttpClient("Api", client =>
 {
     client.BaseAddress = new Uri(builder.Configuration.GetConnectionString("Api")!);
+    client.DefaultRequestHeaders.Add("X-API-Key", builder.Configuration.GetSection("ApiKey").Value!);
 });
 
 builder.Services.AddMudServices();
@@ -29,6 +31,7 @@ builder.Services.AddScoped<IDependencyGraphApiService, DependencyGraphApiService
 builder.Services.AddScoped<IConfigurationTestService, ConfigurationTestService>();
 builder.Services.AddScoped<IAllConfigurationsTestService, AllConfigurationsTestService>();
 builder.Services.AddScoped<ISettingsService, SettingsService>();
+builder.Services.AddScoped<IApiKeysService, ApiKeysService>();
 
 
 await builder.Build().RunAsync(); 
