@@ -66,6 +66,11 @@ public class AdminDataProvider : IAdminDataProvider
         var apiKeys = JsonConvert.DeserializeObject<ApiKeys>(apiKeyString);
         return apiKeys ?? new ApiKeys();
     }
+    
+    public async Task SaveApiKeys(ApiKeys apiKeys, CancellationToken cancellationToken)
+    {
+        await _fileHandler.SaveApiKeys(JsonConvert.SerializeObject(apiKeys), cancellationToken);
+    }
 
     public async Task<List<ConfigurationHeader>> GetHeaderHistory(string id, int page, int pageSize, CancellationToken cancellationToken)
     {

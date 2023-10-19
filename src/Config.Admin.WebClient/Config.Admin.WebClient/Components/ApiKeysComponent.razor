@@ -1,0 +1,97 @@
+@using pote.Config.Admin.WebClient.Model
+@using pote.Config.Admin.WebClient.Services
+<MudGrid>
+    <MudItem xs="2" Style="margin-left:10px">
+        <MudText Typo="Typo.h6" Style="line-height: 48px">API Keys</MudText>
+    </MudItem>
+    <MudItem xs="4">
+        <MudGrid>
+            <MudItem xs="12">
+                <MudTooltip Text="Load from server, will undo changes">
+                    <MudIconButton Icon="@Icons.Material.Filled.Refresh" Color="Color.Info" OnClick="@Load" Title="Load from server, will undo changes"></MudIconButton>
+                </MudTooltip>
+                <MudTooltip Text="Save changes">
+                    <MudIconButton Icon="@Icons.Material.Filled.Save" Color="Color.Info" OnClick="@Save" Title="Save changes"></MudIconButton>
+                </MudTooltip>
+            </MudItem>
+        </MudGrid>
+    </MudItem>
+    <MudItem xs="4"></MudItem>
+    <MudItem xs="6">
+        <MudTable Items="@_apiKeys.Keys" Dense="true" CanCancelEdit="true" Elevation="0">
+            <ColGroup>
+                <col style="width: 400px;"/>
+                <col style="width: 30px;"/>
+            </ColGroup>
+            <HeaderContent>
+                <MudTh>
+                    <MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<string, object>(x => x)">Name</MudTableSortLabel>
+                </MudTh>
+                <MudTh Style="margin:0;padding:0">
+                    <MudIconButton Icon="@Icons.Material.Filled.Add" Title="Add item" OnClick="@AddItem" Color="Color.Success"></MudIconButton>
+                </MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd Style="border: 0">
+                    <MudTextField @bind-Value="@context.Key" Placeholder="enter key" Style="margin-top: 0" AutoFocus="@(string.IsNullOrEmpty(context.Key))"></MudTextField>
+                </MudTd>
+                <MudTd DataLabel="Delete" Style="padding-right: 0; border: 0">
+                    <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Delete" Title="Delete item" OnClick="() => Delete(context)" ></MudIconButton>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudItem>
+</MudGrid>
+
+@code {
+
+    [Inject]
+    public IApiKeysService ApiKeysService { get; set; } = null!;
+
+    [CascadingParameter]
+    public PageError PageError { get; set; } = null!;
+
+    private ApiKeys _apiKeys = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Load();
+    }
+
+    private async Task Load()
+    {
+        PageError.Reset();
+        var callResponse = await ApiKeysService.GetApiKeys();
+        if (callResponse is {IsSuccess: true, Response: not null})
+        {
+            _apiKeys = Mappers.ApiKeysMapper.ToClient(callResponse.Response.ApiKeys);
+        }
+        else
+            PageError.OnError(callResponse.GenerateErrorMessage(), new Exception());
+    }
+
+    private async Task Save()
+    {
+        var callResponse = await ApiKeysService.SaveApiKeys(_apiKeys);
+        if (!callResponse.IsSuccess)
+            PageError.OnError("Error saving API keys, please try again", new Exception());
+        else
+        {
+            await Load();
+            PageError.Reset();
+        }
+    }
+
+    private void AddItem()
+    {
+        _apiKeys.Keys.Add(new ApiKey());
+    }
+
+    private void Delete(ApiKey key)
+    {
+        _apiKeys.Keys.Remove(key);
+        StateHasChanged();
+        //return EventCallback.Empty;
+    }
+
+}

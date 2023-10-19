@@ -1,0 +1,59 @@
+@using pote.Config.Admin.WebClient.Services
+@using pote.Config.Admin.WebClient.Model
+<PageTitle>Settings</PageTitle>
+
+<MudGrid>
+    <MudItem xs="2" Style="margin-left: 10px">
+        <MudText Typo="Typo.h6" Style="line-height: 48px">Settings</MudText>
+    </MudItem>
+    <MudItem xs="4">
+        <MudGrid>
+            <MudItem xs="12">
+                <MudTooltip Text="Load from server, will undo changes">
+                    <MudIconButton Icon="@Icons.Material.Filled.Refresh" Color="Color.Info" OnClick="@Load" Title="Load from server, will undo changes"></MudIconButton>
+                </MudTooltip>
+                <MudTooltip Text="Save changes">
+                    <MudIconButton Icon="@Icons.Material.Filled.Save" Color="Color.Info" OnClick="@Save" Title="Save changes"></MudIconButton>
+                </MudTooltip>
+            </MudItem>
+        </MudGrid>
+    </MudItem>
+</MudGrid>
+<MudGrid>
+    <MudItem xs="12"><MudCheckBox @bind-Checked="@Settings.EncryptAllJson" T="bool">Encrypt all configurations</MudCheckBox></MudItem>
+</MudGrid>
+
+@code {
+    [Inject] public ISettingsService SettingsService { get; set; } = null!;
+    [CascadingParameter] public PageError PageError { get; set; } = null!;
+    private Settings Settings { get; set; } = new();
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await Load();
+    }
+    
+    private async Task Load()
+    {
+        PageError.Reset();
+        var callResponse = await SettingsService.GetSettings();
+        if (callResponse is {IsSuccess: true, Response: not null})
+        {
+            Settings = Mappers.SettingsMapper.ToClient(callResponse.Response.Settings);
+        }
+        else
+            PageError.OnError(callResponse.GenerateErrorMessage(), new Exception());
+    }
+
+    private async Task Save()
+    {
+        var callResponse = await SettingsService.SaveSettings(Settings);
+        if (!callResponse.IsSuccess)
+            PageError.OnError("Error saving API keys, please try again", new Exception());
+        else
+        {
+            await Load();
+            PageError.Reset();
+        }
+    }
+}

@@ -1,24 +1,8 @@
 ﻿@page "/Settings"
+@using pote.Config.Admin.WebClient.Components
 
-<PageTitle>Settings</PageTitle>
+<SettingsComponent></SettingsComponent>
 
-<MudGrid>
-    <MudItem xs="6" Style="margin-left: 10px">
-        <MudText Typo="Typo.h6" Style="line-height: 48px">Settings</MudText>
-    </MudItem>
-    <MudItem xs="6">
-        <MudGrid>
-            <MudItem xs="12">
-                <MudTooltip Text="Load from server, will undo changes">
-                    <MudIconButton Icon="@Icons.Material.Filled.Refresh" Color="Color.Info" OnClick="@Load" Title="Load from server, will undo changes"></MudIconButton>
-                </MudTooltip>
-                <MudTooltip Text="Save changes">
-                    <MudIconButton Icon="@Icons.Material.Filled.Save" Color="Color.Info" OnClick="@Save" Title="Save changes"></MudIconButton>
-                </MudTooltip>
-            </MudItem>
-        </MudGrid>
-    </MudItem>
-</MudGrid>
-<MudGrid>
-    <MudItem xs="12"><MudCheckBox @bind-Checked="@Settings.EncryptAllJson" T="bool">Encrypt all configurations</MudCheckBox></MudItem>
-</MudGrid>
+<div style="padding-top:60px"></div>
+
+<ApiKeysComponent></ApiKeysComponent>

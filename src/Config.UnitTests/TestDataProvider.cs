@@ -109,4 +109,9 @@ public class TestDataProvider : IAdminDataProvider
     {
         throw new System.NotImplementedException();
     }
+
+    public Task SaveApiKeys(ApiKeys apiKeys, CancellationToken cancellationToken)
+    {
+        throw new System.NotImplementedException();
+    }
 }

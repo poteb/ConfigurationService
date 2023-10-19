@@ -24,4 +24,6 @@ public interface IAdminDataProvider : IDataProvider
     
     Task<Settings> GetSettings(CancellationToken cancellationToken);
     Task SaveSettings(Settings settings, CancellationToken cancellationToken);
+    
+    Task SaveApiKeys(ApiKeys apiKeys, CancellationToken cancellationToken);
 }
