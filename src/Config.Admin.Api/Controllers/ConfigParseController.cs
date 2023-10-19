@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using pote.Config.Auth;
 using pote.Config.Shared;
 
 namespace pote.Config.Admin.Api.Controllers;
 
 [ApiController]
 [Route("Configuration")]
+[ApiKey]
 public class ConfigParseController : ControllerBase
 {
     private readonly ILogger<ConfigParseController> _logger;

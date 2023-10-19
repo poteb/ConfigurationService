@@ -7,8 +7,16 @@ using pote.Config.DataProvider.File;
 using pote.Config.DataProvider.Interfaces;
 using pote.Config.Parser;
 using pote.Config.Shared;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateBootstrapLogger();
+
+builder.Host.UseSerilog((context ,services, configuration) => configuration
+    .ReadFrom.Configuration(context.Configuration)
+    .ReadFrom.Services(services).WriteTo.Console()
+);
 
 builder.Services.AddMemoryCache();
 builder.Services.AddControllers();

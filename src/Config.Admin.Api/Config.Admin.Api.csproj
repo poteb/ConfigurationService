@@ -12,6 +12,7 @@
   <ItemGroup>
     <PackageReference Include="Df.ServiceControllerExtensions" Version="1.0.0.2" />
     <PackageReference Include="newtonsoft.json" Version="13.0.2" />
+    <PackageReference Include="Serilog.AspNetCore" Version="7.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>
 
