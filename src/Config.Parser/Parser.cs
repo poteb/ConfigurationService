@@ -11,7 +11,7 @@ public class Parser : IParser
 {
     private readonly IDataProvider _dataProvider;
 
-    private const string RefPattern = "\\$ref:(?<ref>[^#]*)#(?<field>[^\"]*)";
+    private const string RefPatternQuotes = "\\$ref:(?<ref>[^#]*)#(?<field>[^\"]*)";
     private const string RefPatternParentheses = "\\(\\$ref:(?<ref>[^#]*)#(?<field>[^\\)]*)";
     //private const string NamePattern = "(?<name>[^.]*).?(?<application>[^.]*).?(?<environment>[^.]*)";
 
@@ -85,7 +85,7 @@ public class Parser : IParser
             var match = Regex.Match(value, RefPatternParentheses);
             if (!match.Success)
             {
-                match = Regex.Match(value, RefPattern);
+                match = Regex.Match(value, RefPatternQuotes);
                 if (!match.Success)
                     return;
             }
