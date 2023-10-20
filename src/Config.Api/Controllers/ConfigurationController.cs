@@ -29,7 +29,8 @@ public class ConfigurationController : ControllerBase
     {
         try
         {
-            _logger.LogInformation("Method {Controller}{Method} called from application {Application}", nameof(ConfigurationController), nameof(Parse), request.Application);
+            if (!request.Application.Equals("ApiKeys"))
+                _logger.LogInformation("Method {Controller}{Method} called from application {Application}", nameof(ConfigurationController), nameof(Parse), request.Application);
             var response = new ParseResponse { Application = request.Application, Environment = request.Environment };
             var config = await _parser.Parse(request.AsJson(), request.Application, request.Environment, response.AddProblem, CancellationToken.None, _encryptionSettings.JsonEncryptionKey);
             response.FromJson(config);
