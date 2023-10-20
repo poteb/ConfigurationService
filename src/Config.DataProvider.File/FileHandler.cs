@@ -147,12 +147,12 @@ public class FileHandler : IFileHandler
     }
     public async Task AuditLogSettings(string content)
     {
-        await WriteAuditLog(Path.Combine(_settingsDir, "AuditLogApiKeys"), content);
+        await WriteAuditLog(Path.Combine(_settingsDir, "AuditLog"), content);
     }
 
     public async Task AuditLogApiKeys(string content)
     {
-        await WriteAuditLog(Path.Combine(_settingsDir, "AuditLog"), content);
+        await WriteAuditLog(Path.Combine(_settingsDir, "AuditLogApiKeys"), content);
     }
 
     public async Task<string> GetSettings(CancellationToken cancellationToken)
