@@ -44,6 +44,7 @@ public class SettingsController : ControllerBase
         {
             await _dataProvider.SaveSettings(Mappers.SettingsMapper.ToDb(settings), cancellationToken);
             await this.AuditLog("0", "Save", _auditLogHandler.AuditLogSettings);
+            _logger.LogInformation("Settings saved");
             return Ok();
         }
         catch (Exception ex)
