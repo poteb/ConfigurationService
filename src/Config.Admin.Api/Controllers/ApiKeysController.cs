@@ -44,6 +44,7 @@ public class ApiKeysController : ControllerBase
         {
             await _dataProvider.SaveApiKeys(Mappers.ApiKeysMapper.ToDb(apiKeys), cancellationToken);
             await this.AuditLog("0", "Save", _auditLogHandler.AuditLogApiKeys);
+            _logger.LogInformation("API keys saved");
             return Ok();
         }
         catch (Exception ex)

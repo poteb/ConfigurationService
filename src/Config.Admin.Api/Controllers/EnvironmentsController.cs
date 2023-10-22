@@ -54,6 +54,7 @@ public class EnvironmentsController : ControllerBase
             await _dataProvider.UpsertEnvironment(EnvironmentMapper.ToDb(environment), cancellationToken);
             _memoryCache.Remove(DependencyGraphService.CacheName);
             await this.AuditLog(environment.Id, "Insert", _auditLogHandler.AuditLogEnvironment);
+            _logger.LogInformation("Environment {EnvironmentId} inserted", environment.Id);
             return Ok();
         }
         catch (Exception ex)
@@ -71,6 +72,7 @@ public class EnvironmentsController : ControllerBase
             await _dataProvider.DeleteEnvironment(id, cancellationToken);
             _memoryCache.Remove(DependencyGraphService.CacheName);
             await this.AuditLog(id, "Delete", _auditLogHandler.AuditLogEnvironment);
+            _logger.LogInformation("Environment {EnvironmentId} deleted", id);
             return Ok();
         }
         catch (Exception ex)

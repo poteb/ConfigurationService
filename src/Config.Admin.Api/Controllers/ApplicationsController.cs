@@ -53,6 +53,7 @@ public class ApplicationsController : ControllerBase
             await _dataProvider.UpsertApplication(ApplicationMapper.ToDb(application), cancellationToken);
             _memoryCache.Remove(DependencyGraphService.CacheName);
             await this.AuditLog(application.Id, "Insert", _auditLogHandler.AuditLogApplication);
+            _logger.LogInformation("Application {ApplicationId} inserted", application.Id);
             return Ok();
         }
         catch (Exception ex)
@@ -70,6 +71,7 @@ public class ApplicationsController : ControllerBase
             await _dataProvider.DeleteApplication(id, cancellationToken);
             _memoryCache.Remove(DependencyGraphService.CacheName);
             await this.AuditLog(id, "Delete", _auditLogHandler.AuditLogApplication);
+            _logger.LogInformation("Application {ApplicationId} deleted", id);
             return Ok();
         }
         catch (Exception ex)

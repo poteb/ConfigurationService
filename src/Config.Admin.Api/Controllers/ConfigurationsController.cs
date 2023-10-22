@@ -128,6 +128,7 @@ public class ConfigurationsController : ControllerBase
             await _dataProvider.Insert(ConfigurationMapper.ToDb(header), cancellationToken);
             _memoryCache.Remove(DependencyGraphService.CacheName);
             await this.AuditLog(header.Id, "Insert", _auditLogHandler.AuditLogConfiguration);
+            _logger.LogInformation("Configuration header {HeaderId} inserted", header.Id);
             return Ok();
         }
         catch (Exception ex)
@@ -145,6 +146,7 @@ public class ConfigurationsController : ControllerBase
             _dataProvider.DeleteConfiguration(id, permanent);
             if (!permanent)
                 await this.AuditLog(id, "Delete", _auditLogHandler.AuditLogConfiguration);
+            _logger.LogInformation("Configuration header {HeaderId} deleted", id);
             return Ok();
         }
         catch (Exception ex)
