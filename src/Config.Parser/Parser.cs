@@ -12,7 +12,7 @@ public class Parser : IParser
     private readonly IDataProvider _dataProvider;
 
     private const string RefPatternQuotes = "\\$ref:(?<ref>[^#]*)#(?<field>[^\"]*)";
-    private const string RefPatternParentheses = "\\(\\$ref:(?<ref>[^#]*)#(?<field>[^\\)]*)";
+    private const string RefPatternParentheses = "\\(\\$ref:(?<ref>[^#]*)#(?<field>[^\\)]*)\\)";
     //private const string NamePattern = "(?<name>[^.]*).?(?<application>[^.]*).?(?<environment>[^.]*)";
 
     /// <summary>Add your own value to gather tracking data</summary>
@@ -83,11 +83,13 @@ public class Parser : IParser
 
             // Check if the value is a reference
             var match = Regex.Match(value, RefPatternParentheses);
+            var matchTypeParantheses = true;
             if (!match.Success)
             {
                 match = Regex.Match(value, RefPatternQuotes);
                 if (!match.Success)
                     return;
+                matchTypeParantheses = false;
             }
 
             // A match is found, now get the value from the database.
@@ -97,6 +99,7 @@ public class Parser : IParser
                 problems($"Referenced configuration {configurationName} was already resolved from source configuration {sourceConfigurationId} and reference {value}.");
                 return;
             }
+
             var configuration = await _dataProvider.GetConfiguration(configurationName, application, environment, cancellationToken);
             fetchedConfigurations.Add(new KeyValuePair<string, string>(configurationName, value));
             if (string.IsNullOrWhiteSpace(configuration.Json))
@@ -106,17 +109,22 @@ public class Parser : IParser
             }
 
             // Decrypt the value if needed
-            if (configuration.IsJsonEncrypted) 
+            if (configuration.IsJsonEncrypted)
                 configuration.Json = EncryptionHandler.Decrypt(configuration.Json, encryptionKey);
-            
+
             var refO = JObject.Parse(configuration.Json);
             var refField = match.Groups["field"];
             var refToken = refO.SelectToken(refField.Value);
             if (refToken == null) return;
-            
+
             // Replace the value with the value from the database.
-            jProp.Value = refToken;
-            
+            //jProp.Value = refToken;
+            //jProp.Value.Replace(match.Value, refToken.ToString());
+            if (matchTypeParantheses)
+                jProp.Value = new JValue(jProp.Value.ToString().Replace(match.Value, refToken.ToString()));
+            else
+                jProp.Value = refToken;
+
             TrackingAction(sourceConfigurationId, configuration.HeaderId);
             sourceConfigurationId = configuration.HeaderId;
 
@@ -155,6 +163,7 @@ public class Parser : IParser
             existing?.Remove();
             root[child.Name] = child.Value;
         }
+
         baseObj.Remove();
     }
 }
