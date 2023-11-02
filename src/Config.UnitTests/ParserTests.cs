@@ -58,7 +58,18 @@ public class ParserTests
         var response = await parser.Parse("{\"Value1\":\"this is my text:($ref:Wagga#Wagga); with some more text\"}", "unittest", "test", _ => { }, CancellationToken.None, "");
         var dyn = JsonConvert.DeserializeObject<dynamic>(response);
         var value1 = dyn?.Value1.ToString();
-        Assert.AreEqual("Mama", value1);
+        Assert.AreEqual("this is my text:Mama; with some more text", value1);
+    }
+    
+    [Test]
+    public async Task TestParenthesesDeep()
+    {
+        var dataProvider = new TestDataProvider();
+        var parser = new Parser.Parser(dataProvider);
+        var response = await parser.Parse("{\"Value1\":\"this is my text:($ref:Deep#Deep.Foo); with some more text\"}", "unittest", "test", _ => { }, CancellationToken.None, "");
+        var dyn = JsonConvert.DeserializeObject<dynamic>(response);
+        var value1 = dyn?.Value1.ToString();
+        Assert.AreEqual("this is my text:Baa; with some more text", value1);
     }
 
     [Test, Explicit]
