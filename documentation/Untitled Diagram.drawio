@@ -1,1 +1,28 @@
-<mxfile host="app.diagrams.net" modified="2023-11-03T19:28:49.815Z" agent="5.0 (Windows)" version="20.8.16" etag="AczqWsm3fo2c5oVXsglE" type="github"><diagram name="Page-1" id="dcWUBzU9fhlhp9Y05Il0">UzV2zq1wL0osyPDNT0nNUTV2VTV2LsrPL4GwciucU3NyVI0MMlNUjV1UjYwMgFjVyA2HrCFY1qAgsSg1rwSLBiADYTaQg2Y1AA==</diagram></mxfile>
+<mxfile host="app.diagrams.net" modified="2023-11-03T19:35:54.679Z" agent="5.0 (Windows)" etag="R23WxoAhlf_328mN14Fo" version="20.8.16" type="github">
+  <diagram name="Page-1" id="dcWUBzU9fhlhp9Y05Il0">
+    <mxGraphModel dx="1029" dy="829" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="pR6wOZlUK_r56ZYDmY0q-1" value="" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="320" y="100" as="sourcePoint" />
+            <mxPoint x="320" y="160" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pR6wOZlUK_r56ZYDmY0q-4" value="&lt;pre class=&quot;notranslate&quot;&gt;&lt;code&gt;&lt;b&gt;JSON input:&lt;/b&gt;&lt;br&gt;{&lt;br&gt;  &lt;/code&gt;&lt;code&gt;&quot;base&quot;:&quot;$ref:base-configuration&quot;&lt;br&gt;&lt;/code&gt;&lt;code&gt;}&lt;/code&gt;&lt;/pre&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="440" y="80" width="350" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="pR6wOZlUK_r56ZYDmY0q-6" value="Client, service, app, etc." style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="310" y="30" width="20" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="pR6wOZlUK_r56ZYDmY0q-7" value="Configuration Service API" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="240" y="160" width="160" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="pR6wOZlUK_r56ZYDmY0q-8" value="" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" vertex="1" parent="1">
+          <mxGeometry x="130" y="200" width="60" height="80" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
