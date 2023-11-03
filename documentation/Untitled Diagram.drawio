@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2023-11-03T19:35:54.679Z" agent="5.0 (Windows)" etag="R23WxoAhlf_328mN14Fo" version="20.8.16" type="github">
+<mxfile host="app.diagrams.net" modified="2023-11-03T19:40:01.207Z" agent="5.0 (Windows)" etag="5iYvusfECmloVqsXO_fJ" version="20.8.16" type="github">
   <diagram name="Page-1" id="dcWUBzU9fhlhp9Y05Il0">
     <mxGraphModel dx="1029" dy="829" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
@@ -20,7 +20,22 @@
           <mxGeometry x="240" y="160" width="160" height="40" as="geometry" />
         </mxCell>
         <mxCell id="pR6wOZlUK_r56ZYDmY0q-8" value="" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" vertex="1" parent="1">
-          <mxGeometry x="130" y="200" width="60" height="80" as="geometry" />
+          <mxGeometry x="500" y="200" width="60" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="pR6wOZlUK_r56ZYDmY0q-11" value="" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="319.5" y="210" as="sourcePoint" />
+            <mxPoint x="320" y="560" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pR6wOZlUK_r56ZYDmY0q-12" value="" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="pR6wOZlUK_r56ZYDmY0q-8">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="170" y="240" as="sourcePoint" />
+            <mxPoint x="330" y="240" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pR6wOZlUK_r56ZYDmY0q-13" value="&lt;div&gt;&lt;b&gt;SQL connection string&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;code&gt;&quot;ConnectionStrings&quot;:&lt;/code&gt;&lt;/div&gt;&lt;div&gt;&lt;pre class=&quot;notranslate&quot;&gt;&lt;code&gt;{&lt;br&gt;  &quot;Default&quot;: &quot;Data Source=dbserver;&lt;br&gt;             Initial Catalog=myDb;User Id=sa;&lt;br&gt;             Password=SuperNinjaPassword&quot;&lt;br&gt;}&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="470" y="290" width="350" height="120" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
