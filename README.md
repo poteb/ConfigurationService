@@ -26,6 +26,10 @@ The configurations are split into smaller parts and linked together. This makes 
 
 ![Basic usage](/documentation/BasicOverview.png)
 
+Example with JSON:
+
+![Example with JSON](/documentation/JsonFlow.png)
+
 ## JSON Reference ($ref)
 The configurations are stored as JSON files. The JSON reference syntax is used to link the configurations together. 
 The reference syntax is `$ref:<path>#<json-property>`. The path is relative to the current configuration file. The json-property is optional and if omitted the entire content of the referenced configuration is used.
@@ -168,12 +172,6 @@ Let's look at a standard appsettings.json file.
 ##### *appsettings.json:*
 
     {
-      "Logging": {
-        "LogLevel": {
-          "Default": "Information",
-          "Microsoft.AspNetCore": "Warning"
-        }
-      },
       "ConnectionStrings": {
         "Default": "Data Source=dbserver;Initial Catalog=myDb;User Id=sa;Password=SuperNinjaPassword"
       },
@@ -188,12 +186,6 @@ Let's look at a standard appsettings.json file.
 We could change this to
 
     {
-      "Logging": {
-        "LogLevel": {
-          "Default": "Information",
-          "Microsoft.AspNetCore": "Warning"
-        }
-      },
       "ConnectionStrings": {
         "Default": "$ref:ConnectionStrings#DefaultConnection"
       },
@@ -203,24 +195,12 @@ We could change this to
 But instead we use a base-reference
 
     {
-      "Logging": {
-        "LogLevel": {
-          "Default": "Information",
-          "Microsoft.AspNetCore": "Warning"
-        }
-      },
       "base":"$ref:base-configuration"
     }
 
 which results in 
 
     {
-      "Logging": {
-        "LogLevel": {
-          "Default": "Information",
-          "Microsoft.AspNetCore": "Warning"
-        }
-      },
       "ConnectionStrings": {
         "Default": "Data Source=dbserver;Initial Catalog=myDb;User Id=sa;Password=SuperNinjaPassword"
       },
