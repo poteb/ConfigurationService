@@ -12,7 +12,7 @@ public class Parser : IParser
     private readonly IDataProvider _dataProvider;
 
     private const string RefPatternQuotes = "\\$ref:(?<ref>[^#]*)#(?<field>[^\"]*)";
-    private const string RefPatternParentheses = "\\(\\$ref:(?<ref>[^#]*)#(?<field>[^\\)]*)\\)";
+    private const string RefPatternParentheses = @"\(\$ref:(?<ref>[^#]*)#(?<field>[^\)]*)\)";
     //private const string NamePattern = "(?<name>[^.]*).?(?<application>[^.]*).?(?<environment>[^.]*)";
 
     /// <summary>Add your own value to gather tracking data</summary>
@@ -24,8 +24,7 @@ public class Parser : IParser
     }
 
     /// <summary>Parses the specified configuration. Will do some pre- and post-processing.</summary>
-    public async Task<string> Parse(string json, string application, string environment, Action<string> problems,
-        CancellationToken cancellationToken, string encryptionKey, string rootId = "")
+    public async Task<string> Parse(string json, string application, string environment, Action<string> problems, CancellationToken cancellationToken, string encryptionKey, string rootId = "")
     {
         // Pre process
         if (string.IsNullOrWhiteSpace(json))

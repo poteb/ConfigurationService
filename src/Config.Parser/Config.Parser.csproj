@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
+		<TargetFramework>net8.0</TargetFramework>
 		<RootNamespace>pote.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
 		<AssemblyName>pote.$(MSBuildProjectName)</AssemblyName>
 		<ImplicitUsings>enable</ImplicitUsings>
@@ -10,6 +10,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="JsonPath.Net" Version="0.7.0" />
 		<PackageReference Include="newtonsoft.json" Version="13.0.2" />
 	</ItemGroup>
 
