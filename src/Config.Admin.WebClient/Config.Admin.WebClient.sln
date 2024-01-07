@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Config.Shared", "..\Config.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Config.Admin.WebClient.Tests", "..\Config.Admin.WebClient.Tests\Config.Admin.WebClient.Tests.csproj", "{16D5E712-598E-48EB-8C85-44493D029292}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Config.Admin.WebClient.UnitTests", "Config.Admin.WebClient.UnitTests\Config.Admin.WebClient.UnitTests.csproj", "{95EEC154-54DD-4509-96C3-510D7B711517}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{16D5E712-598E-48EB-8C85-44493D029292}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{16D5E712-598E-48EB-8C85-44493D029292}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{16D5E712-598E-48EB-8C85-44493D029292}.Release|Any CPU.Build.0 = Release|Any CPU
+		{95EEC154-54DD-4509-96C3-510D7B711517}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95EEC154-54DD-4509-96C3-510D7B711517}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95EEC154-54DD-4509-96C3-510D7B711517}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95EEC154-54DD-4509-96C3-510D7B711517}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
