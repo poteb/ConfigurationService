@@ -14,6 +14,7 @@ public enum TestStages
 public interface IAllConfigurationsTestService
 {
     IHeaderTestContainer CreateAndAddTestContainer(ConfigurationHeader header);
+    void UpdateTestContainer(ConfigurationHeader header);
     Task TestAll();
 }
 
@@ -27,14 +28,25 @@ public class AllConfigurationsTestService : IAllConfigurationsTestService
         _configurationTestService = configurationTestService;
     }
 
+    /// <summary>Creates a new test container if it does not exist, otherwise updates the existing one.</summary>
     public IHeaderTestContainer CreateAndAddTestContainer(ConfigurationHeader header)
     {
         var exists = _testContainers.FirstOrDefault(c => c.Header.Id == header.Id);
         if (exists != null)
+        {
+            exists.UpdateHeader(header);
             return exists;
+        }
         var container = new HeaderTestContainer(header, _configurationTestService);
         _testContainers.Add(container);
         return container;
+    }
+
+    public void UpdateTestContainer(ConfigurationHeader header)
+    {
+        var exists = _testContainers.FirstOrDefault(c => c.Header.Id == header.Id);
+        if (exists != null)
+            exists.UpdateHeader(header);
     }
 
     public async Task TestAll()

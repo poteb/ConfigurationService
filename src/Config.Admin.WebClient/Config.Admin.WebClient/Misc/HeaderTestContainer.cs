@@ -10,13 +10,14 @@ public interface IHeaderTestContainer
     ConfigurationHeader Header { get; }
     Dictionary<string,List<ParseResponse>> ParseResponses { get; }
     Task RunTests();
+    void UpdateHeader(ConfigurationHeader header);
 }
 
 public class HeaderTestContainer : IHeaderTestContainer
 {
     private readonly IConfigurationTestService _configurationTestService;
     
-    public ConfigurationHeader Header { get; }
+    public ConfigurationHeader Header { get; private set; }
     public TestStages TestStage { get; private set; } = TestStages.NotStarted;
     public Dictionary<string,List<ParseResponse>> ParseResponses { get; } = new();
 
@@ -39,5 +40,10 @@ public class HeaderTestContainer : IHeaderTestContainer
         }
         if (TestStage != TestStages.Failed)
             TestStage = TestStages.Complete;
+    }
+
+    public void UpdateHeader(ConfigurationHeader header)
+    {
+        Header = header;
     }
 }

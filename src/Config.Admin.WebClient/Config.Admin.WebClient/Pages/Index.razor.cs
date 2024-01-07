@@ -20,6 +20,7 @@ public partial class Index
     protected override async Task OnInitializedAsync()
     {
         await Load();
+        Console.WriteLine("OnInitializedAsync");
     }
 
     private async Task Load()
