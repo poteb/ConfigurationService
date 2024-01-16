@@ -11,7 +11,7 @@
 	<ItemGroup>
 	  <PackageReference Include="dapper" Version="2.0.123" />
 	  <PackageReference Include="Dapper.Contrib" Version="2.0.78" />
-	  <PackageReference Include="microsoft.data.sqlclient" Version="4.0.0" />
+	  <PackageReference Include="microsoft.data.sqlclient" Version="4.0.5" />
 	  <PackageReference Include="newtonsoft.json" Version="13.0.2" />
 	</ItemGroup>
 
