@@ -148,7 +148,7 @@ Both application use the same base configuration, but the results differ.
     }
 The only difference is the username and password for RabbitMQ. If we later create another application that has a similar configuration we only need to create a new *RabbitMQ-Login* configuration and link it to our application. If our new application needs the AnotherConnection SQL connection string we just reference that instead, or create a third one.
 
-Besides different applications it's also required to link all configurations to an environment. This makes it possible to use the same set of configurations across different environments. It could be different test environments and development. An example could *ConnectionStrings* where we want to use a different Default connection string when debugging our application.
+Besides different applications it's also required to link all configurations to an environment. This makes it possible to use the same set of configurations across different environments. It could be different test environments and development. An example could be *ConnectionStrings* where we want to use a different Default connection string when debugging our application.
 ##### *ConnectionStrings • Environments: Test1:*
     {
       "DefaultConnection":"Data Source=dbserver;Initial Catalog=myDbTest1;User Id=sa;Password=SuperNinjaPassword",
