@@ -164,7 +164,7 @@ Besides different applications it's also required to link all configurations to 
       "DefaultConnection":"Data Source=.;Initial Catalog=myDb;Trusted_Connection=True",
       "AnotherConnection":"Server=dbserver;Database=yourDb;Trusted_Connection=True"
     }
-Here we use different the same SQL Server instance for our test environments but different databases. And locally we use "." and a trusted connection. The base configuration remains unchanged.
+Here we use the same SQL Server instance for our test environments but different databases. And locally we use "." and a trusted connection. The base configuration remains unchanged.
 
 ### "Base" naming convention
 If the name of the json property being processed is named *base* or *Base* the result of the reference replaces the whole key-value pair.
