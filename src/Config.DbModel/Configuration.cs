@@ -11,4 +11,5 @@ public class Configuration
     public List<string> Environments { get; set; } = new();
     public bool Deleted { get; set; }
     public bool IsJsonEncrypted { get; set; }
+    public bool IsSecret { get; set; }
 }

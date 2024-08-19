@@ -12,16 +12,17 @@ public class TestDataProvider : IAdminDataProvider
     {
         return name switch
         {
-            "Wagga" => Task.FromResult(new Configuration {Json = "{\"Wagga\":\"Mama\"}"}),
-            "Wagga_nested" => Task.FromResult(new Configuration {Json = "{\"Wagga\":\"$ref:Super#\"}"}),
-            "Super" => Task.FromResult(new Configuration {Json = "{\"Super\":\"mule\",\"Super2\":\"mule2\"}"}),
-            "Circular" => Task.FromResult(new Configuration {Id = "0dfa086a-da82-4ed4-916c-a604aed33fbf", Json = "{\"Wagga\":\"$ref:RefCircular#\"}"}),
-            "RefCircular" => Task.FromResult(new Configuration {Id = "2b338c20-709e-4c56-a823-47fbdad051a8", Json = "{\"Dingo\":\"$ref:Circular#\"}"}),
-            "MultiRef" => Task.FromResult(new Configuration {Json = "{\"Wagga\":\"$ref:Wagga#\",\"Super\":\"$ref:Super#Super\",\"Super\":\"$ref:Super#Super2\"}", Applications = new List<string> {"AppId1"}, Environments = new List<string> {"EnvId1"}}),
-            "ExistingSection" => Task.FromResult(new Configuration {Json = "{\"Wagga\":\"TheRealMama\",\"Foo\":{\"Baa\":false}}" }),
-            "EncryptedSimple" => Task.FromResult(new Configuration {Json = "ddiWml5jx2W7XivdnZ+uiVG8Ok2PJ+CJh+q60CY7rKA=", IsJsonEncrypted = true}),
-            "EncryptedButNot" => Task.FromResult(new Configuration {Json = "{\"Wagga\":\"Mama\"}", IsJsonEncrypted = true}),
-            "Deep" => Task.FromResult(new Configuration {Json = "{\"Deep\":{\"Foo\":\"Baa\"}}"}),
+            "Wagga" => Task.FromResult(new Configuration {Json = """{"Wagga":"Mama"}"""}),
+            "Wagga_nested" => Task.FromResult(new Configuration {Json = """{"Wagga":"$ref:Super#"}"""}),
+            "Super" => Task.FromResult(new Configuration {Json = """{"Super":"mule","Super2":"mule2"}"""}),
+            "Circular" => Task.FromResult(new Configuration {Id = """0dfa086a-da82-4ed4-916c-a604aed33fbf", Json = "{"Wagga":"$ref:RefCircular#"}"""}),
+            "RefCircular" => Task.FromResult(new Configuration {Id = """2b338c20-709e-4c56-a823-47fbdad051a8", Json = "{"Dingo":"$ref:Circular#"}"""}),
+            "MultiRef" => Task.FromResult(new Configuration {Json = """{"Wagga":"$ref:Wagga#","Super":"$ref:Super#Super","Super":"$ref:Super#Super2"}""", Applications = new List<string> {"AppId1"}, Environments = new List<string> {"EnvId1"}}),
+            "ExistingSection" => Task.FromResult(new Configuration {Json = """{"Wagga":"TheRealMama","Foo":{"Baa":false}}""" }),
+            "EncryptedSimple" => Task.FromResult(new Configuration {Json = """ddiWml5jx2W7XivdnZ+uiVG8Ok2PJ+CJh+q60CY7rKA=""", IsJsonEncrypted = true}),
+            "EncryptedButNot" => Task.FromResult(new Configuration {Json = """{"Wagga":"Mama"}""", IsJsonEncrypted = true}),
+            "Deep" => Task.FromResult(new Configuration {Json = """{"Deep":{"Foo":"Baa"}}"""}),
+            "Refp" => Task.FromResult(new Configuration {Json = """{"Wagga":"$refp:Super#Super"}""" }),
             _ => Task.FromResult(new Configuration())
         };
     }

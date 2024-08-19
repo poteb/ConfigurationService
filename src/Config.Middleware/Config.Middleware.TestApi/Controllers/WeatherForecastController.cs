@@ -12,10 +12,13 @@ public class WeatherForecastController : ControllerBase
     };
 
     private readonly ILogger<WeatherForecastController> _logger;
+    private readonly IConfiguration _configuration;
 
-    public WeatherForecastController(ILogger<WeatherForecastController> logger)
+    public WeatherForecastController(ILogger<WeatherForecastController> logger, IConfiguration configuration)
     {
         _logger = logger;
+        _configuration = configuration;
+        var d = configuration.GetValue<SecretSettings>("SecretSettings");
     }
 
     [HttpGet(Name = "GetWeatherForecast")]
