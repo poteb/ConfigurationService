@@ -27,7 +27,7 @@ public class Parser : IParser
     public async Task<string> Parse(string json, string application, string environment, Action<string> problems,
         CancellationToken cancellationToken, string encryptionKey, string rootId = "")
     {
-        // Pre process
+        // Pre-process
         if (string.IsNullOrWhiteSpace(json))
         {
             problems("Input json is empty.");
@@ -54,7 +54,7 @@ public class Parser : IParser
         }
 
         // Process
-        await HandleToken(root, dbApplication.Id, dbEnvironment.Id, problems, cancellationToken, rootId, new List<KeyValuePair<string, string>>(), encryptionKey);
+        await HandleToken(root, dbApplication.Id, dbEnvironment.Id, problems, cancellationToken, rootId, new Dictionary<KeyValuePair<string, string>, int>(), encryptionKey);
 
         // Post process
         MoveBaseChildrenToRoot(root);
@@ -62,10 +62,10 @@ public class Parser : IParser
         return root.ToString();
     }
 
-    /// <summary>Method for recursively handling the tokens in the json</summary>
+    /// <summary>Method for recursively handling the tokens in the json. There is no return value because the given token is changed with the resolved reference.</summary>
     /// <param name="sourceConfigurationId">Used to track what's happening.</param>
     [SuppressMessage("ReSharper", "InvalidXmlDocComment")]
-    private async Task HandleToken(JToken token, string application, string environment, Action<string> problems, CancellationToken cancellationToken, string sourceConfigurationId, List<KeyValuePair<string, string>> fetchedConfigurations, string encryptionKey)
+    private async Task HandleToken(JToken token, string application, string environment, Action<string> problems, CancellationToken cancellationToken, string sourceConfigurationId, Dictionary<KeyValuePair<string, string>, int> fetchedConfigurations, string encryptionKey)
     {
         while (true)
         {
@@ -83,25 +83,33 @@ public class Parser : IParser
 
             // Check if the value is a reference
             var match = Regex.Match(value, RefPatternParentheses);
-            var matchTypeParantheses = true;
+            var matchTypeParentheses = true;
             if (!match.Success)
             {
                 match = Regex.Match(value, RefPatternQuotes);
                 if (!match.Success)
                     return;
-                matchTypeParantheses = false;
+                matchTypeParentheses = false;
             }
 
             // A match is found, now get the value from the database.
             var configurationName = match.Groups[1].Value;
-            if (fetchedConfigurations.Any(pair => pair.Key.Equals(configurationName) && pair.Value.Equals(value)))
+            var key = new KeyValuePair<string, string>(configurationName, value);
+            if (fetchedConfigurations.TryGetValue(key, out var count))
             {
-                problems($"Referenced configuration {configurationName} was already resolved from source configuration {sourceConfigurationId} and reference {value}.");
-                return;
+                if (count > 2)
+                {
+                    problems($"Referenced configuration {configurationName} was already resolved 3 times. This might be a circular reference and resolving it again could cause an infinite loop. The reference will be ignored.");
+                    return;
+                }
+                fetchedConfigurations[key]++;
             }
-
+            else
+            {
+                fetchedConfigurations[key] = 0;
+            }
+            
             var configuration = await _dataProvider.GetConfiguration(configurationName, application, environment, cancellationToken);
-            fetchedConfigurations.Add(new KeyValuePair<string, string>(configurationName, value));
             if (string.IsNullOrWhiteSpace(configuration.Json))
             {
                 problems($"Reference could not be resolved, {match.Groups[0].Value}");
@@ -120,7 +128,7 @@ public class Parser : IParser
             // Replace the value with the value from the database.
             //jProp.Value = refToken;
             //jProp.Value.Replace(match.Value, refToken.ToString());
-            if (matchTypeParantheses)
+            if (matchTypeParentheses)
                 jProp.Value = new JValue(jProp.Value.ToString().Replace(match.Value, refToken.ToString()));
             else
                 jProp.Value = refToken;
