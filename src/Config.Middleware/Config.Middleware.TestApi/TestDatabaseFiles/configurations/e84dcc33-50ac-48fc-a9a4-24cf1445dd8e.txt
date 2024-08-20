@@ -13,8 +13,8 @@
 			"Json": "{\"Secret1\":\"DontTell\"}",
 			"CreatedUtc": "2024-08-19T19:59:15.437Z",
 			"IsActive": true,
-			"Applications": "[\"b0876c9d-c46f-4da1-9b92-5f8d80eddbdd\",\"f2dc0de9-03f8-4c33-9f25-1175c3286fad\"]",
-			"Environments": "[\"5868233c-1d5d-42a6-a93c-9043edabf146\",\"5213b39e-9b17-4d91-bd4b-e54aacddbb49\",\"0f3d9e7a-3979-4130-bef6-b46ca267f565\"]",
+			"Applications": "[\"b0876c9d-c46f-4da1-9b92-5f8d80eddbdd\"]",
+			"Environments": "[\"5868233c-1d5d-42a6-a93c-9043edabf146\"]",
 			"Deleted": false,
 			"History": []
 		}
