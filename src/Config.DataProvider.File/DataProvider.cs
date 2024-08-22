@@ -10,12 +10,14 @@ public class DataProvider : IDataProvider
     private readonly IFileHandler _fileHandler;
     private readonly IEnvironmentDataAccess _environmentDataAccess;
     private readonly IApplicationDataAccess _applicationDataAccess;
+    private readonly ISecretDataAccess _secretDataAccess;
 
-    public DataProvider(IFileHandler fileHandler, IEnvironmentDataAccess environmentDataAccess, IApplicationDataAccess applicationDataAccess)
+    public DataProvider(IFileHandler fileHandler, IEnvironmentDataAccess environmentDataAccess, IApplicationDataAccess applicationDataAccess, ISecretDataAccess secretDataAccess)
     {
         _fileHandler = fileHandler;
         _environmentDataAccess = environmentDataAccess;
         _applicationDataAccess = applicationDataAccess;
+        _secretDataAccess = secretDataAccess;
     }
 
     public async Task<string> GetConfigurationJson(string name, string applicationId, string environmentId, CancellationToken cancellationToken)
@@ -71,5 +73,10 @@ public class DataProvider : IDataProvider
     public async Task<List<DbModel.Environment>> GetEnvironments(CancellationToken cancellationToken)
     {
         return await _environmentDataAccess.GetEnvironments(cancellationToken);
+    }
+
+    public IAsyncEnumerable<Secret> GetSecrets(CancellationToken cancellationToken)
+    {
+        return _secretDataAccess.GetSecrets(cancellationToken);
     }
 }

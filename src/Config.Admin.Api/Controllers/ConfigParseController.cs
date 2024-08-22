@@ -26,7 +26,7 @@ public class ConfigParseController : ControllerBase
         try
         {
             var response = new ParseResponse { Application = request.Application, Environment = request.Environment };
-            var config = await _parser.Parse(request.AsJson(), request.Application, request.Environment, response.AddProblem, CancellationToken.None, _encryptionSettings.JsonEncryptionKey);
+            var config = await _parser.Parse(request.AsJson(), request.Application, request.Environment, response.AddProblem, CancellationToken.None, _encryptionSettings.JsonEncryptionKey, request.ResolveSecrets);
             response.FromJson(config);
             return Ok(response);
         }

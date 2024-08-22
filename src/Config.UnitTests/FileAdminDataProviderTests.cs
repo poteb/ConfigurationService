@@ -27,7 +27,8 @@ public class FileAdminDataProviderTests
         var applicationDataAccess = Substitute.For<IApplicationDataAccess>();
 
         var environmentAccess = new EnvironmentDataAccess(fileHandler);
-        var provider = new AdminDataProvider(fileHandler, applicationDataAccess, environmentAccess, new EncryptionSettings {JsonEncryptionKey = "detteErEnVildtGodEncryptionKey11"});
+        var secretAccess = new SecretDataAccess(fileHandler);
+        var provider = new AdminDataProvider(fileHandler, applicationDataAccess, environmentAccess, secretAccess, new EncryptionSettings {JsonEncryptionKey = "detteErEnVildtGodEncryptionKey11"});
         var files = await provider.GetEnvironments(CancellationToken.None);
 
         Assert.AreEqual(3, files.Count);

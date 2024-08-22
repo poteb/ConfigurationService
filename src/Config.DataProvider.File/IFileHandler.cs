@@ -30,4 +30,7 @@ public interface IFileHandler
     Task SaveSettings(string settings, CancellationToken cancellationToken);
     Task<string> GetApiKeys(CancellationToken cancellationToken);
     Task SaveApiKeys(string apiKeys, CancellationToken cancellationToken);
+    
+    string[] GetSecretFiles();
+    Task<string> GetSecretContentAbsolutePath(string file, CancellationToken cancellationToken);
 }

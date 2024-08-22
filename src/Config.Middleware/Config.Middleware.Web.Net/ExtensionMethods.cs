@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using pote.Config.Shared;
 
 namespace pote.Config.Middleware;
@@ -32,5 +33,12 @@ public static class ExtensionMethods
             throw new FileNotFoundException($"An old parsed configuration not found, file: {file}");
         builder.Configuration.AddJsonFile(file, false, true);
         return builder;
+    }
+    
+    public static IServiceCollection AddSecretsResolver(this IServiceCollection services, Func<HttpClient> clientProvider, BuilderConfiguration configuration)
+    {
+        var secretResolver = new SecretResolver(configuration, clientProvider);
+        services.AddSingleton<ISecretResolver>(secretResolver);
+        return services;
     }
 }

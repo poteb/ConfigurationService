@@ -25,7 +25,7 @@ public class Parser : IParser
 
     /// <summary>Parses the specified configuration. Will do some pre- and post-processing.</summary>
     public async Task<string> Parse(string json, string application, string environment, Action<string> problems,
-        CancellationToken cancellationToken, string encryptionKey, string rootId = "")
+        CancellationToken cancellationToken, string encryptionKey, bool resolveSecrets, string rootId = "")
     {
         // Pre-process
         if (string.IsNullOrWhiteSpace(json))
@@ -54,7 +54,7 @@ public class Parser : IParser
         }
 
         // Process
-        await HandleToken(root, dbApplication.Id, dbEnvironment.Id, problems, cancellationToken, rootId, new Dictionary<KeyValuePair<string, string>, int>(), encryptionKey);
+        await HandleToken(root, dbApplication.Id, dbEnvironment.Id, problems, cancellationToken, rootId, new Dictionary<KeyValuePair<string, string>, int>(), encryptionKey, resolveSecrets);
 
         // Post process
         MoveBaseChildrenToRoot(root);
@@ -65,14 +65,14 @@ public class Parser : IParser
     /// <summary>Method for recursively handling the tokens in the json. There is no return value because the given token is changed with the resolved reference.</summary>
     /// <param name="sourceConfigurationId">Used to track what's happening.</param>
     [SuppressMessage("ReSharper", "InvalidXmlDocComment")]
-    private async Task HandleToken(JToken token, string application, string environment, Action<string> problems, CancellationToken cancellationToken, string sourceConfigurationId, Dictionary<KeyValuePair<string, string>, int> fetchedConfigurations, string encryptionKey)
+    private async Task HandleToken(JToken token, string application, string environment, Action<string> problems, CancellationToken cancellationToken, string sourceConfigurationId, Dictionary<KeyValuePair<string, string>, int> fetchedConfigurations, string encryptionKey, bool resolveSecrets)
     {
         while (true)
         {
             // Recurse into children
             if (token.HasValues)
                 foreach (var child in token.Children())
-                    await HandleToken(child, application, environment, problems, cancellationToken, sourceConfigurationId, fetchedConfigurations, encryptionKey);
+                    await HandleToken(child, application, environment, problems, cancellationToken, sourceConfigurationId, fetchedConfigurations, encryptionKey, resolveSecrets);
 
             // Check token for different types
             if (token.Type != JTokenType.Property) return;
@@ -92,14 +92,13 @@ public class Parser : IParser
                 matchTypeParentheses = false;
             }
 
-            // A match is found, now get the value from the database.
             var configurationName = match.Groups[1].Value;
             var key = new KeyValuePair<string, string>(configurationName, value);
             if (fetchedConfigurations.TryGetValue(key, out var count))
             {
                 if (count > 2)
                 {
-                    problems($"Referenced configuration {configurationName} was already resolved 3 times. This might be a circular reference and resolving it again could cause an infinite loop. The reference will be ignored.");
+                    problems($"Referenced configuration {configurationName} was already resolved 3 times. This might be a circular reference and could cause an infinite loop. The reference will be ignored.");
                     return;
                 }
                 fetchedConfigurations[key]++;
@@ -109,6 +108,7 @@ public class Parser : IParser
                 fetchedConfigurations[key] = 0;
             }
             
+            // A match is found, now get the value from the database.
             var configuration = await _dataProvider.GetConfiguration(configurationName, application, environment, cancellationToken);
             if (string.IsNullOrWhiteSpace(configuration.Json))
             {

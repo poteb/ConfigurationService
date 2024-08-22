@@ -2,7 +2,7 @@
 
 namespace pote.Config.DataProvider.Interfaces
 {
-    public interface IDataProvider : IEnvironmentDataAccess, IApplicationDataAccess
+    public interface IDataProvider : IEnvironmentDataAccess, IApplicationDataAccess, ISecretDataAccess
     {
         //Task<string> GetConfigurationJson(string name, string applicationId, string environment, CancellationToken cancellationToken);
         Task<Configuration> GetConfiguration(string name, string applicationId, string environment, CancellationToken cancellationToken);

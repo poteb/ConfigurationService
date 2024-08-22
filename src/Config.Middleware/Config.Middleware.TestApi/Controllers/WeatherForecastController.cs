@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using pote.Config.Shared;
 
 namespace pote.Config.Middleware.TestApi.Controllers;
 
@@ -13,17 +14,22 @@ public class WeatherForecastController : ControllerBase
 
     private readonly ILogger<WeatherForecastController> _logger;
     private readonly IConfiguration _configuration;
+    private readonly ISecretResolver _secretResolver;
 
-    public WeatherForecastController(ILogger<WeatherForecastController> logger, IConfiguration configuration)
+    public WeatherForecastController(ILogger<WeatherForecastController> logger, IConfiguration configuration, ISecretResolver secretResolver)
     {
         _logger = logger;
         _configuration = configuration;
-        var d = configuration.GetValue<SecretSettings>("SecretSettings");
+        _secretResolver = secretResolver;
+        var d = configuration.GetSection("SecretSettings").Get<SecretSettings>();
+        var dd = secretResolver.ResolveSecret<string>(d.Secret1).Result;
     }
 
     [HttpGet(Name = "GetWeatherForecast")]
     public IEnumerable<WeatherForecast> Get()
     {
+        
+        
         return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {
                 Date = DateTime.Now.AddDays(index),

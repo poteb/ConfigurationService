@@ -40,6 +40,7 @@ var fileDb = builder.Configuration.GetSection("FileDatabase").GetSection("Direct
 builder.Services.AddScoped<IFileHandler>(_ => new FileHandler(fileDb));
 builder.Services.AddScoped<IApplicationDataAccess, ApplicationDataAccess>();
 builder.Services.AddScoped<IEnvironmentDataAccess, EnvironmentDataAccess>();
+builder.Services.AddScoped<ISecretDataAccess, SecretDataAccess>();
 builder.Services.AddScoped<IAdminDataProvider, AdminDataProvider>();
 builder.Services.AddScoped<IDependencyGraphService, DependencyGraphService>();
 builder.Services.AddScoped<IAuditLogHandler, AuditLogHandler>();

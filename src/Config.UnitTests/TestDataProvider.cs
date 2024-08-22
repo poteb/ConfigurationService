@@ -115,4 +115,9 @@ public class TestDataProvider : IAdminDataProvider
     {
         throw new System.NotImplementedException();
     }
+
+    public IAsyncEnumerable<Secret> GetSecrets(CancellationToken cancellationToken)
+    {
+        throw new System.NotImplementedException();
+    }
 }

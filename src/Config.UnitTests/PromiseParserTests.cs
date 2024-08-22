@@ -13,7 +13,7 @@ public class PromiseParserTests
     {
         var dataProvider = new TestDataProvider();
         var parser = new Parser.Parser(dataProvider);
-        var response = await parser.Parse("{\"Value1\":\"$ref:Refp#\"}", "unittest", "test", _ => { }, CancellationToken.None, "");
+        var response = await parser.Parse("{\"Value1\":\"$ref:Refp#\"}", "unittest", "test", _ => { }, CancellationToken.None, "", false);
         var dyn = JsonConvert.DeserializeObject<dynamic>(response);
         var value1 = dyn?.Value1.Wagga.ToString();
         Assert.AreEqual("$refp:Super#Super", value1); // still not resolved because it's a promise

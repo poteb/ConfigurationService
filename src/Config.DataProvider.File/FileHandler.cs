@@ -1,4 +1,6 @@
-﻿namespace pote.Config.DataProvider.File;
+﻿using pote.Config.DbModel;
+
+namespace pote.Config.DataProvider.File;
 
 public class FileHandler : IFileHandler
 {
@@ -6,6 +8,7 @@ public class FileHandler : IFileHandler
     private readonly string _environmentsDir;
     private readonly string _applicationsDir;
     private readonly string _settingsDir;
+    private readonly string _secretsDir;
 
     public FileHandler(string directory)
     {
@@ -13,6 +16,7 @@ public class FileHandler : IFileHandler
         _environmentsDir = Path.Combine(directory, "environments");
         _applicationsDir = Path.Combine(directory, "applications");
         _settingsDir = Path.Combine(directory, "settings");
+        _secretsDir = Path.Combine(directory, "secrets");
 
         if (!Directory.Exists(_configurationRootDir))
             Directory.CreateDirectory(_configurationRootDir);
@@ -22,6 +26,8 @@ public class FileHandler : IFileHandler
             Directory.CreateDirectory(_applicationsDir);
         if (!Directory.Exists(_settingsDir))
             Directory.CreateDirectory(_settingsDir);
+        if (!Directory.Exists(_secretsDir))
+            Directory.CreateDirectory(_secretsDir);
     }
 
     public string[] GetConfigurationFiles()
@@ -179,6 +185,15 @@ public class FileHandler : IFileHandler
     {
         var file = Path.Combine(_settingsDir, "apikeys.json");
         await System.IO.File.WriteAllTextAsync(file, apiKeys, cancellationToken);
+    }
+
+    public string[] GetSecretFiles()
+    {
+        return Directory.GetFiles(_secretsDir);
+    }
+    public async Task<string> GetSecretContentAbsolutePath(string file, CancellationToken cancellationToken)
+    {
+        return await System.IO.File.ReadAllTextAsync(file, cancellationToken);
     }
 
     private async Task WriteAuditLog(string dir, string content)

@@ -11,6 +11,7 @@ var configSettings = new BuilderConfiguration
 };
 var environmentSettingsJsonContent = File.ReadAllText($"appsettings.{configSettings.Environment}.json");
 _ = builder.AddConfigurationFromApi(configSettings, environmentSettingsJsonContent, () => new HttpClient(), (s, ex) => { }).Result;
+builder.Services.AddSecretsResolver(() => new HttpClient(), configSettings);
 
 
 // Add services to the container.

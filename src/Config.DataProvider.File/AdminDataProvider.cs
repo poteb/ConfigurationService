@@ -12,17 +12,19 @@ public class AdminDataProvider : IAdminDataProvider
     private readonly IFileHandler _fileHandler;
     private readonly IApplicationDataAccess _applicationDataAccess;
     private readonly IEnvironmentDataAccess _environmentDataAccess;
+    private readonly ISecretDataAccess _secretDataAccess;
     private readonly EncryptionSettings _encryptionSettings;
     private readonly DataProvider _dataProvider;
 
-    public AdminDataProvider(IFileHandler fileHandler, IApplicationDataAccess applicationDataAccess, IEnvironmentDataAccess environmentDataAccess, EncryptionSettings encryptionSettings)
+    public AdminDataProvider(IFileHandler fileHandler, IApplicationDataAccess applicationDataAccess, IEnvironmentDataAccess environmentDataAccess, ISecretDataAccess secretDataAccess, EncryptionSettings encryptionSettings)
     {
         _fileHandler = fileHandler;
         _applicationDataAccess = applicationDataAccess;
         _environmentDataAccess = environmentDataAccess;
+        _secretDataAccess = secretDataAccess;
         _encryptionSettings = encryptionSettings;
 
-        _dataProvider = new DataProvider(fileHandler, environmentDataAccess, applicationDataAccess);
+        _dataProvider = new DataProvider(fileHandler, environmentDataAccess, applicationDataAccess, secretDataAccess);
     }
 
     public async Task<List<ConfigurationHeader>> GetAll(CancellationToken cancellationToken)
@@ -163,5 +165,10 @@ public class AdminDataProvider : IAdminDataProvider
     public async Task SaveSettings(Settings settings, CancellationToken cancellationToken)
     {
         await _fileHandler.SaveSettings(JsonConvert.SerializeObject(settings), cancellationToken);
+    }
+
+    public IAsyncEnumerable<Secret> GetSecrets(CancellationToken cancellationToken)
+    {
+        return _secretDataAccess.GetSecrets(cancellationToken);
     }
 }
