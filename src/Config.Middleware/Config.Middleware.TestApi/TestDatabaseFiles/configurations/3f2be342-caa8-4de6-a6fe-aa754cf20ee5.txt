@@ -15,8 +15,7 @@
 			"Applications": ["b0876c9d-c46f-4da1-9b92-5f8d80eddbdd"],
 			"Environments": ["5868233c-1d5d-42a6-a93c-9043edabf146"],
 			"Deleted": false,
-			"IsJsonEncrypted": true,
-			"IsSecret": true
+			"IsJsonEncrypted": true
 		}
 	],
 	"IsJsonEncrypted": true

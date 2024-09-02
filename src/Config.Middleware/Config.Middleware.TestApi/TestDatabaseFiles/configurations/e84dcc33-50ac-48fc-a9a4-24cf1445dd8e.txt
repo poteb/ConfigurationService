@@ -5,7 +5,6 @@
 	"UpdateUtc": "2024-08-19T19:57:06.513Z",
 	"Deleted": false,
 	"IsActive": true,
-	"IsSecret": true,
 	"Configurations": [
 		{
 			"HeaderId": "e84dcc33-50ac-48fc-a9a4-24cf1445dd8e",

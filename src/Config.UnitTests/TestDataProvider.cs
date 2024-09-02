@@ -44,7 +44,7 @@ public class TestDataProvider : IAdminDataProvider
         return Task.FromResult(list);
     }
 
-    public Task<List<ConfigurationHeader>> GetAll(CancellationToken cancellationToken)
+    public Task<List<ConfigurationHeader>> GetAllConfigurationHeaders(CancellationToken cancellationToken)
     {
         throw new System.NotImplementedException();
     }
@@ -76,7 +76,7 @@ public class TestDataProvider : IAdminDataProvider
         throw new System.NotImplementedException();
     }
 
-    public Task Insert(ConfigurationHeader header, CancellationToken cancellationToken)
+    public Task InsertConfiguration(ConfigurationHeader header, CancellationToken cancellationToken)
     {
         throw new System.NotImplementedException();
     }
@@ -116,7 +116,32 @@ public class TestDataProvider : IAdminDataProvider
         throw new System.NotImplementedException();
     }
 
-    public IAsyncEnumerable<Secret> GetSecrets(CancellationToken cancellationToken)
+    public Task InsertSecret(SecretHeader header, CancellationToken cancellationToken)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public Task<List<Secret>> GetSecrets(CancellationToken cancellationToken)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public Task UpsertSecret(Secret secret, CancellationToken cancellationToken)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public Task DeleteSecret(string id, CancellationToken cancellationToken)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public Task<List<SecretHeader>> GetAllSecretHeaders(CancellationToken cancellationToken)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public Task<SecretHeader> GetSecret(string id, CancellationToken cancellationToken, bool includeHistory = true)
     {
         throw new System.NotImplementedException();
     }

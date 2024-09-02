@@ -35,7 +35,7 @@ public class ConfigurationsController : ControllerBase
         {
             var applications = await _dataProvider.GetApplications(cancellationToken);
             var environments = await _dataProvider.GetEnvironments(cancellationToken);
-            var d = await _dataProvider.GetAll(cancellationToken);
+            var d = await _dataProvider.GetAllConfigurationHeaders(cancellationToken);
             var response = new ConfigurationsResponse
             {
                 Configurations = ConfigurationMapper.ToApi(d, applications, environments)
@@ -125,7 +125,7 @@ public class ConfigurationsController : ControllerBase
     {
         try
         {
-            await _dataProvider.Insert(ConfigurationMapper.ToDb(header), cancellationToken);
+            await _dataProvider.InsertConfiguration(ConfigurationMapper.ToDb(header), cancellationToken);
             _memoryCache.Remove(DependencyGraphService.CacheName);
             await this.AuditLog(header.Id, "Insert", _auditLogHandler.AuditLogConfiguration);
             _logger.LogInformation("Configuration header {HeaderId} inserted", header.Id);

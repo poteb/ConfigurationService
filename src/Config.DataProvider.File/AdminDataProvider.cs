@@ -27,7 +27,7 @@ public class AdminDataProvider : IAdminDataProvider
         _dataProvider = new DataProvider(fileHandler, environmentDataAccess, applicationDataAccess, secretDataAccess);
     }
 
-    public async Task<List<ConfigurationHeader>> GetAll(CancellationToken cancellationToken)
+    public async Task<List<ConfigurationHeader>> GetAllConfigurationHeaders(CancellationToken cancellationToken)
     {
         var files = _fileHandler.GetConfigurationFiles();
         var result = new List<ConfigurationHeader>();
@@ -108,7 +108,7 @@ public class AdminDataProvider : IAdminDataProvider
         _fileHandler.DeleteConfiguration(id, permanent);
     }
 
-    public async Task Insert(ConfigurationHeader header, CancellationToken cancellationToken)
+    public async Task InsertConfiguration(ConfigurationHeader header, CancellationToken cancellationToken)
     {
         var settings = await GetSettings(cancellationToken);
         header.Configurations.ForEach(c =>
@@ -167,8 +167,47 @@ public class AdminDataProvider : IAdminDataProvider
         await _fileHandler.SaveSettings(JsonConvert.SerializeObject(settings), cancellationToken);
     }
 
-    public IAsyncEnumerable<Secret> GetSecrets(CancellationToken cancellationToken)
+    public async Task InsertSecret(SecretHeader header, CancellationToken cancellationToken)
     {
-        return _secretDataAccess.GetSecrets(cancellationToken);
+        header.Secrets.ForEach(c =>
+        {
+            c.CreatedUtc = header.CreatedUtc;
+            EncryptionHandler.Encrypt(c, _encryptionSettings.JsonEncryptionKey);
+        });
+        await _fileHandler.WriteSecretContent(header.Id, JsonConvert.SerializeObject(header), cancellationToken);
+    }
+
+    public Task DeleteSecret(string id, CancellationToken cancellationToken)
+    {
+        _fileHandler.DeleteSecret(id);
+        return Task.CompletedTask;
+    }
+
+    public async Task<List<SecretHeader>> GetAllSecretHeaders(CancellationToken cancellationToken)
+    {
+        var files = _fileHandler.GetSecretFiles();
+        var result = new List<SecretHeader>();
+        foreach (var file in files)
+        {
+            try
+            {
+                var header = await GetSecret(Path.GetFileNameWithoutExtension(file), cancellationToken, false);
+                result.Add(header);
+            }
+            catch (Exception)
+            {
+                /* ignore */
+            }
+        }
+
+        return result;
+    }
+
+    public async Task<SecretHeader> GetSecret(string id, CancellationToken cancellationToken, bool includeHistory = true)
+    {
+        var header = JsonConvert.DeserializeObject<SecretHeader>(await _fileHandler.GetSecretContent(id, cancellationToken));
+        if (header == null) throw new KeyNotFoundException($"Could not read json from file {id}");
+        EncryptionHandler.Decrypt(header.Secrets, _encryptionSettings.JsonEncryptionKey);
+        return header;
     }
 }

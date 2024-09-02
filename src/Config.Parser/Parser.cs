@@ -116,13 +116,6 @@ public class Parser : IParser
                 return;
             }
 
-            if (configuration.IsSecret)
-            {
-                // Don't parse secrets. Convert it to a promise.
-                jProp.Value = value.Replace("$ref:","$refp:");
-                return;
-            }
-
             // Decrypt the value if needed
             if (configuration.IsJsonEncrypted)
                 configuration.Json = EncryptionHandler.Decrypt(configuration.Json, encryptionKey);

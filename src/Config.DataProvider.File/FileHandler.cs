@@ -161,6 +161,11 @@ public class FileHandler : IFileHandler
         await WriteAuditLog(Path.Combine(_settingsDir, "AuditLogApiKeys"), content);
     }
 
+    public Task AuditLogSecrets(string id, string content)
+    {
+        return WriteAuditLog(Path.Combine(_secretsDir, "AuditLog", id), content);
+    }
+
     public async Task<string> GetSettings(CancellationToken cancellationToken)
     {
         var file = Path.Combine(_settingsDir, "settings.json");
@@ -193,6 +198,26 @@ public class FileHandler : IFileHandler
     }
     public async Task<string> GetSecretContentAbsolutePath(string file, CancellationToken cancellationToken)
     {
+        return await System.IO.File.ReadAllTextAsync(file, cancellationToken);
+    }
+
+    public async Task WriteSecretContent(string id, string content, CancellationToken cancellationToken)
+    {
+        var file = Path.ChangeExtension(Path.Combine(_secretsDir, id), ".txt");
+        await System.IO.File.WriteAllTextAsync(file, content, cancellationToken);
+    }
+
+    public void DeleteSecret(string id)
+    {
+        var file = Path.ChangeExtension(Path.Combine(_secretsDir, id), ".txt");
+        if (!System.IO.File.Exists(file)) return;
+        System.IO.File.Delete(file);
+    }
+
+    public async Task<string> GetSecretContent(string id, CancellationToken cancellationToken)
+    {
+        var file = Path.ChangeExtension(Path.Combine(_secretsDir, id), ".txt");
+        if (!System.IO.File.Exists(file)) throw new FileNotFoundException();
         return await System.IO.File.ReadAllTextAsync(file, cancellationToken);
     }
 

@@ -35,4 +35,9 @@ public class AuditLogHandler : IAuditLogHandler
     {
         await _fileHandler.AuditLogApiKeys($"{callerIp}{Environment.NewLine}{content}");
     }
+
+    public Task AuditLogSecrets(string id, string callerIp, string content)
+    {
+        return _fileHandler.AuditLogSecrets(id, $"{callerIp}{Environment.NewLine}{content}");
+    }
 }

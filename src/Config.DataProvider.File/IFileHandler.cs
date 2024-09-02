@@ -25,6 +25,7 @@ public interface IFileHandler
     Task AuditLogApplication(string id, string content);
     Task AuditLogSettings(string content);
     Task AuditLogApiKeys(string content);
+    Task AuditLogSecrets(string id, string content);
     
     Task<string> GetSettings(CancellationToken cancellationToken);
     Task SaveSettings(string settings, CancellationToken cancellationToken);
@@ -33,4 +34,7 @@ public interface IFileHandler
     
     string[] GetSecretFiles();
     Task<string> GetSecretContentAbsolutePath(string file, CancellationToken cancellationToken);
+    Task WriteSecretContent(string secretId, string serializeObject, CancellationToken cancellationToken);
+    void DeleteSecret(string id);
+    Task<string> GetSecretContent(string id, CancellationToken cancellationToken);
 }

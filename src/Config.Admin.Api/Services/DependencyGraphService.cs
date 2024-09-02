@@ -30,7 +30,7 @@ public class DependencyGraphService : IDependencyGraphService
 
         var environments = await _adminDataProvider.GetEnvironments(cancellationToken);
         var applications = await _adminDataProvider.GetApplications(cancellationToken);
-        var configurationHeadersDb = await _adminDataProvider.GetAll(cancellationToken);
+        var configurationHeadersDb = await _adminDataProvider.GetAllConfigurationHeaders(cancellationToken);
         var configurationHeadersApi = ConfigurationMapper.ToApi(configurationHeadersDb, applications, environments);
 
         parser.TrackingAction = (from, to) =>

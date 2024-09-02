@@ -132,7 +132,6 @@ public static class ConfigurationMapper
 
     public static void CopyTo(this Configuration from, Configuration to)
     {
-
         to.Id = from.Id;
         to.CreatedUtc = from.CreatedUtc;
         to.Json = from.Json;

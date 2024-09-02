@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="newtonsoft.json" Version="13.0.2" />
+    <PackageReference Include="System.Linq.Async" Version="6.0.1" />
   </ItemGroup>
 
   <ItemGroup>
