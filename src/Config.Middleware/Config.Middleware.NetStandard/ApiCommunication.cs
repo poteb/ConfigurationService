@@ -24,7 +24,7 @@ internal class ApiCommunication : IApiCommunication
     public async Task<ParseResponse?> GetConfiguration(ParseRequest request)
     {
         using var client = _clientProvider.Invoke();
-        var response = await client.PostAsync(_apiUri, new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json"));
+        var response = await client.PostAsync($"{_apiUri}/Configuration", new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json"));
         response.EnsureSuccessStatusCode();
         return await JsonSerializer.DeserializeAsync<ParseResponse>(await response.Content.ReadAsStreamAsync(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
     }

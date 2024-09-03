@@ -12,7 +12,6 @@ public class AdminDataProvider : IAdminDataProvider
     private readonly IFileHandler _fileHandler;
     private readonly IApplicationDataAccess _applicationDataAccess;
     private readonly IEnvironmentDataAccess _environmentDataAccess;
-    private readonly ISecretDataAccess _secretDataAccess;
     private readonly EncryptionSettings _encryptionSettings;
     private readonly DataProvider _dataProvider;
 
@@ -21,10 +20,9 @@ public class AdminDataProvider : IAdminDataProvider
         _fileHandler = fileHandler;
         _applicationDataAccess = applicationDataAccess;
         _environmentDataAccess = environmentDataAccess;
-        _secretDataAccess = secretDataAccess;
         _encryptionSettings = encryptionSettings;
 
-        _dataProvider = new DataProvider(fileHandler, environmentDataAccess, applicationDataAccess, secretDataAccess);
+        _dataProvider = new DataProvider(fileHandler, environmentDataAccess, applicationDataAccess, secretDataAccess, encryptionSettings);
     }
 
     public async Task<List<ConfigurationHeader>> GetAllConfigurationHeaders(CancellationToken cancellationToken)
@@ -68,7 +66,12 @@ public class AdminDataProvider : IAdminDataProvider
         var apiKeys = JsonConvert.DeserializeObject<ApiKeys>(apiKeyString);
         return apiKeys ?? new ApiKeys();
     }
-    
+
+    public Task<string> GetSecretValue(string name, string applicationId, string environmentId, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task SaveApiKeys(ApiKeys apiKeys, CancellationToken cancellationToken)
     {
         await _fileHandler.SaveApiKeys(JsonConvert.SerializeObject(apiKeys), cancellationToken);

@@ -7,7 +7,6 @@ public class ParseRequest
     public byte[] InputJson { get; set; }
     public string Application { get; set; }
     public string Environment { get; set; }
-    public bool ResolveSecrets { get; set; } = false;
 
     public ParseRequest()
     {

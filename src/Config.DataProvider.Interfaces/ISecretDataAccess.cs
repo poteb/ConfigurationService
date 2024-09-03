@@ -4,5 +4,5 @@ namespace pote.Config.DataProvider.Interfaces;
 
 public interface ISecretDataAccess
 {
-    IAsyncEnumerable<Secret> GetSecrets(CancellationToken cancellationToken);
+    Task<Secret> GetSecret(string name, string applicationId, string environmentId, CancellationToken cancellationToken);
 }

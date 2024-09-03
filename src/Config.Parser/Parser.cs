@@ -25,7 +25,7 @@ public class Parser : IParser
 
     /// <summary>Parses the specified configuration. Will do some pre- and post-processing.</summary>
     public async Task<string> Parse(string json, string application, string environment, Action<string> problems,
-        CancellationToken cancellationToken, string encryptionKey, bool resolveSecrets, string rootId = "")
+        CancellationToken cancellationToken, string encryptionKey, string rootId = "")
     {
         // Pre-process
         if (string.IsNullOrWhiteSpace(json))
@@ -54,7 +54,7 @@ public class Parser : IParser
         }
 
         // Process
-        await HandleToken(root, dbApplication.Id, dbEnvironment.Id, problems, cancellationToken, rootId, new Dictionary<KeyValuePair<string, string>, int>(), encryptionKey, resolveSecrets);
+        await HandleToken(root, dbApplication.Id, dbEnvironment.Id, problems, cancellationToken, rootId, new Dictionary<KeyValuePair<string, string>, int>(), encryptionKey);
 
         // Post process
         MoveBaseChildrenToRoot(root);
@@ -65,14 +65,14 @@ public class Parser : IParser
     /// <summary>Method for recursively handling the tokens in the json. There is no return value because the given token is changed with the resolved reference.</summary>
     /// <param name="sourceConfigurationId">Used to track what's happening.</param>
     [SuppressMessage("ReSharper", "InvalidXmlDocComment")]
-    private async Task HandleToken(JToken token, string application, string environment, Action<string> problems, CancellationToken cancellationToken, string sourceConfigurationId, Dictionary<KeyValuePair<string, string>, int> fetchedConfigurations, string encryptionKey, bool resolveSecrets)
+    private async Task HandleToken(JToken token, string application, string environment, Action<string> problems, CancellationToken cancellationToken, string sourceConfigurationId, Dictionary<KeyValuePair<string, string>, int> fetchedConfigurations, string encryptionKey)
     {
         while (true)
         {
             // Recurse into children
             if (token.HasValues)
                 foreach (var child in token.Children())
-                    await HandleToken(child, application, environment, problems, cancellationToken, sourceConfigurationId, fetchedConfigurations, encryptionKey, resolveSecrets);
+                    await HandleToken(child, application, environment, problems, cancellationToken, sourceConfigurationId, fetchedConfigurations, encryptionKey);
 
             // Check token for different types
             if (token.Type != JTokenType.Property) return;

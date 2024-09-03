@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using pote.Config.DataProvider.Interfaces;
 using pote.Config.DbModel;
+using pote.Config.Encryption;
 using pote.Config.Shared;
 
 namespace pote.Config.DataProvider.File;
@@ -11,13 +12,15 @@ public class DataProvider : IDataProvider
     private readonly IEnvironmentDataAccess _environmentDataAccess;
     private readonly IApplicationDataAccess _applicationDataAccess;
     private readonly ISecretDataAccess _secretDataAccess;
+    private readonly EncryptionSettings _encryptionSettings;
 
-    public DataProvider(IFileHandler fileHandler, IEnvironmentDataAccess environmentDataAccess, IApplicationDataAccess applicationDataAccess, ISecretDataAccess secretDataAccess)
+    public DataProvider(IFileHandler fileHandler, IEnvironmentDataAccess environmentDataAccess, IApplicationDataAccess applicationDataAccess, ISecretDataAccess secretDataAccess, EncryptionSettings encryptionSettings)
     {
         _fileHandler = fileHandler;
         _environmentDataAccess = environmentDataAccess;
         _applicationDataAccess = applicationDataAccess;
         _secretDataAccess = secretDataAccess;
+        _encryptionSettings = encryptionSettings;
     }
 
     public async Task<string> GetConfigurationJson(string name, string applicationId, string environmentId, CancellationToken cancellationToken)
@@ -65,6 +68,14 @@ public class DataProvider : IDataProvider
         return apiKeys ?? new ApiKeys();
     }
 
+    public async Task<string> GetSecretValue(string name, string applicationId, string environmentId, CancellationToken cancellationToken)
+    {
+        var secret = await _secretDataAccess.GetSecret(name, applicationId, environmentId, cancellationToken);
+        if (string.IsNullOrWhiteSpace(secret.Value)) return string.Empty;
+        secret.Value = EncryptionHandler.Decrypt(secret.Value, _encryptionSettings.JsonEncryptionKey);
+        return secret.Id == string.Empty ? string.Empty : secret.Value;
+    }
+
     public async Task<List<Application>> GetApplications(CancellationToken cancellationToken)
     {
         return await _applicationDataAccess.GetApplications(cancellationToken);
@@ -73,10 +84,5 @@ public class DataProvider : IDataProvider
     public async Task<List<DbModel.Environment>> GetEnvironments(CancellationToken cancellationToken)
     {
         return await _environmentDataAccess.GetEnvironments(cancellationToken);
-    }
-
-    public IAsyncEnumerable<Secret> GetSecrets(CancellationToken cancellationToken)
-    {
-        return _secretDataAccess.GetSecrets(cancellationToken);
     }
 }

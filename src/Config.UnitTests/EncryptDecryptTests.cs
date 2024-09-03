@@ -27,7 +27,7 @@ public class EncryptDecryptTests
     {
         var dataProvider = new TestDataProvider();
         var parser = new Parser.Parser(dataProvider);
-        var response = await parser.Parse("{\"Value1\":\"$ref:EncryptedButNot#Wagga\"}", "unittest", "test", _ => { }, CancellationToken.None, "", false);
+        var response = await parser.Parse("{\"Value1\":\"$ref:EncryptedButNot#Wagga\"}", "unittest", "test", _ => { }, CancellationToken.None, "");
         var dyn = JsonConvert.DeserializeObject<dynamic>(response);
         var value1 = dyn?.Value1.ToString();
         Assert.AreEqual("Mama", value1);
@@ -38,7 +38,7 @@ public class EncryptDecryptTests
     {
         var dataProvider = new TestDataProvider();
         var parser = new Parser.Parser(dataProvider);
-        var response = await parser.Parse("{\"Value1\":\"$ref:EncryptedSimple#Wagga\"}", "unittest", "test", _ => { }, CancellationToken.None, encryptionKey: "detteErEnVildtGodEncryptionKey11", false, rootId: "");
+        var response = await parser.Parse("{\"Value1\":\"$ref:EncryptedSimple#Wagga\"}", "unittest", "test", _ => { }, CancellationToken.None, encryptionKey: "detteErEnVildtGodEncryptionKey11", rootId: "");
         var dyn = JsonConvert.DeserializeObject<dynamic>(response);
         var value1 = dyn?.Value1.ToString();
         Assert.AreEqual("Mama", value1);

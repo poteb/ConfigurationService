@@ -22,7 +22,7 @@ public class WeatherForecastController : ControllerBase
         _configuration = configuration;
         _secretResolver = secretResolver;
         var d = configuration.GetSection("SecretSettings").Get<SecretSettings>();
-        var dd = secretResolver.ResolveSecret<string>(d.Secret1).Result;
+        var dd = secretResolver.ResolveSecret(d.Secret1).Result;
     }
 
     [HttpGet(Name = "GetWeatherForecast")]

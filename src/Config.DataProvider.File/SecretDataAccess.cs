@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using pote.Config.DataProvider.Interfaces;
 using pote.Config.DbModel;
 
@@ -14,14 +13,22 @@ public class SecretDataAccess : ISecretDataAccess
         _fileHandler = fileHandler;
     }
 
-    public async IAsyncEnumerable<Secret> GetSecrets([EnumeratorCancellation] CancellationToken cancellationToken)
+    public async Task<Secret> GetSecret(string name, string applicationId, string environmentId, CancellationToken cancellationToken)
     {
-        var files = _fileHandler.GetSecretFiles();
-        foreach (var file in files)
+        foreach (var file in _fileHandler.GetSecretFiles())
         {
-            var secret = JsonConvert.DeserializeObject<Secret>(await _fileHandler.GetSecretContentAbsolutePath(file, cancellationToken));
-            if (secret == null) continue;
-            yield return secret;
+            var header = JsonConvert.DeserializeObject<SecretHeader>(await System.IO.File.ReadAllTextAsync(file, cancellationToken));
+            if (header == null) continue;
+            if (!header.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase)) continue;
+            foreach (var secret in header.Secrets)
+            {
+                if (secret.Applications.All(a => !string.Equals(a, applicationId, StringComparison.InvariantCultureIgnoreCase))) continue;
+                if (secret.Environments.All(e => !string.Equals(e, environmentId, StringComparison.InvariantCultureIgnoreCase))) continue;
+
+                return secret;
+            }
         }
+
+        return new Secret { Id = string.Empty };
     }
 }

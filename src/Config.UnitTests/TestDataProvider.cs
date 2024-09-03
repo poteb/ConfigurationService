@@ -22,7 +22,6 @@ public class TestDataProvider : IAdminDataProvider
             "EncryptedSimple" => Task.FromResult(new Configuration {Json = """ddiWml5jx2W7XivdnZ+uiVG8Ok2PJ+CJh+q60CY7rKA=""", IsJsonEncrypted = true}),
             "EncryptedButNot" => Task.FromResult(new Configuration {Json = """{"Wagga":"Mama"}""", IsJsonEncrypted = true}),
             "Deep" => Task.FromResult(new Configuration {Json = """{"Deep":{"Foo":"Baa"}}"""}),
-            "Refp" => Task.FromResult(new Configuration {Json = """{"Wagga":"$refp:Super#Super"}""" }),
             _ => Task.FromResult(new Configuration())
         };
     }
@@ -30,6 +29,11 @@ public class TestDataProvider : IAdminDataProvider
     public Task<ApiKeys> GetApiKeys(CancellationToken cancellationToken)
     {
         return Task.FromResult(new ApiKeys());
+    }
+
+    public Task<string> GetSecretValue(string name, string applicationId, string environmentId, CancellationToken cancellationToken)
+    {
+        return Task.FromResult("Ssshhh");
     }
 
     public Task<List<Environment>> GetEnvironments(CancellationToken cancellationToken)

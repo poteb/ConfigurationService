@@ -6,13 +6,22 @@ var configSettings = new BuilderConfiguration
 {
     Application = "Goofy",
     Environment = "Development",
-    ApiUri = builder.Configuration.GetValue<string>("ConfigurationApiUri"),
+    ApiUri = builder.Configuration.GetValue<string>("ConfigurationApiUri")!,
     WorkingDirectory = ""
 };
 var environmentSettingsJsonContent = File.ReadAllText($"appsettings.{configSettings.Environment}.json");
-_ = builder.AddConfigurationFromApi(configSettings, environmentSettingsJsonContent, () => new HttpClient(), (s, ex) => { }).Result;
-builder.Services.AddSecretsResolver(() => new HttpClient(), configSettings);
-
+_ = builder.AddConfigurationFromApi(configSettings, environmentSettingsJsonContent, () =>
+{
+    var client = new HttpClient();
+    client.DefaultRequestHeaders.Add("X-API-Key", builder.Configuration.GetSection("ApiKey").Value!);
+    return client;
+}, (_, _) => { }).Result;
+builder.Services.AddSecretsResolver(() =>
+{
+    var client = new HttpClient();
+    client.DefaultRequestHeaders.Add("X-API-Key", builder.Configuration.GetSection("ApiKey").Value!);
+    return client;
+}, configSettings);
 
 // Add services to the container.
 
