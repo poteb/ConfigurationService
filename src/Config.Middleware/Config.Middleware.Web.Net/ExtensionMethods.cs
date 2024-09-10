@@ -35,10 +35,10 @@ public static class ExtensionMethods
         return builder;
     }
     
-    public static IServiceCollection AddSecretsResolver(this IServiceCollection services, Func<HttpClient> clientProvider, BuilderConfiguration configuration)
+    public static IServiceCollection AddSecretsResolver(this IServiceCollection services, Func<HttpClient> clientProvider, BuilderConfiguration configuration, out ISecretResolver secretResolver)
     {
-        var secretResolver = new SecretResolver(configuration, clientProvider);
-        services.AddSingleton<ISecretResolver>(secretResolver);
+        secretResolver = new SecretResolver(configuration, clientProvider);
+        services.AddSingleton(secretResolver);
         return services;
     }
 }

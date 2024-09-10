@@ -1,4 +1,5 @@
 using pote.Config.Middleware;
+using pote.Config.Middleware.TestApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,7 +22,17 @@ builder.Services.AddSecretsResolver(() =>
     var client = new HttpClient();
     client.DefaultRequestHeaders.Add("X-API-Key", builder.Configuration.GetSection("ApiKey").Value!);
     return client;
-}, configSettings);
+}, configSettings, out var secretResolver);
+
+AddSecretConfiguration<MySecrets>(builder.Services, builder.Configuration, secretResolver);
+
+static T AddSecretConfiguration<T>(IServiceCollection services, IConfiguration configuration, ISecretResolver secretResolver) where T : class, ISecretSettings
+{
+    T settings = configuration.GetSection(typeof (T).Name).Get<T>()!;
+    settings.SecretResolver = secretResolver;
+    services.AddSingleton<T>(_ => settings);
+    return settings;
+}
 
 // Add services to the container.
 

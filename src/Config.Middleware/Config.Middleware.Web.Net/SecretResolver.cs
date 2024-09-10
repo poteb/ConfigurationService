@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using pote.Config.Shared;
@@ -7,7 +8,8 @@ namespace pote.Config.Middleware;
 
 public interface ISecretResolver
 {
-    Task<string> ResolveSecret(string secret);
+    string ResolveSecret(string secret);
+    Task<string> ResolveSecretAsync(string secret);
 }
 
 public class SecretResolver : ISecretResolver
@@ -22,7 +24,33 @@ public class SecretResolver : ISecretResolver
         _clientProvider = clientProvider;
     }
 
-    public async Task<string> ResolveSecret(string secret)
+    public string ResolveSecret(string secret)
+    {
+        var secretName = secret;
+        var match = Regex.Match(secret, RefPatternQuotes);
+        if (match.Success)
+            secretName = match.Groups["ref"].Value;
+        var client = _clientProvider();
+        var request = new SecretValueRequest
+        {
+            SecretName = secretName,
+            Application = "b0876c9d-c46f-4da1-9b92-5f8d80eddbdd",
+            Environment = "5213b39e-9b17-4d91-bd4b-e54aacddbb49"
+        };
+        var webRequest = new HttpRequestMessage(HttpMethod.Post, $"{_configuration.ApiUri}/Secrets/")
+        {
+            Content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")
+        };
+        var response = client.Send(webRequest);
+        if (!response.IsSuccessStatusCode)
+            throw new Exception($"Error getting secret {secretName} from API. Status code: {response.StatusCode}");
+        using var reader = new StreamReader(response.Content.ReadAsStream());
+        var jsonResponse = reader.ReadToEnd();
+        var responseBody = JsonSerializer.Deserialize<SecretValueResponse>(jsonResponse, new JsonSerializerOptions{PropertyNameCaseInsensitive = true});
+        return responseBody!.Value;
+    }
+    
+    public async Task<string> ResolveSecretAsync(string secret)
     {
         var secretName = secret;
         var match = Regex.Match(secret, RefPatternQuotes);
