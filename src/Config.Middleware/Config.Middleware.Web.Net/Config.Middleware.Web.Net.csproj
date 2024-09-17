@@ -25,6 +25,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\Config.Shared\Config.Shared.csproj" />
+      <ProjectReference Include="..\Config.Middleware.Secrets\Config.Middleware.Secrets.csproj" />
     </ItemGroup>
 
     <ItemGroup>

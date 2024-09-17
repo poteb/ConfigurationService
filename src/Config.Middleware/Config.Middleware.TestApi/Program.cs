@@ -1,5 +1,6 @@
 using pote.Config.Middleware;
 using pote.Config.Middleware.TestApi;
+using pote.Config.Middleware.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,26 +25,14 @@ builder.Services.AddSecretsResolver(() =>
     return client;
 }, configSettings, out var secretResolver);
 
-AddSecretConfiguration<MySecrets>(builder.Services, builder.Configuration, secretResolver);
-
-static T AddSecretConfiguration<T>(IServiceCollection services, IConfiguration configuration, ISecretResolver secretResolver) where T : class, ISecretSettings
-{
-    T settings = configuration.GetSection(typeof (T).Name).Get<T>()!;
-    settings.SecretResolver = secretResolver;
-    services.AddSingleton<T>(_ => settings);
-    return settings;
-}
-
-// Add services to the container.
+builder.Services.AddSecretConfiguration<MySecrets>(builder.Configuration, secretResolver);
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -51,9 +40,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();

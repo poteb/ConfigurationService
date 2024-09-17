@@ -41,8 +41,3 @@ public partial class MySecrets2
     
     public ISecretResolver SecretResolver { get; set; } = null!;
 }
-
-public interface ISecretSettings
-{
-    ISecretResolver SecretResolver { get; set; }
-}

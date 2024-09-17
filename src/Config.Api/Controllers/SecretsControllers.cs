@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using pote.Config.Admin.Api.Model.RequestResponse;
 using pote.Config.Auth;
 using pote.Config.DataProvider.Interfaces;
 
@@ -11,13 +10,11 @@ namespace pote.Config.Api.Controllers;
 public class SecretsControllers : ControllerBase
 {
     private readonly ILogger<SecretsControllers> _logger;
-    private readonly EncryptionSettings _encryptionSettings;
     private readonly IDataProvider _dataProvider;
 
-    public SecretsControllers(ILogger<SecretsControllers> logger, IDataProvider dataProvider, EncryptionSettings encryptionSettings)
+    public SecretsControllers(ILogger<SecretsControllers> logger, IDataProvider dataProvider)
     {
         _logger = logger;
-        _encryptionSettings = encryptionSettings;
         _dataProvider = dataProvider;
     }
     [HttpPost]
@@ -25,7 +22,10 @@ public class SecretsControllers : ControllerBase
     {
         try
         {
-            var result = await _dataProvider.GetSecretValue(request.SecretName, request.Application, request.Environment, cancellationToken);
+            var application = await _dataProvider.GetApplication(request.Application, cancellationToken);
+            var environment = await _dataProvider.GetEnvironment(request.Environment, cancellationToken);
+            
+            var result = await _dataProvider.GetSecretValue(request.SecretName, application.Id, environment.Id, cancellationToken);
             var response = new SecretValueResponse
             {
                 Value = result

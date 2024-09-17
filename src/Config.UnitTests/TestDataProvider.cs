@@ -42,10 +42,20 @@ public class TestDataProvider : IAdminDataProvider
         return Task.FromResult(list);
     }
 
+    public Task<Environment> GetEnvironment(string idOrName, CancellationToken cancellationToken)
+    {
+        throw new System.NotImplementedException();
+    }
+
     public Task<List<Application>> GetApplications(CancellationToken cancellationToken)
     {
         var list = new List<Application> {new() {Id = "AppId1", Name = "unittest"}};
         return Task.FromResult(list);
+    }
+
+    public Task<Application> GetApplication(string idOrName, CancellationToken cancellationToken)
+    {
+        throw new System.NotImplementedException();
     }
 
     public Task<List<ConfigurationHeader>> GetAllConfigurationHeaders(CancellationToken cancellationToken)

@@ -13,6 +13,7 @@ public class ApplicationDataAccess : IApplicationDataAccess
     {
         _fileHandler = fileHandler;
     }
+
     public async Task<List<Application>> GetApplications(CancellationToken cancellationToken)
     {
         var files = _fileHandler.GetApplicationFiles();
@@ -29,5 +30,23 @@ public class ApplicationDataAccess : IApplicationDataAccess
         }
 
         return result;
+    }
+
+    public async Task<Application> GetApplication(string idOrName, CancellationToken cancellationToken)
+    {
+        var files = _fileHandler.GetApplicationFiles();
+        foreach (var file in files)
+        {
+            try
+            {
+                var application = JsonConvert.DeserializeObject<Application>(await _fileHandler.GetApplicationContentAbsolutePath(file, cancellationToken));
+                if (application == null) continue;
+                if (application.Id == idOrName || application.Name.Equals(idOrName, StringComparison.InvariantCultureIgnoreCase))
+                    return application;
+            }
+            catch (Exception) { /* ignore */ }
+        }
+
+        throw new KeyNotFoundException($"Application not found, idOrName: {idOrName}");
     }
 }

@@ -67,9 +67,9 @@ public class AdminDataProvider : IAdminDataProvider
         return apiKeys ?? new ApiKeys();
     }
 
-    public Task<string> GetSecretValue(string name, string applicationId, string environmentId, CancellationToken cancellationToken)
+    public async Task<string> GetSecretValue(string name, string applicationId, string environmentId, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        return await _dataProvider.GetSecretValue(name, applicationId, applicationId, cancellationToken);
     }
 
     public async Task SaveApiKeys(ApiKeys apiKeys, CancellationToken cancellationToken)
@@ -152,11 +152,21 @@ public class AdminDataProvider : IAdminDataProvider
         return await _applicationDataAccess.GetApplications(cancellationToken);
     }
 
+    public async Task<Application> GetApplication(string idOrName, CancellationToken cancellationToken)
+    {
+        return await _applicationDataAccess.GetApplication(idOrName, cancellationToken);
+    }
+
     public async Task<List<Environment>> GetEnvironments(CancellationToken cancellationToken)
     {
         return await _environmentDataAccess.GetEnvironments(cancellationToken);
     }
-    
+
+    public Task<Environment> GetEnvironment(string idOrName, CancellationToken cancellationToken)
+    {
+        return _environmentDataAccess.GetEnvironment(idOrName, cancellationToken);
+    }
+
 
     public async Task<Settings> GetSettings(CancellationToken cancellationToken)
     {

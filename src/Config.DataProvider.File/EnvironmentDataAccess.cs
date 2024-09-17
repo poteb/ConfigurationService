@@ -29,4 +29,22 @@ public class EnvironmentDataAccess : IEnvironmentDataAccess
 
         return result;
     }
+
+    public async Task<DbModel.Environment> GetEnvironment(string idOrName, CancellationToken cancellationToken)
+    { 
+        var files = _fileHandler.GetEnvironmentFiles();
+        foreach (var file in files)
+        {
+            try
+            {
+                var env = JsonConvert.DeserializeObject<DbModel.Environment>(await _fileHandler.GetEnvironmentContentAbsolutePath(file, cancellationToken));
+                if (env == null) continue;
+                if (env.Id == idOrName || env.Name.Equals(idOrName, StringComparison.InvariantCultureIgnoreCase))
+                    return env;
+            }
+            catch (Exception) { /* ignore */ }
+        }
+
+        throw new KeyNotFoundException($"Environment not found, idOrName: {idOrName}");
+    }
 }

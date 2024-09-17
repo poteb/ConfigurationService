@@ -2,15 +2,10 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using pote.Config.Middleware.Secrets;
 using pote.Config.Shared;
 
-namespace pote.Config.Middleware;
-
-public interface ISecretResolver
-{
-    string ResolveSecret(string secret);
-    Task<string> ResolveSecretAsync(string secret);
-}
+namespace pote.Config.Middleware.Web;
 
 public class SecretResolver : ISecretResolver
 {
@@ -34,8 +29,8 @@ public class SecretResolver : ISecretResolver
         var request = new SecretValueRequest
         {
             SecretName = secretName,
-            Application = "b0876c9d-c46f-4da1-9b92-5f8d80eddbdd",
-            Environment = "5213b39e-9b17-4d91-bd4b-e54aacddbb49"
+            Application = _configuration.Application,
+            Environment = _configuration.Environment
         };
         var webRequest = new HttpRequestMessage(HttpMethod.Post, $"{_configuration.ApiUri}/Secrets/")
         {
@@ -60,8 +55,8 @@ public class SecretResolver : ISecretResolver
         var request = new SecretValueRequest
         {
             SecretName = secretName,
-            Application = "b0876c9d-c46f-4da1-9b92-5f8d80eddbdd",
-            Environment = "5213b39e-9b17-4d91-bd4b-e54aacddbb49"
+            Application = _configuration.Application,
+            Environment = _configuration.Environment
         };
         var response = await client.PostAsJsonAsync($"{_configuration.ApiUri}/Secrets/", request);
         if (!response.IsSuccessStatusCode)

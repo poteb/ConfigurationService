@@ -2,5 +2,5 @@
 
 public interface ISecretSettings
 {
-    
+    ISecretResolver SecretResolver { get; set; }
 }

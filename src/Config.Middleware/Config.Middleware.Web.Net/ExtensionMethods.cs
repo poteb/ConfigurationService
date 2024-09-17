@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using pote.Config.Middleware.Secrets;
 using pote.Config.Shared;
 
-namespace pote.Config.Middleware;
+namespace pote.Config.Middleware.Web;
 
 public static class ExtensionMethods
 {
@@ -40,5 +41,13 @@ public static class ExtensionMethods
         secretResolver = new SecretResolver(configuration, clientProvider);
         services.AddSingleton(secretResolver);
         return services;
+    }
+    
+    public static T AddSecretConfiguration<T>(this IServiceCollection services, IConfiguration configuration, ISecretResolver secretResolver) where T : class, ISecretSettings
+    {
+        var settings = configuration.GetSection(typeof (T).Name).Get<T>()!;
+        settings.SecretResolver = secretResolver;
+        services.AddSingleton<T>(_ => settings);
+        return settings;
     }
 }
