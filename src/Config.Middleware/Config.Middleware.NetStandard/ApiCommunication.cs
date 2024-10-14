@@ -13,18 +13,17 @@ public interface IApiCommunication
 internal class ApiCommunication : IApiCommunication
 {
     private readonly string _apiUri;
-    private readonly Func<HttpClient> _clientProvider;
+    private readonly HttpClient _client;
 
-    public ApiCommunication(string apiUri, Func<HttpClient> clientProvider)
+    public ApiCommunication(string apiUri, HttpClient client)
     {
         _apiUri = apiUri;
-        _clientProvider = clientProvider;
+        _client = client;
     }
 
     public async Task<ParseResponse?> GetConfiguration(ParseRequest request)
     {
-        using var client = _clientProvider.Invoke();
-        var response = await client.PostAsync($"{_apiUri}/Configuration", new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json"));
+        var response = await _client.PostAsync($"{_apiUri}/Configuration", new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json"));
         response.EnsureSuccessStatusCode();
         return await JsonSerializer.DeserializeAsync<ParseResponse>(await response.Content.ReadAsStreamAsync(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
     }
