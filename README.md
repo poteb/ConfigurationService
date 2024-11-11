@@ -214,6 +214,45 @@ which results in
 The *base* key is gone from the original *appsettings.json* and replaced with the result of the reference.
 This works because the name of the json property is *base* or *Base*.
 
+## Key vault
+If you have sensitive information that you don't want to store in the configuration files you can use a key vault. The secrets are stored as key/value pairs.
+
+A source generator is used to generate the needed code to fetch the secrets from the key vault. The source generator is triggered by the `SecretAttribute`.
+
+Example of a key vault reference in a configuration file:
+    
+    public partial class MyConfiguration
+    {
+        [Secret]
+        private string _secret1 = "";
+    }
+
+The source generator will generate the following code:
+
+    public partial class MySecrets : ISecretSettings
+    {
+        private bool _isSecret1Resolved;
+        public string Secret1
+        {
+            get 
+            {
+                if (!this._isSecret1Resolved)
+                {
+                    this._secret1 = SecretResolver.ResolveSecret(this._secret1);
+                }
+                this._isSecret1Resolved = true;
+                return this._secret1;
+            }
+            set => this._secret1 = value;
+        }
+
+        public ISecretResolver SecretResolver { get; set; }
+    }
+
+The `ISecretResolver` is an interface that is used to resolve the secrets. The `SecretResolver` is a class that implements the `ISecretResolver` interface. The `SecretResolver` is injected into the `MySecrets` class and used to resolve the secrets.
+
+
+
 ## Admin UI
 ![Basic usage](/documentation/AdminUi1.png)
 Here is an example of a configuration in the Admin UI.
