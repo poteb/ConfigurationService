@@ -1,0 +1,21 @@
+{
+	"Id": "e84dcc33-50ac-48fc-a9a4-24cf1445dd8e",
+	"Name": "Secrets",
+	"CreatedUtc": "2024-08-19T22:18:48.722Z",
+	"UpdateUtc": "2024-08-19T19:57:06.513Z",
+	"Deleted": false,
+	"IsActive": true,
+	"Configurations": [
+		{
+			"HeaderId": "e84dcc33-50ac-48fc-a9a4-24cf1445dd8e",
+			"Id": "99200cfc-9d8b-4b59-a3ae-28755a234605",
+			"Json": "{\"Secret1\":\"DontTell\"}",
+			"CreatedUtc": "2024-08-19T19:59:15.437Z",
+			"IsActive": true,
+			"Applications": "[\"b0876c9d-c46f-4da1-9b92-5f8d80eddbdd\"]",
+			"Environments": "[\"5868233c-1d5d-42a6-a93c-9043edabf146\"]",
+			"Deleted": false,
+			"History": []
+		}
+	]
+}

@@ -15,17 +15,17 @@ public class AdminDataProvider : IAdminDataProvider
     private readonly EncryptionSettings _encryptionSettings;
     private readonly DataProvider _dataProvider;
 
-    public AdminDataProvider(IFileHandler fileHandler, IApplicationDataAccess applicationDataAccess, IEnvironmentDataAccess environmentDataAccess, EncryptionSettings encryptionSettings)
+    public AdminDataProvider(IFileHandler fileHandler, IApplicationDataAccess applicationDataAccess, IEnvironmentDataAccess environmentDataAccess, ISecretDataAccess secretDataAccess, EncryptionSettings encryptionSettings)
     {
         _fileHandler = fileHandler;
         _applicationDataAccess = applicationDataAccess;
         _environmentDataAccess = environmentDataAccess;
         _encryptionSettings = encryptionSettings;
 
-        _dataProvider = new DataProvider(fileHandler, environmentDataAccess, applicationDataAccess);
+        _dataProvider = new DataProvider(fileHandler, environmentDataAccess, applicationDataAccess, secretDataAccess, encryptionSettings);
     }
 
-    public async Task<List<ConfigurationHeader>> GetAll(CancellationToken cancellationToken)
+    public async Task<List<ConfigurationHeader>> GetAllConfigurationHeaders(CancellationToken cancellationToken)
     {
         var files = _fileHandler.GetConfigurationFiles();
         var result = new List<ConfigurationHeader>();
@@ -66,7 +66,12 @@ public class AdminDataProvider : IAdminDataProvider
         var apiKeys = JsonConvert.DeserializeObject<ApiKeys>(apiKeyString);
         return apiKeys ?? new ApiKeys();
     }
-    
+
+    public async Task<string> GetSecretValue(string name, string applicationId, string environmentId, CancellationToken cancellationToken)
+    {
+        return await _dataProvider.GetSecretValue(name, applicationId, applicationId, cancellationToken);
+    }
+
     public async Task SaveApiKeys(ApiKeys apiKeys, CancellationToken cancellationToken)
     {
         await _fileHandler.SaveApiKeys(JsonConvert.SerializeObject(apiKeys), cancellationToken);
@@ -106,7 +111,7 @@ public class AdminDataProvider : IAdminDataProvider
         _fileHandler.DeleteConfiguration(id, permanent);
     }
 
-    public async Task Insert(ConfigurationHeader header, CancellationToken cancellationToken)
+    public async Task InsertConfiguration(ConfigurationHeader header, CancellationToken cancellationToken)
     {
         var settings = await GetSettings(cancellationToken);
         header.Configurations.ForEach(c =>
@@ -147,11 +152,21 @@ public class AdminDataProvider : IAdminDataProvider
         return await _applicationDataAccess.GetApplications(cancellationToken);
     }
 
+    public async Task<Application> GetApplication(string idOrName, CancellationToken cancellationToken)
+    {
+        return await _applicationDataAccess.GetApplication(idOrName, cancellationToken);
+    }
+
     public async Task<List<Environment>> GetEnvironments(CancellationToken cancellationToken)
     {
         return await _environmentDataAccess.GetEnvironments(cancellationToken);
     }
-    
+
+    public Task<Environment> GetEnvironment(string idOrName, CancellationToken cancellationToken)
+    {
+        return _environmentDataAccess.GetEnvironment(idOrName, cancellationToken);
+    }
+
 
     public async Task<Settings> GetSettings(CancellationToken cancellationToken)
     {
@@ -163,5 +178,49 @@ public class AdminDataProvider : IAdminDataProvider
     public async Task SaveSettings(Settings settings, CancellationToken cancellationToken)
     {
         await _fileHandler.SaveSettings(JsonConvert.SerializeObject(settings), cancellationToken);
+    }
+
+    public async Task InsertSecret(SecretHeader header, CancellationToken cancellationToken)
+    {
+        header.Secrets.ForEach(c =>
+        {
+            c.CreatedUtc = header.CreatedUtc;
+            EncryptionHandler.Encrypt(c, _encryptionSettings.JsonEncryptionKey);
+        });
+        await _fileHandler.WriteSecretContent(header.Id, JsonConvert.SerializeObject(header), cancellationToken);
+    }
+
+    public Task DeleteSecret(string id, CancellationToken cancellationToken)
+    {
+        _fileHandler.DeleteSecret(id);
+        return Task.CompletedTask;
+    }
+
+    public async Task<List<SecretHeader>> GetAllSecretHeaders(CancellationToken cancellationToken)
+    {
+        var files = _fileHandler.GetSecretFiles();
+        var result = new List<SecretHeader>();
+        foreach (var file in files)
+        {
+            try
+            {
+                var header = await GetSecret(Path.GetFileNameWithoutExtension(file), cancellationToken, false);
+                result.Add(header);
+            }
+            catch (Exception)
+            {
+                /* ignore */
+            }
+        }
+
+        return result;
+    }
+
+    public async Task<SecretHeader> GetSecret(string id, CancellationToken cancellationToken, bool includeHistory = true)
+    {
+        var header = JsonConvert.DeserializeObject<SecretHeader>(await _fileHandler.GetSecretContent(id, cancellationToken));
+        if (header == null) throw new KeyNotFoundException($"Could not read json from file {id}");
+        EncryptionHandler.Decrypt(header.Secrets, _encryptionSettings.JsonEncryptionKey);
+        return header;
     }
 }

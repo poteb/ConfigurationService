@@ -24,25 +24,28 @@ public class Configuration : IEquatable<Configuration>, IComparable<Configuratio
 
     public bool Equals(Configuration? other)
     {
+        int i = 0;
         if (other == null) return false;
         if (!Id.Equals(other.Id)) return false;
         if (!Json.Equals(other.Json)) return false;
         if (!CreatedUtc.Equals(other.CreatedUtc)) return false;
         if (!IsActive == other.IsActive) return false;
         if (!Deleted == other.Deleted) return false;
+        Console.WriteLine(i++);
+        Console.WriteLine($"{Id} == {other.Id}");
         if (!IsJsonEncrypted == other.IsJsonEncrypted) return false;
 
         if (!Applications.Count.Equals(other.Applications.Count)) return false;
         foreach (var application in Applications)
             if (other.Applications.All(o => o.Id != application.Id))
                 return false;
-        //if (!string.Join(",", Applications.Select(s => s.Id)).Equals(string.Join(",", other.Applications.Select(s => s.Id)))) return false;
+        Console.WriteLine(i++);
 
         if (!Environments.Count.Equals(other.Environments.Count)) return false;
         foreach (var environment in Environments)
             if (other.Environments.All(e => e.Id != environment.Id))
                 return false;
-        //if (!string.Join(",", Environments.Select(e => e.Id)).Equals(string.Join(",", other.Environments.Select(e => e.Id)))) return false;
+        Console.WriteLine(i++);
 
         return true;
     }

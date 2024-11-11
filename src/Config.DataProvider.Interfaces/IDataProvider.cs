@@ -8,5 +8,7 @@ namespace pote.Config.DataProvider.Interfaces
         Task<Configuration> GetConfiguration(string name, string applicationId, string environment, CancellationToken cancellationToken);
         
         Task<ApiKeys> GetApiKeys(CancellationToken cancellationToken);
+        
+        Task<string> GetSecretValue(string name, string applicationId, string environmentId, CancellationToken cancellationToken);
     }
 }

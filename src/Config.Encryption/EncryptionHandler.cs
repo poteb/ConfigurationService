@@ -63,6 +63,32 @@ public static class EncryptionHandler
             Decrypt(configuration, key);
         return configurations;
     }
+    
+    public static Secret Encrypt(Secret configuration, string key)
+    {
+        configuration.Value = Encrypt(configuration.Value, key);
+        return configuration;
+    }
+    
+    public static Secret Decrypt(Secret secret, string key)
+    {
+        secret.Value = Decrypt(secret.Value, key);
+        return secret;
+    }
+
+    public static IReadOnlyList<Secret> Encrypt(IReadOnlyList<Secret> secrets, string key)
+    {
+        foreach (var secret in secrets) 
+            Encrypt(secret, key);
+        return secrets;
+    }
+    
+    public static IReadOnlyList<Secret> Decrypt(IReadOnlyList<Secret> secrets, string key)
+    {
+        foreach (var secret in secrets) 
+            Decrypt(secret, key);
+        return secrets;
+    }
 
     private static bool IsStringEncrypted(ReadOnlySpan<char> text)
     {

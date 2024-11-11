@@ -1,30 +1,20 @@
-using pote.Config.Middleware;
+using pote.Config.Middleware.TestApi;
+using pote.Config.Middleware.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Host.ConfigureAppConfiguration((host, configurationBuilder) =>
-{
-    var configSettings = new BuilderConfiguration
-    {
-        Application = "Goofy",
-        Environment = "Development",
-        ApiUri = builder.Configuration.GetValue<string>("ConfigurationApiUri"),
-        WorkingDirectory = ""
-    };
-    var environmentSettingsJsonContent = File.ReadAllText($"appsettings.{configSettings.Environment}.json");
-    var _ = builder.AddConfigurationFromApi(configSettings, environmentSettingsJsonContent, () => new HttpClient(), (s, ex) => { }).Result;
-});
-
-// Add services to the container.
+var configSettings = builder.Services.AddBuilderConfiguration("Goofy", "Development", builder.Configuration.GetValue<string>("ConfigurationApiUri")!, "");
+var environmentSettingsJsonContent = File.ReadAllText($"appsettings.{configSettings.Environment}.json");
+await builder.AddConfigurationFromApi(configSettings, environmentSettingsJsonContent, builder.Configuration.GetSection("ApiKey").Value!, (_, _) => { });
+var secretsResolver = builder.Services.AddSecretsResolver(configSettings, builder.Configuration.GetSection("ApiKey").Value!);
+builder.Services.AddSecretConfiguration<MySecrets>(builder.Configuration, secretsResolver);
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -32,9 +22,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();

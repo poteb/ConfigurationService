@@ -18,7 +18,7 @@ public class DateTimeParserTests
         var obj = JsonConvert.DeserializeObject<DateTimeContainerClass>(response);
         Assert.AreEqual(new DateTime(2022, 12, 7, 9, 25, 13, 585, DateTimeKind.Utc), obj?.MyDateTime);
         var timeZoneId = TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time");
-        var local = TimeZoneInfo.ConvertTimeFromUtc(obj.MyDateTime, timeZoneId);
+        var local = TimeZoneInfo.ConvertTimeFromUtc(obj!.MyDateTime, timeZoneId);
         Assert.AreEqual(new DateTime(2022, 12, 7, 10, 25, 13, 585, DateTimeKind.Local), local);
     }
     
@@ -31,12 +31,13 @@ public class DateTimeParserTests
         var obj = JsonConvert.DeserializeObject<DateTimeContainerClass>(response);
         Assert.AreEqual(new DateTime(2023, 8, 22, 11, 56, 11, 151, DateTimeKind.Utc), obj?.MyDateTime);
         var timeZoneId = TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time");
-        var local = TimeZoneInfo.ConvertTimeFromUtc(obj.MyDateTime, timeZoneId);
+        var local = TimeZoneInfo.ConvertTimeFromUtc(obj!.MyDateTime, timeZoneId);
         Assert.AreEqual(new DateTime(2023, 8, 22, 13, 56, 11, 151, DateTimeKind.Local), local);
     }
 }
 
 public class DateTimeContainerClass
 {
+    // ReSharper disable once UnusedAutoPropertyAccessor.Global
     public DateTime MyDateTime { get; set; }
 }

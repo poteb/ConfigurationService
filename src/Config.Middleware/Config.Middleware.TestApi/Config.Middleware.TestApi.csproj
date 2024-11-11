@@ -1,18 +1,21 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <AssemblyName>pote.Config.Middleware.TestApi</AssemblyName>
         <RootNamespace>pote.Config.Middleware.TestApi</RootNamespace>
+<!--        <PublishAot>true</PublishAot>-->
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.11.0" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Config.Middleware.Secrets\Config.Middleware.Secrets.csproj" OutputItemType="Analyzer" />
       <ProjectReference Include="..\Config.Middleware.Web.Net\Config.Middleware.Web.Net.csproj" />
     </ItemGroup>
 </Project>

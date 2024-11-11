@@ -1,4 +1,6 @@
-﻿namespace pote.Config.DataProvider.File;
+﻿using pote.Config.DbModel;
+
+namespace pote.Config.DataProvider.File;
 
 public class FileHandler : IFileHandler
 {
@@ -6,6 +8,7 @@ public class FileHandler : IFileHandler
     private readonly string _environmentsDir;
     private readonly string _applicationsDir;
     private readonly string _settingsDir;
+    private readonly string _secretsDir;
 
     public FileHandler(string directory)
     {
@@ -13,6 +16,7 @@ public class FileHandler : IFileHandler
         _environmentsDir = Path.Combine(directory, "environments");
         _applicationsDir = Path.Combine(directory, "applications");
         _settingsDir = Path.Combine(directory, "settings");
+        _secretsDir = Path.Combine(directory, "secrets");
 
         if (!Directory.Exists(_configurationRootDir))
             Directory.CreateDirectory(_configurationRootDir);
@@ -22,6 +26,8 @@ public class FileHandler : IFileHandler
             Directory.CreateDirectory(_applicationsDir);
         if (!Directory.Exists(_settingsDir))
             Directory.CreateDirectory(_settingsDir);
+        if (!Directory.Exists(_secretsDir))
+            Directory.CreateDirectory(_secretsDir);
     }
 
     public string[] GetConfigurationFiles()
@@ -155,6 +161,11 @@ public class FileHandler : IFileHandler
         await WriteAuditLog(Path.Combine(_settingsDir, "AuditLogApiKeys"), content);
     }
 
+    public Task AuditLogSecrets(string id, string content)
+    {
+        return WriteAuditLog(Path.Combine(_secretsDir, "AuditLog", id), content);
+    }
+
     public async Task<string> GetSettings(CancellationToken cancellationToken)
     {
         var file = Path.Combine(_settingsDir, "settings.json");
@@ -179,6 +190,35 @@ public class FileHandler : IFileHandler
     {
         var file = Path.Combine(_settingsDir, "apikeys.json");
         await System.IO.File.WriteAllTextAsync(file, apiKeys, cancellationToken);
+    }
+
+    public string[] GetSecretFiles()
+    {
+        return Directory.GetFiles(_secretsDir);
+    }
+    public async Task<string> GetSecretContentAbsolutePath(string file, CancellationToken cancellationToken)
+    {
+        return await System.IO.File.ReadAllTextAsync(file, cancellationToken);
+    }
+
+    public async Task WriteSecretContent(string id, string content, CancellationToken cancellationToken)
+    {
+        var file = Path.ChangeExtension(Path.Combine(_secretsDir, id), ".txt");
+        await System.IO.File.WriteAllTextAsync(file, content, cancellationToken);
+    }
+
+    public void DeleteSecret(string id)
+    {
+        var file = Path.ChangeExtension(Path.Combine(_secretsDir, id), ".txt");
+        if (!System.IO.File.Exists(file)) return;
+        System.IO.File.Delete(file);
+    }
+
+    public async Task<string> GetSecretContent(string id, CancellationToken cancellationToken)
+    {
+        var file = Path.ChangeExtension(Path.Combine(_secretsDir, id), ".txt");
+        if (!System.IO.File.Exists(file)) throw new FileNotFoundException();
+        return await System.IO.File.ReadAllTextAsync(file, cancellationToken);
     }
 
     private async Task WriteAuditLog(string dir, string content)

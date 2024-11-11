@@ -78,6 +78,8 @@ public partial class EditConfiguration : IDisposable, IConfigurationActions
             if (callResponse is {IsSuccess: true, Response: { }})
             {
                 Header = ConfigurationMapper.ToClient(callResponse.Response.Configuration);
+                if (Header.IsJsonEncrypted || _settings.EncryptAllJson)
+                    IsJsonEncryptedCheck(Header.IsJsonEncrypted || _settings.EncryptAllJson);
                 OriginalHeader = ConfigurationMapper.Copy(Header);
                 UpdateConfigurationIndex();
             }

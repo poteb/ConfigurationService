@@ -16,6 +16,10 @@ namespace pote.Config.Admin.WebClient.Services
         Task<ApiCallResponse<object>> SaveApplications(List<Application> applications);
         Task<ApiCallResponse<object>> SaveConfiguration(ConfigurationHeader configuration);
         Task<ApiCallResponse<bool>> DeleteConfiguration(string id, bool permanent);
+        Task<ApiCallResponse<SecretsResponse>> GetSecrets();
+        Task<ApiCallResponse<bool>> DeleteSecret(string id);
+        Task<ApiCallResponse<SecretResponse>> GetSecret(string gid);
+        Task<ApiCallResponse<object>> SaveSecret(SecretHeader secret);
     }
 
     public class AdminApiService : ApiServiceBase, IAdminApiService
@@ -217,6 +221,75 @@ namespace pote.Config.Admin.WebClient.Services
             catch (Exception ex)
             {
                 return DefaultExceptionResponse(false, "Error deleting configuration", ex);
+            }
+        }
+
+        public async Task<ApiCallResponse<SecretsResponse>> GetSecrets()
+        {
+            try
+            {
+                using var client = _clientFactory.CreateClient("AdminApi");
+                var response = await client.GetAsync("Secrets");
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadFromJsonAsync<SecretsResponse>() ?? new SecretsResponse();
+                    return new ApiCallResponse<SecretsResponse> { IsSuccess = true, Response = content };
+                }
+
+                return DefaultUnsuccessfulResponse(new SecretsResponse(), (int)response.StatusCode);
+            }
+            catch (Exception ex)
+            {
+                return DefaultExceptionResponse(new SecretsResponse(), "Error getting data from API", ex);
+            }
+        }
+
+        public async Task<ApiCallResponse<bool>> DeleteSecret(string id)
+        {
+            try
+            {
+                using var client = _clientFactory.CreateClient("AdminApi");
+                await client.PostAsync($"Secrets/delete/{id}", null);
+                return new ApiCallResponse<bool> { IsSuccess = true };
+            }
+            catch (Exception ex)
+            {
+                return DefaultExceptionResponse(false, "Error deleting secret", ex);
+            }
+        }
+
+        public async Task<ApiCallResponse<SecretResponse>> GetSecret(string gid)
+        {
+            try
+            {
+                using var client = _clientFactory.CreateClient("AdminApi");
+                var response = await client.GetAsync($"Secrets/{gid}");
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadFromJsonAsync<SecretResponse>() ?? new SecretResponse();
+                    return new ApiCallResponse<SecretResponse> { IsSuccess = true, Response = content };
+                }
+
+                return DefaultUnsuccessfulResponse(new SecretResponse(), (int)response.StatusCode);
+            }
+            catch (Exception ex)
+            {
+                return DefaultExceptionResponse(new SecretResponse(), "Error getting data from API", ex);
+            }
+        }
+
+        public async Task<ApiCallResponse<object>> SaveSecret(SecretHeader secret)
+        {
+            try
+            {
+                using var client = _clientFactory.CreateClient("AdminApi");
+                var apiSecret = Mappers.SecretMapper.ToApi(secret);
+                await client.PostAsJsonAsync("Secrets", apiSecret);
+                return new ApiCallResponse<object> { IsSuccess = true };
+            }
+            catch (Exception ex)
+            {
+                return DefaultExceptionResponse(new object(), "Error saving secret header", ex);
             }
         }
     }

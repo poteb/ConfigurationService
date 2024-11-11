@@ -7,4 +7,5 @@ public interface IAuditLogHandler
     Task AuditLogApplication(string id, string callerIp, string content);
     Task AuditLogSettings(string id, string callerIp, string content);
     Task AuditLogApiKeys(string id, string callerIp, string content);
+    Task AuditLogSecrets(string id, string callerIp, string content);
 }

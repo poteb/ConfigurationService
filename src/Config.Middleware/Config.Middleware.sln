@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Config.Middleware.Net", "Co
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Config.Middleware.Web.Net", "Config.Middleware.Web.Net\Config.Middleware.Web.Net.csproj", "{2037FF1E-050B-455E-BA9B-F7F4DEEA0127}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Config.Middleware.Secrets", "Config.Middleware.Secrets\Config.Middleware.Secrets.csproj", "{1417F51B-F799-45AC-B32D-4470FE0A1942}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{2037FF1E-050B-455E-BA9B-F7F4DEEA0127}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2037FF1E-050B-455E-BA9B-F7F4DEEA0127}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2037FF1E-050B-455E-BA9B-F7F4DEEA0127}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1417F51B-F799-45AC-B32D-4470FE0A1942}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1417F51B-F799-45AC-B32D-4470FE0A1942}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1417F51B-F799-45AC-B32D-4470FE0A1942}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1417F51B-F799-45AC-B32D-4470FE0A1942}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

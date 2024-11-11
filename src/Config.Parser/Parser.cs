@@ -92,14 +92,13 @@ public class Parser : IParser
                 matchTypeParentheses = false;
             }
 
-            // A match is found, now get the value from the database.
             var configurationName = match.Groups[1].Value;
             var key = new KeyValuePair<string, string>(configurationName, value);
             if (fetchedConfigurations.TryGetValue(key, out var count))
             {
                 if (count > 2)
                 {
-                    problems($"Referenced configuration {configurationName} was already resolved 3 times. This might be a circular reference and resolving it again could cause an infinite loop. The reference will be ignored.");
+                    problems($"Referenced configuration {configurationName} was already resolved 3 times. This might be a circular reference and could cause an infinite loop. The reference will be ignored.");
                     return;
                 }
                 fetchedConfigurations[key]++;
@@ -109,6 +108,7 @@ public class Parser : IParser
                 fetchedConfigurations[key] = 0;
             }
             
+            // A match is found, now get the value from the database.
             var configuration = await _dataProvider.GetConfiguration(configurationName, application, environment, cancellationToken);
             if (string.IsNullOrWhiteSpace(configuration.Json))
             {
