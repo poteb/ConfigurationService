@@ -15,6 +15,12 @@
       <Compile Include="..\Config.Middleware.NetStandard\BuilderConfiguration.cs">
         <Link>BuilderConfiguration.cs</Link>
       </Compile>
+      <Compile Include="..\Config.Middleware.Net\SecretResolver.cs">
+        <Link>SecretResolver.cs</Link>
+      </Compile>
+      <Compile Include="..\Config.Middleware.Net\SecretsExtensionMethods.cs">
+        <Link>SecretsExtensionMethods.cs</Link>
+      </Compile>
     </ItemGroup>
 
     <ItemGroup>

@@ -1,4 +1,4 @@
-﻿namespace pote.Config.Middleware.Secrets;
+﻿namespace pote.Config.Shared.Secrets;
 
 public interface ISecretSettings
 {

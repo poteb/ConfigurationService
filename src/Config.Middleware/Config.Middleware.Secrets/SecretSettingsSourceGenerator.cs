@@ -1,5 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
@@ -21,7 +22,7 @@ public class SecretSettingsSourceGenerator : ISourceGenerator
     {
         if (!(context.SyntaxContextReceiver is SyntaxReceiver receiver))
             return;
-
+        
         foreach (var group in receiver.Fields.GroupBy(f => f.ContainingType, SymbolEqualityComparer.Default))
         {
             string classSource = ProcessClass(group.Key, group.ToList());
@@ -43,8 +44,7 @@ public class SecretSettingsSourceGenerator : ISourceGenerator
         propertyBuilder.AppendLine();
         propertyBuilder.AppendLine(CreateSecretResolverProperty());
 
-        return $@"using pote.Config.Middleware.Secrets;
-using pote.Config.Shared;
+        return $@"using pote.Config.Shared.Secrets;
 namespace {namespaceName}
 {{
     public partial class {className} : ISecretSettings
@@ -84,7 +84,7 @@ namespace {namespaceName}
         return "        public ISecretResolver SecretResolver { get; set; }";
     }
 
-    class SyntaxReceiver : ISyntaxContextReceiver
+    public class SyntaxReceiver : ISyntaxContextReceiver
     {
         public List<IFieldSymbol> Fields { get; } = [];
 
@@ -97,10 +97,26 @@ namespace {namespaceName}
                 {
                     var fieldSymbol = context.SemanticModel.GetDeclaredSymbol(variable) as IFieldSymbol;
                     if (fieldSymbol is null) continue;
-                    if (fieldSymbol.GetAttributes().Any(ad => ad.AttributeClass?.ToDisplayString() == "pote.Config.Middleware.Secrets.SecretAttribute"))
+                    var attributes = fieldSymbol.GetAttributes();
+                    foreach (var attribute in attributes)
                     {
-                        Fields.Add(fieldSymbol);
+                        var attributeClass = attribute.AttributeClass;
+                        if (attributeClass is null) continue;
+                        // var containingNamespace = attributeClass.ContainingNamespace;
+                        // var namespaceName = containingNamespace.ToDisplayString();
+                        // var fullyQualifiedName = attributeClass.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                        // var d = attributeClass.ToString();
+                        // var d2 = attributeClass.Name;
+                        var displayString = attributeClass.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                        if (displayString == "pote.Config.Shared.Secrets.SecretAttribute" || displayString == "global::pote.Config.Shared.Secrets.SecretAttribute" || displayString == "Secret")
+                        {
+                            Fields.Add(fieldSymbol);
+                        }
                     }
+                    // if (attributes.Any(ad => ad.AttributeClass?.ToDisplayString() == "pote.Config.Shared.Secrets.SecretAttribute"))
+                    // {
+                    //     Fields.Add(fieldSymbol);
+                    // }
                 }
             }
         }

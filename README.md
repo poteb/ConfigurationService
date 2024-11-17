@@ -205,7 +205,7 @@ which results in
         "Default": "Data Source=dbserver;Initial Catalog=myDb;User Id=sa;Password=SuperNinjaPassword"
       },
       "RabbitMQ": {
-        "Server": "MyMqServer",
+        "Server": "MyMqServer",~~~~
         "Port": 5672,
         "Username": "Goofy",
         "Password": "EpicHeroPassword"
@@ -227,9 +227,11 @@ Example of a key vault reference in a configuration file:
         private string _secret1 = "";
     }
 
-The source generator will generate the following code:
+The class must be partial.
 
-    public partial class MySecrets : ISecretSettings
+The generated code will look like this:
+
+    public partial class MyConfiguration : ISecretSettings
     {
         private bool _isSecret1Resolved;
         public string Secret1
@@ -251,7 +253,7 @@ The source generator will generate the following code:
 
 The `ISecretResolver` is an interface that is used to resolve the secrets. The `SecretResolver` is a class that implements the `ISecretResolver` interface. The `SecretResolver` is injected into the `MySecrets` class and used to resolve the secrets.
 
-
+The secrets are resolved once and only once. This might change in the future to not keep secrets in memory. But a change like that will put a tighter coupling to the configuration service. 
 
 ## Admin UI
 ![Basic usage](/documentation/AdminUi1.png)
