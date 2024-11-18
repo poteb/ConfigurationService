@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using pote.Config.Middleware.Secrets;
 using pote.Config.Shared;
 using pote.Config.Shared.Secrets;
 

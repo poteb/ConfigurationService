@@ -24,8 +24,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Config.Middleware.Secrets",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Config.Middleware.TestApi.Nuget", "Config.Middleware.TestApi.Nuget\Config.Middleware.TestApi.Nuget.csproj", "{27C5173F-FA5A-4555-A71D-61DCDE2A930D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Config.Middleware.Tests", "Config.Middleware.Tests\Config.Middleware.Tests.csproj", "{566D0210-3B1D-4984-A5E3-1F415EE0E8F1}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp1", "ConsoleApp1\ConsoleApp1.csproj", "{128F5465-D2C7-4927-AF0B-1542096173BC}"
 EndProject
 Global
@@ -62,10 +60,6 @@ Global
 		{27C5173F-FA5A-4555-A71D-61DCDE2A930D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{27C5173F-FA5A-4555-A71D-61DCDE2A930D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{27C5173F-FA5A-4555-A71D-61DCDE2A930D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{566D0210-3B1D-4984-A5E3-1F415EE0E8F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{566D0210-3B1D-4984-A5E3-1F415EE0E8F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{566D0210-3B1D-4984-A5E3-1F415EE0E8F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{566D0210-3B1D-4984-A5E3-1F415EE0E8F1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{128F5465-D2C7-4927-AF0B-1542096173BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{128F5465-D2C7-4927-AF0B-1542096173BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{128F5465-D2C7-4927-AF0B-1542096173BC}.Release|Any CPU.ActiveCfg = Release|Any CPU

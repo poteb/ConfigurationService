@@ -8,7 +8,7 @@ var configSettings = builder.Services.AddBuilderConfiguration("Goofy", "Developm
 var environmentSettingsJsonContent = File.ReadAllText($"appsettings.{configSettings.Environment}.json");
 await builder.AddConfigurationFromApi(configSettings, environmentSettingsJsonContent, builder.Configuration.GetSection("ApiKey").Value!, (_, _) => { });
 var secretsResolver = builder.Services.AddSecretsResolver(configSettings, builder.Configuration.GetSection("ApiKey").Value!);
-//builder.Services.AddSecretConfiguration<MySecrets>(builder.Configuration, secretsResolver);
+builder.Services.AddSecretConfiguration<MySecrets>(builder.Configuration, secretsResolver);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using pote.Config.Middleware.Secrets;
 using pote.Config.Shared.Secrets;
 
 namespace pote.Config.Middleware;

@@ -1,4 +1,5 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿// This app is for debugging the generator. https://github.com/JoanComasFdz/dotnet-how-to-debug-source-generator-vs2022
+// Set Config.Middleware.Secrets as the startup project
 
 using ConsoleApp1;
 using pote.Config.Middleware;

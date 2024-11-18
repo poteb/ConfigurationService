@@ -2,8 +2,6 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using pote.Config.Middleware.Secrets;
-using pote.Config.Shared;
 using pote.Config.Shared.Secrets;
 
 namespace pote.Config.Middleware;
