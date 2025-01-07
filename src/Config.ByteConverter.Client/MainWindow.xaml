@@ -8,8 +8,8 @@
         Title="Config byte converter" Height="936" Width="957">
     <Grid>
 
-        <TabControl Margin="3">
-            <TabItem Header="    JSON to BYTES    ">
+        <TabControl Margin="3" SelectedIndex="0" x:Name="tc">
+            <TabItem Header="JSON to BYTES">
                 <Grid Background="white">
                     <TextBlock HorizontalAlignment="Left" Margin="10,5,0,0" TextWrapping="Wrap" Text="Environment:" VerticalAlignment="Top"/>
                     <TextBox HorizontalAlignment="Left" Margin="85,4,0,0" TextWrapping="Wrap" Text="{Binding SelectedEnvironment}" VerticalAlignment="Top" Width="120"/>
@@ -22,15 +22,27 @@
 
                     <TextBlock HorizontalAlignment="Left" Margin="10,0,0,390" TextWrapping="Wrap" Text="Configuration bytes. This is what the API takes as input:" VerticalAlignment="Bottom"/>
                     <TextBox Margin="4,0,4,0" Text="{Binding ApplicationConfigurationBytes}" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible" Height="385" VerticalAlignment="Bottom"/>
-                    <Button Content="Copy" HorizontalAlignment="Right" Margin="0,0,20,393" VerticalAlignment="Bottom" x:Name="BCopyAppConfigBytes" Click="BCopyAppConfigBytes_Click"/>
+                    <Button Content="Test" HorizontalAlignment="Right" Margin="0,0,80,393" VerticalAlignment="Bottom" Width="50" Click="BCopyByteDataToTestTab_Click" />
+                    <Button Content="Copy" HorizontalAlignment="Right" Margin="0,0,20,393" VerticalAlignment="Bottom" Width="50" Click="BCopyAppConfigBytes_Click"/>
                 </Grid>
             </TabItem>
-            <TabItem Header="    BYTES to JSON    ">
+            <TabItem Header="BYTES to JSON">
                 <Grid Background="white">
                     <TextBlock HorizontalAlignment="Left" Margin="10,5,0,0" TextWrapping="Wrap" Text="Result from API:" VerticalAlignment="Top"/>
                     <TextBox Margin="4,26,4,0" Text="{Binding BytesFromApi}" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible" Height="397" VerticalAlignment="Top"/>
                     <Button Content="Convert to human readable text" HorizontalAlignment="Left" Margin="10,428,0,0" x:Name="BConvertApiResultToText" VerticalAlignment="Top" Width="202" Click="BConvertApiResultToText_Click"/>
                     <TextBox Margin="4,453,4,0" Text="{Binding HumanReadableTextFromApi}" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="TEST">
+                <Grid Background="White">
+                    <TextBlock HorizontalAlignment="Left" Margin="10,5,0,0" TextWrapping="Wrap" Text="Config service URL:" VerticalAlignment="Top"/>
+                    <TextBox HorizontalAlignment="Left" Margin="115,4,0,0" TextWrapping="Wrap" Text="{Binding ConfigServiceUrl}" VerticalAlignment="Top" Width="190"/>
+                    <Button Content="Test" HorizontalAlignment="Left" Margin="310,4,0,0" VerticalAlignment="Top" Width="50" Click="BTestAgainstConfigService_OnClick" />
+                    <TextBox Margin="4,26,4,436" Text="{Binding ApplicationConfigurationBytes}" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible"/>
+                    
+                    <TextBlock HorizontalAlignment="Left" Margin="10,0,0,415" TextWrapping="Wrap" Text="Result from the API:" VerticalAlignment="Bottom"/>
+                    <TextBox Margin="4,0,4,0" Text="{Binding ResponseFromApi}" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible" Height="410" VerticalAlignment="Bottom"/>
                 </Grid>
             </TabItem>
         </TabControl>
