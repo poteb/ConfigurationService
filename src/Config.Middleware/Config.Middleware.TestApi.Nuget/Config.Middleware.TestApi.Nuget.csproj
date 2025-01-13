@@ -7,8 +7,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="pote.Configuration.Middleware.Web" Version="0.1.0.13" />
-        <PackageReference Include="pote.Configuration.Secrets" Version="0.1.0.7">
+        <PackageReference Include="pote.Configuration.Middleware.Web" Version="0.1.0.14" />
+        <PackageReference Include="pote.Configuration.Secrets" Version="0.1.0.8">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>

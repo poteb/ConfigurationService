@@ -17,7 +17,7 @@ Get-ChildItem -Path "F:\build\temp\webpackage\lib\netstandard2.0" -File | where 
 dotnet build Config.Middleware.Web.Net\Config.Middleware.Web.Net.csproj --configuration Release --output F:\build\temp\webpackage\lib\net6.0
 Get-ChildItem -Path "F:\build\temp\webpackage\lib\net6.0" -File | where {$_.name -like "pote.*.dll"} | Move-Item -Destination F:\build\webpackage\lib\net6.0 -Force
 
-F:\build\NuGet.exe pack Config.Middleware.Web.nuspec -OutputDirectory F:\build\artifacts -BasePath F:\build\webpackage -Version 0.1.0.13 -Properties Configuration=Release
+F:\build\NuGet.exe pack Config.Middleware.Web.nuspec -OutputDirectory F:\build\artifacts -BasePath F:\build\webpackage -Version 0.1.0.14 -Properties Configuration=Release
 
 
 SECRETS
@@ -26,4 +26,4 @@ Remove-Item -LiteralPath "F:\build\secrets\analyzers\dotnet\cs" -Force -Recurse
 New-Item -Type Directory F:\build\secrets\analyzers\dotnet\cs
 dotnet build Config.Middleware.Secrets\Config.Middleware.Secrets.csproj --configuration Release --output F:\build\temp\secrets\analyzers\dotnet\cs
 Get-ChildItem -Path "F:\build\temp\secrets\analyzers\dotnet\cs" -File | where {$_.name -like "pote.*.dll"} | Copy-Item -Destination F:\build\secrets\analyzers\dotnet\cs -Force -PassThru
-F:\build\NuGet.exe pack Config.Middleware.Secrets.nuspec -OutputDirectory F:\build\artifacts -BasePath F:\build\secrets -Version 0.1.0.7 -Properties Configuration=Release
+F:\build\NuGet.exe pack Config.Middleware.Secrets.nuspec -OutputDirectory F:\build\artifacts -BasePath F:\build\secrets -Version 0.1.0.8 -Properties Configuration=Release
