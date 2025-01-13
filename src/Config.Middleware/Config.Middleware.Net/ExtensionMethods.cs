@@ -11,7 +11,7 @@ public static class ExtensionMethods
         var parsedJsonFile = Path.Combine(configuration.WorkingDirectory, $"appsettings.{configuration.Environment}.Parsed.json");
         try
         {
-            var apiCommunication = new ApiCommunication(configuration.ApiUri, clientProvider.Invoke());
+            var apiCommunication = new ApiCommunication(configuration.RootApiUri, clientProvider.Invoke());
             var response = await apiCommunication.GetConfiguration(new ParseRequest(configuration.Application, configuration.Environment, inputJson));
             if (response == null)  throw new InvalidDataException("Reponse from API was empty.");
             var json = response.GetJson();
@@ -45,7 +45,7 @@ public static class ExtensionMethods
         {
             Application = application,
             Environment = environment,
-            ApiUri = apiUri,
+            RootApiUri = apiUri,
             WorkingDirectory = workingDirectory
         };
         services.AddSingleton(configSettings);
