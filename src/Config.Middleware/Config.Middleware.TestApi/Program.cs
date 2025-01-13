@@ -1,3 +1,4 @@
+using pote.Config.Middleware;
 using pote.Config.Middleware.TestApi;
 using pote.Config.Middleware.Web;
 

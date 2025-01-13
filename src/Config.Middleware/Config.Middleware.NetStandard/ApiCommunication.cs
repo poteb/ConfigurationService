@@ -12,18 +12,18 @@ public interface IApiCommunication
 
 internal class ApiCommunication : IApiCommunication
 {
-    private readonly string _apiUri;
+    private readonly string _rootApiUri;
     private readonly HttpClient _client;
 
-    public ApiCommunication(string apiUri, HttpClient client)
+    public ApiCommunication(string rootApiUri, HttpClient client)
     {
-        _apiUri = apiUri;
+        _rootApiUri = rootApiUri;
         _client = client;
     }
 
     public async Task<ParseResponse?> GetConfiguration(ParseRequest request)
     {
-        var response = await _client.PostAsync($"{_apiUri}/Configuration", new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json"));
+        var response = await _client.PostAsync($"{_rootApiUri}/Configuration", new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json"));
         response.EnsureSuccessStatusCode();
         return await JsonSerializer.DeserializeAsync<ParseResponse>(await response.Content.ReadAsStreamAsync(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
     }

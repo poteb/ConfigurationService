@@ -1,4 +1,4 @@
-namespace pote.Config.Shared;
+namespace pote.Config.Shared.Secrets;
 
 public class SecretValueRequest
 {

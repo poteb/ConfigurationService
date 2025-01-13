@@ -15,6 +15,12 @@
       <Compile Include="..\Config.Middleware.NetStandard\BuilderConfiguration.cs">
         <Link>BuilderConfiguration.cs</Link>
       </Compile>
+      <Compile Include="..\Config.Middleware.Net\SecretResolver.cs">
+        <Link>SecretResolver.cs</Link>
+      </Compile>
+      <Compile Include="..\Config.Middleware.Net\SecretsExtensionMethods.cs">
+        <Link>SecretsExtensionMethods.cs</Link>
+      </Compile>
     </ItemGroup>
 
     <ItemGroup>
@@ -25,7 +31,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\Config.Shared\Config.Shared.csproj" />
-      <ProjectReference Include="..\Config.Middleware.Secrets\Config.Middleware.Secrets.csproj" />
     </ItemGroup>
 
     <ItemGroup>

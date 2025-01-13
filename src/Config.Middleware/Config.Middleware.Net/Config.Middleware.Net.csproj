@@ -19,12 +19,14 @@
 
     <ItemGroup>
       <PackageReference Include="Microsoft.AspNetCore.Components" Version="6.0.25" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.0" />
       <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
       <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\..\Config.Shared\Config.Shared.csproj" />
+      <ProjectReference Include="..\Config.Middleware.Secrets\Config.Middleware.Secrets.csproj" />
     </ItemGroup>
 
 </Project>

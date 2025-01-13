@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-
-namespace pote.Config.Middleware.Secrets;
+﻿namespace pote.Config.Shared.Secrets;
 
 /// <summary>Resolves secrets from the configuration API</summary>
 public interface ISecretResolver

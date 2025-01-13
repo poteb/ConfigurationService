@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using pote.Config.Auth;
 using pote.Config.DataProvider.Interfaces;
+using pote.Config.Shared.Secrets;
 
 namespace pote.Config.Api.Controllers;
 
