@@ -8,8 +8,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{CEE24B98-D71F-4CA1-8630-9790FE8300FA}"
 	ProjectSection(SolutionItems) = preProject
 		Config.Middleware.nuspec = Config.Middleware.nuspec
-		Config.Middleware.Secrets.nuspec = Config.Middleware.Secrets.nuspec
+		Config.Middleware.Secrets.CodeGenerator.nuspec = Config.Middleware.Secrets.CodeGenerator.nuspec
 		Config.Middleware.Web.nuspec = Config.Middleware.Web.nuspec
+		Config.Shared.nuspec = Config.Shared.nuspec
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Config.Shared", "..\Config.Shared\Config.Shared.csproj", "{D4CE3195-74BB-4344-8142-47B8D341C18C}"

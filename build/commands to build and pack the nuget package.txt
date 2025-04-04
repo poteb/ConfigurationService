@@ -34,8 +34,18 @@ F:\build\NuGet.exe pack Config.Middleware.Web.nuspec -OutputDirectory F:\build\a
 
 SECRETS
 Remove-Item -LiteralPath "F:\build\temp" -Force -Recurse
-Remove-Item -LiteralPath "F:\build\secrets\analyzers\dotnet\cs" -Force -Recurse
-New-Item -Type Directory F:\build\secrets\analyzers\dotnet\cs
-dotnet build Config.Middleware.Secrets\Config.Middleware.Secrets.csproj --configuration Release --output F:\build\temp\secrets\analyzers\dotnet\cs
-Get-ChildItem -Path "F:\build\temp\secrets\analyzers\dotnet\cs" -File | where {$_.name -like "pote.*.dll"} | Copy-Item -Destination F:\build\secrets\analyzers\dotnet\cs -Force -PassThru
-F:\build\NuGet.exe pack Config.Middleware.Secrets.nuspec -OutputDirectory F:\build\artifacts -BasePath F:\build\secrets -Version 0.1.0.8 -Properties Configuration=Release
+Remove-Item -LiteralPath "F:\build\secretscodegenerator\analyzers\dotnet\cs" -Force -Recurse
+New-Item -Type Directory F:\build\secretscodegenerator\analyzers\dotnet\cs
+dotnet build Config.Middleware.Secrets\Config.Middleware.Secrets.csproj --configuration Release --output F:\build\temp\secretscodegenerator\analyzers\dotnet\cs
+Get-ChildItem -Path "F:\build\temp\secretscodegenerator\analyzers\dotnet\cs" -File | where {$_.name -like "pote.*.dll"} | Copy-Item -Destination F:\build\secretscodegenerator\analyzers\dotnet\cs -Force -PassThru
+F:\build\NuGet.exe pack Config.Middleware.Secrets.CodeGenerator.nuspec -OutputDirectory F:\build\artifacts -BasePath F:\build\secretscodegenerator -Version 0.1.0.8 -Properties Configuration=Release
+
+
+SHARED
+Remove-Item -LiteralPath "F:\build\temp" -Force -Recurse
+Remove-Item -LiteralPath "F:\build\shared" -Force -Recurse
+New-Item -Type Directory F:\build\temp\shared\lib\netstandard2.0
+New-Item -Type Directory F:\build\shared\lib\netstandard2.0
+dotnet build ..\Config.Shared\Config.Shared.csproj --configuration Release --output F:\build\temp\shared\lib\netstandard2.0
+Get-ChildItem -Path "F:\build\temp\shared\lib\netstandard2.0" -File | where {$_.name -like "pote.*.dll"} | Copy-Item -Destination F:\build\shared\lib\netstandard2.0 -Force -PassThru
+F:\build\NuGet.exe pack Config.Shared.nuspec -OutputDirectory F:\build\artifacts -BasePath F:\build\shared -Version 0.1.0.1 -Properties Configuration=Release
