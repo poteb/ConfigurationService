@@ -9,6 +9,15 @@ Application configuration taken to the next level.
 - Fetch configuration through an API.
 - Frontend Blazor app to manage the configurations.
 
+## Overview
+
+The Configuration Service enables applications to:
+- Store sensitive configuration values (connection strings, API keys, secrets) outside of source control
+- Manage environment-specific configurations centrally
+- Use template-based configuration with reference patterns
+- Merge local and remote configuration sources seamlessly
+- Write fully resolved configuration to parsed output files for debugging
+
 ### The reason behind it
 I don't like configuration-as-code. I should never be forced to release my application to make a change to a setting. Not even if the changes to settings is done in the release pipeline, i.e. Octopus Deploy or Azure DevOps. I just don't like it.
 I prefer a system where I can make the changes on the fly, test them and still have version control. This is what this service can offer.
@@ -17,6 +26,132 @@ I prefer a system where I can make the changes on the fly, test them and still h
 I've so far created everything here myself. But I'd be happy to get your (yes you!) view on this.
 
 It can at first be hard to wrap your head around the concepts described below. Here you'll see that configuration isn't static anymore.
+
+## Middleware Installation
+
+Install the NuGet package in your project:
+
+```bash
+dotnet add package pote.Configuration.Middleware
+```
+
+## Quick Start
+
+### 1. Add the Configuration Service URL to appsettings.json
+
+Create environment-specific appsettings files with the Configuration Service URL:
+
+**appsettings.Development.json:**
+```json
+{
+  "ConfigurationServiceApiUrl": "http://your-config-server:port"
+}
+```
+
+**appsettings.Production.json:**
+```json
+{
+  "ConfigurationServiceApiUrl": "http://your-config-server:port"
+}
+```
+
+### 2. Configure in Program.cs
+
+Add the Configuration Service during application startup:
+
+```csharp
+using pote.Config.Middleware;
+using System.Text.Json;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Add Configuration Service
+AddConfiguration(builder);
+
+var app = builder.Build();
+app.Run();
+
+static void AddConfiguration(WebApplicationBuilder builder)
+{
+    var environmentName = builder.Environment.EnvironmentName;
+
+    try
+    {
+        // Read the environment-specific appsettings file
+        var envAppsettingsContent = File.ReadAllText($"appsettings.{environmentName}.json");
+
+        // Parse to extract the Configuration Service URL
+        var appSettingsJsonDoc = JsonDocument.Parse(envAppsettingsContent);
+        var configurationApiUrl = appSettingsJsonDoc.RootElement
+            .GetProperty("ConfigurationServiceApiUrl")
+            .GetString() ?? throw new InvalidOperationException("ConfigurationServiceApiUrl not found");
+
+        // Configure the Configuration Service client
+        var configSettings = new BuilderConfiguration
+        {
+            Application = "YourApplicationName",
+            Environment = environmentName,
+            WorkingDirectory = "",
+            RootApiUri = configurationApiUrl
+        };
+
+        // Fetch and merge configuration from the service
+        _ = builder.Configuration
+            .AddConfigurationFromApi(
+                configSettings,
+                envAppsettingsContent,
+                () => new HttpClient(),
+                (message, ex) => Console.WriteLine($"Error: {message}", ex))
+            .Result;
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error reading app settings. Environment: {environmentName}", ex);
+        throw;
+    }
+}
+```
+
+### 3. Alternative: Worker Service Configuration
+
+For background services or workers, use the `ConfigureAppConfiguration` method:
+
+```csharp
+var builder = Host.CreateApplicationBuilder(args);
+var environmentName = builder.Environment.EnvironmentName;
+var folder = AppContext.BaseDirectory;
+
+builder.Configuration.Sources.Clear();
+builder.Configuration.AddJsonFile("appsettings.json", optional: false);
+builder.Configuration.AddJsonFile($"appsettings.{environmentName}.json", optional: false);
+
+builder.Configuration.ConfigureAppConfiguration((hostingContext, config) =>
+{
+    var envAppsettingsContent = File.ReadAllText($"appsettings.{environmentName}.json");
+    var appSettingsJsonDoc = JsonDocument.Parse(envAppsettingsContent);
+    var configurationApiUrl = appSettingsJsonDoc.RootElement
+        .GetProperty("ConfigurationServiceApiUrl")
+        .GetString() ?? "unknown";
+
+    var configSettings = new BuilderConfiguration
+    {
+        Application = "YourServiceName",
+        Environment = environmentName,
+        WorkingDirectory = folder,
+        RootApiUri = configurationApiUrl
+    };
+
+    _ = config.AddConfigurationFromApi(
+        configSettings,
+        envAppsettingsContent,
+        () => new HttpClient(),
+        (s, ex) => Console.WriteLine(s, ex))
+    .Result;
+});
+
+var host = builder.Build();
+host.Run();
+```
 
 ## Reusability
 
@@ -280,5 +415,162 @@ None. So don't expose the APIs outside your network.
 
 There are two issues that will add api-key security. [#125](https://github.com/poteb/ConfigurationService/issues/125) and [#126](https://github.com/poteb/ConfigurationService/issues/126).
 
-## Build
-There is no build pipeline set up for this repository. This is because it's not just a nuget package but multiple full-blown applications.
+## Build and Deployment
+
+The Configuration Service consists of three main components that need to be built and hosted separately:
+
+### Prerequisites
+- .NET 7.0 SDK or later
+- A shared file system location accessible by both APIs (for file-based storage)
+
+### Component Overview
+
+1. **Configuration API (Config.Api)** - The API that middleware clients contact to resolve configuration requests
+2. **Admin API (Config.Admin.Api)** - The backend API for managing configurations
+3. **Admin Client (Config.Admin.WebClient)** - The Blazor WebAssembly frontend for managing configurations
+
+### 1. Configuration API (Config.Api)
+
+This API handles configuration resolution requests from applications using the middleware.
+
+**Build:**
+```bash
+cd src/Config.Api
+dotnet build
+```
+
+**Configuration (appsettings.json):**
+```json
+{
+  "FileDatabase": {
+    "Directory": "C:\\ConfigurationDatabase"
+  },
+  "EncryptionSettings": {
+    "JsonEncryptionKey": "YourSecure32ByteEncryptionKey!!"
+  }
+}
+```
+
+**Run:**
+```bash
+dotnet run --urls "http://localhost:5146"
+```
+
+**Publish:**
+```bash
+dotnet publish -c Release -o ./publish
+```
+
+**Important:** The `FileDatabase.Directory` must point to the same location used by the Admin API.
+
+### 2. Admin API (Config.Admin.Api)
+
+This API provides endpoints for the Admin Client to create, read, update, and delete configurations.
+
+**Build:**
+```bash
+cd src/Config.Admin.Api
+dotnet build
+```
+
+**Configuration (appsettings.json):**
+```json
+{
+  "FileDatabase": {
+    "Directory": "C:\\ConfigurationDatabase"
+  },
+  "WithOrigins": [
+    "http://localhost:5071"
+  ],
+  "EncryptionSettings": {
+    "JsonEncryptionKey": "YourSecure32ByteEncryptionKey!!"
+  }
+}
+```
+
+**Run:**
+```bash
+dotnet run --urls "http://localhost:34246"
+```
+
+**Publish:**
+```bash
+dotnet publish -c Release -o ./publish
+```
+
+**Important:**
+- The `FileDatabase.Directory` must point to the same location used by the Configuration API
+- The `WithOrigins` array should include the URL where the Admin Client will be hosted
+- The `JsonEncryptionKey` must match the key used by the Configuration API
+
+### 3. Admin Client (Config.Admin.WebClient)
+
+This is the Blazor WebAssembly frontend for managing configurations through a web interface.
+
+**Build:**
+```bash
+cd src/Config.Admin.WebClient/Config.Admin.WebClient
+dotnet build
+```
+
+**Configuration (wwwroot/appsettings.json):**
+```json
+{
+  "ConnectionStrings": {
+    "AdminApi": "http://localhost:34246/",
+    "Api": "http://localhost:5146"
+  },
+  "ApiKey": "YourApiKeyHere"
+}
+```
+
+**Run:**
+```bash
+dotnet run --urls "http://localhost:5071"
+```
+
+**Publish:**
+```bash
+dotnet publish -c Release -o ./publish
+```
+
+The published output can be hosted on any static file server (IIS, nginx, Apache, etc.) or as part of an ASP.NET Core application.
+
+### Deployment Checklist
+
+1. Create a shared directory for configuration storage (e.g., `C:\ConfigurationDatabase` or `/var/configurationdb`)
+2. Ensure both APIs have read/write access to this directory
+3. Generate a secure 32-byte encryption key and use the same key in both APIs
+4. Configure the Admin API's CORS settings to allow the Admin Client origin
+5. Update the Admin Client's appsettings.json with the correct API URLs
+6. Start the Configuration API first
+7. Start the Admin API second
+8. Deploy and access the Admin Client
+
+### Docker Deployment (Optional)
+
+You can containerize each component using Docker. Example Dockerfile for the Configuration API:
+
+```dockerfile
+FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
+WORKDIR /app
+EXPOSE 80
+
+FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+WORKDIR /src
+COPY ["Config.Api/Config.Api.csproj", "Config.Api/"]
+RUN dotnet restore "Config.Api/Config.Api.csproj"
+COPY . .
+WORKDIR "/src/Config.Api"
+RUN dotnet build "Config.Api.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "Config.Api.csproj" -c Release -o /app/publish
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "pote.Config.Api.dll"]
+```
+
+**Note:** When using Docker, ensure the configuration database directory is mounted as a volume accessible to both API containers.
