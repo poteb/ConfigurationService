@@ -9,6 +9,15 @@ Application configuration taken to the next level.
 - Fetch configuration through an API.
 - Frontend Blazor app to manage the configurations.
 
+## Overview
+
+The Configuration Service enables applications to:
+- Store sensitive configuration values (connection strings, API keys, secrets) outside of source control
+- Manage environment-specific configurations centrally
+- Use template-based configuration with reference patterns
+- Merge local and remote configuration sources seamlessly
+- Write fully resolved configuration to parsed output files for debugging
+
 ### The reason behind it
 I don't like configuration-as-code. I should never be forced to release my application to make a change to a setting. Not even if the changes to settings is done in the release pipeline, i.e. Octopus Deploy or Azure DevOps. I just don't like it.
 I prefer a system where I can make the changes on the fly, test them and still have version control. This is what this service can offer.
@@ -17,6 +26,132 @@ I prefer a system where I can make the changes on the fly, test them and still h
 I've so far created everything here myself. But I'd be happy to get your (yes you!) view on this.
 
 It can at first be hard to wrap your head around the concepts described below. Here you'll see that configuration isn't static anymore.
+
+## Middleware Installation
+
+Install the NuGet package in your project:
+
+```bash
+dotnet add package pote.Configuration.Middleware
+```
+
+## Quick Start
+
+### 1. Add the Configuration Service URL to appsettings.json
+
+Create environment-specific appsettings files with the Configuration Service URL:
+
+**appsettings.Development.json:**
+```json
+{
+  "ConfigurationServiceApiUrl": "http://your-config-server:port"
+}
+```
+
+**appsettings.Production.json:**
+```json
+{
+  "ConfigurationServiceApiUrl": "http://your-config-server:port"
+}
+```
+
+### 2. Configure in Program.cs
+
+Add the Configuration Service during application startup:
+
+```csharp
+using pote.Config.Middleware;
+using System.Text.Json;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Add Configuration Service
+AddConfiguration(builder);
+
+var app = builder.Build();
+app.Run();
+
+static void AddConfiguration(WebApplicationBuilder builder)
+{
+    var environmentName = builder.Environment.EnvironmentName;
+
+    try
+    {
+        // Read the environment-specific appsettings file
+        var envAppsettingsContent = File.ReadAllText($"appsettings.{environmentName}.json");
+
+        // Parse to extract the Configuration Service URL
+        var appSettingsJsonDoc = JsonDocument.Parse(envAppsettingsContent);
+        var configurationApiUrl = appSettingsJsonDoc.RootElement
+            .GetProperty("ConfigurationServiceApiUrl")
+            .GetString() ?? throw new InvalidOperationException("ConfigurationServiceApiUrl not found");
+
+        // Configure the Configuration Service client
+        var configSettings = new BuilderConfiguration
+        {
+            Application = "YourApplicationName",
+            Environment = environmentName,
+            WorkingDirectory = "",
+            RootApiUri = configurationApiUrl
+        };
+
+        // Fetch and merge configuration from the service
+        _ = builder.Configuration
+            .AddConfigurationFromApi(
+                configSettings,
+                envAppsettingsContent,
+                () => new HttpClient(),
+                (message, ex) => Console.WriteLine($"Error: {message}", ex))
+            .Result;
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error reading app settings. Environment: {environmentName}", ex);
+        throw;
+    }
+}
+```
+
+### 3. Alternative: Worker Service Configuration
+
+For background services or workers, use the `ConfigureAppConfiguration` method:
+
+```csharp
+var builder = Host.CreateApplicationBuilder(args);
+var environmentName = builder.Environment.EnvironmentName;
+var folder = AppContext.BaseDirectory;
+
+builder.Configuration.Sources.Clear();
+builder.Configuration.AddJsonFile("appsettings.json", optional: false);
+builder.Configuration.AddJsonFile($"appsettings.{environmentName}.json", optional: false);
+
+builder.Configuration.ConfigureAppConfiguration((hostingContext, config) =>
+{
+    var envAppsettingsContent = File.ReadAllText($"appsettings.{environmentName}.json");
+    var appSettingsJsonDoc = JsonDocument.Parse(envAppsettingsContent);
+    var configurationApiUrl = appSettingsJsonDoc.RootElement
+        .GetProperty("ConfigurationServiceApiUrl")
+        .GetString() ?? "unknown";
+
+    var configSettings = new BuilderConfiguration
+    {
+        Application = "YourServiceName",
+        Environment = environmentName,
+        WorkingDirectory = folder,
+        RootApiUri = configurationApiUrl
+    };
+
+    _ = config.AddConfigurationFromApi(
+        configSettings,
+        envAppsettingsContent,
+        () => new HttpClient(),
+        (s, ex) => Console.WriteLine(s, ex))
+    .Result;
+});
+
+var host = builder.Build();
+host.Run();
+```
 
 ## Reusability
 
