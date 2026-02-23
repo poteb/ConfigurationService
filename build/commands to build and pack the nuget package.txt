@@ -6,11 +6,13 @@ New-Item -Type Directory F:\build\temp\package\lib\net6.0
 New-Item -Type Directory F:\build\temp\package\lib\net7.0
 New-Item -Type Directory F:\build\temp\package\lib\net8.0
 New-Item -Type Directory F:\build\temp\package\lib\net9.0
+New-Item -Type Directory F:\build\temp\package\lib\net10.0
 New-Item -Type Directory F:\build\package\lib\netstandard2.0
 New-Item -Type Directory F:\build\package\lib\net6.0
 New-Item -Type Directory F:\build\package\lib\net7.0
 New-Item -Type Directory F:\build\package\lib\net8.0
 New-Item -Type Directory F:\build\package\lib\net9.0
+New-Item -Type Directory F:\build\package\lib\net10.0
 
 dotnet build Config.Middleware.NetStandard\Config.Middleware.NetStandard.csproj --configuration Release --output F:\build\temp\package\lib\netstandard2.0
 Get-ChildItem -Path "F:\build\temp\package\lib\netstandard2.0" -File | where {$_.name -like "pote*dll"} | Move-Item -Destination F:\build\package\lib\netstandard2.0 -Force
@@ -19,10 +21,12 @@ dotnet build Config.Middleware.Net\Config.Middleware.Net.csproj --configuration 
 dotnet build Config.Middleware.Net\Config.Middleware.Net.csproj --configuration Release --output F:\build\temp\package\lib\net7.0 -p:TargetFramework=net7.0
 dotnet build Config.Middleware.Net\Config.Middleware.Net.csproj --configuration Release --output F:\build\temp\package\lib\net8.0 -p:TargetFramework=net8.0
 dotnet build Config.Middleware.Net\Config.Middleware.Net.csproj --configuration Release --output F:\build\temp\package\lib\net9.0 -p:TargetFramework=net9.0
+dotnet build Config.Middleware.Net\Config.Middleware.Net.csproj --configuration Release --output F:\build\temp\package\lib\net10.0 -p:TargetFramework=net10.0
 Get-ChildItem -Path "F:\build\temp\package\lib\net6.0" -File | where {$_.name -like "pote.*.dll"} | Move-Item -Destination F:\build\package\lib\net6.0 -Force
 Get-ChildItem -Path "F:\build\temp\package\lib\net7.0" -File | where {$_.name -like "pote.*.dll"} | Move-Item -Destination F:\build\package\lib\net7.0 -Force
 Get-ChildItem -Path "F:\build\temp\package\lib\net8.0" -File | where {$_.name -like "pote.*.dll"} | Move-Item -Destination F:\build\package\lib\net8.0 -Force
 Get-ChildItem -Path "F:\build\temp\package\lib\net9.0" -File | where {$_.name -like "pote.*.dll"} | Move-Item -Destination F:\build\package\lib\net9.0 -Force
+Get-ChildItem -Path "F:\build\temp\package\lib\net10.0" -File | where {$_.name -like "pote.*.dll"} | Move-Item -Destination F:\build\package\lib\net10.0 -Force
 
 F:\build\NuGet.exe pack Config.Middleware.nuspec -OutputDirectory F:\build\artifacts -BasePath F:\build\package -Version 0.1.0.13 -Properties Configuration=Release
 
@@ -35,11 +39,13 @@ New-Item -Type Directory F:\build\temp\webpackage\lib\net6.0
 New-Item -Type Directory F:\build\temp\webpackage\lib\net7.0
 New-Item -Type Directory F:\build\temp\webpackage\lib\net8.0
 New-Item -Type Directory F:\build\temp\webpackage\lib\net9.0
+New-Item -Type Directory F:\build\temp\webpackage\lib\net10.0
 New-Item -Type Directory F:\build\webpackage\lib\netstandard2.0
 New-Item -Type Directory F:\build\webpackage\lib\net6.0
 New-Item -Type Directory F:\build\webpackage\lib\net7.0
 New-Item -Type Directory F:\build\webpackage\lib\net8.0
 New-Item -Type Directory F:\build\webpackage\lib\net9.0
+New-Item -Type Directory F:\build\webpackage\lib\net10.0
 
 dotnet build Config.Middleware.NetStandard\Config.Middleware.NetStandard.csproj --configuration Release --output F:\build\temp\webpackage\lib\netstandard2.0
 Get-ChildItem -Path "F:\build\temp\webpackage\lib\netstandard2.0" -File | where {$_.name -like "pote*dll"} | Move-Item -Destination F:\build\webpackage\lib\netstandard2.0 -Force
@@ -48,10 +54,12 @@ dotnet build Config.Middleware.Web.Net\Config.Middleware.Web.Net.csproj --config
 dotnet build Config.Middleware.Web.Net\Config.Middleware.Web.Net.csproj --configuration Release --output F:\build\temp\webpackage\lib\net7.0 -p:TargetFramework=net7.0
 dotnet build Config.Middleware.Web.Net\Config.Middleware.Web.Net.csproj --configuration Release --output F:\build\temp\webpackage\lib\net8.0 -p:TargetFramework=net8.0
 dotnet build Config.Middleware.Web.Net\Config.Middleware.Web.Net.csproj --configuration Release --output F:\build\temp\webpackage\lib\net9.0 -p:TargetFramework=net9.0
+dotnet build Config.Middleware.Web.Net\Config.Middleware.Web.Net.csproj --configuration Release --output F:\build\temp\webpackage\lib\net10.0 -p:TargetFramework=net10.0
 Get-ChildItem -Path "F:\build\temp\webpackage\lib\net6.0" -File | where {$_.name -like "pote.*.dll"} | Move-Item -Destination F:\build\webpackage\lib\net6.0 -Force
 Get-ChildItem -Path "F:\build\temp\webpackage\lib\net7.0" -File | where {$_.name -like "pote.*.dll"} | Move-Item -Destination F:\build\webpackage\lib\net7.0 -Force
 Get-ChildItem -Path "F:\build\temp\webpackage\lib\net8.0" -File | where {$_.name -like "pote.*.dll"} | Move-Item -Destination F:\build\webpackage\lib\net8.0 -Force
 Get-ChildItem -Path "F:\build\temp\webpackage\lib\net9.0" -File | where {$_.name -like "pote.*.dll"} | Move-Item -Destination F:\build\webpackage\lib\net9.0 -Force
+Get-ChildItem -Path "F:\build\temp\webpackage\lib\net10.0" -File | where {$_.name -like "pote.*.dll"} | Move-Item -Destination F:\build\webpackage\lib\net10.0 -Force
 
 F:\build\NuGet.exe pack Config.Middleware.Web.nuspec -OutputDirectory F:\build\artifacts -BasePath F:\build\webpackage -Version 0.1.0.15 -Properties Configuration=Release
 
