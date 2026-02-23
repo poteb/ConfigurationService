@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using Df.ServiceControllerExtensions;
 using Microsoft.AspNetCore.Http.Json;
+using Microsoft.OpenApi.Models;
 using pote.Config.Admin.Api.Services;
 using pote.Config.Auth;
 using pote.Config.DataProvider.File;
@@ -21,7 +22,34 @@ builder.Host.UseSerilog((context ,services, configuration) => configuration
 builder.Services.AddMemoryCache();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme
+    {
+        Description = "API Key needed to access the endpoints. X-API-Key: My_API_Key",
+        In = ParameterLocation.Header,
+        Name = "X-API-Key",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "ApiKeyScheme"
+    });
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "ApiKey"
+                },
+                Scheme = "ApiKeyScheme",
+                Name = "X-API-Key",
+                In = ParameterLocation.Header
+            },
+            new List<string>()
+        }
+    });
+});
 
 builder.Services.AddCors(p => p.AddPolicy("allowall", policy =>
 {
