@@ -23,6 +23,7 @@ public partial class EditConfiguration : IDisposable, IConfigurationActions
     private bool _loadingHistory;
     private bool _disableReorderButtons => Header.Configurations.Count <= 1;
     private Settings _settings = new();
+    private string _saveError = string.Empty;
 
     [Inject] protected IJSRuntime JsRuntime { get; set; } = null!;
     [Parameter] public string Gid { get; set; } = string.Empty;
@@ -168,6 +169,7 @@ public partial class EditConfiguration : IDisposable, IConfigurationActions
         await _form.Validate();
         if (!_formIsValid) return false;
 
+        _saveError = string.Empty;
         PageError.Reset();
         Header.CreatedUtc = DateTime.UtcNow;
         var reload = Header.Configurations.Any(c => c.Deleted);
@@ -189,7 +191,7 @@ public partial class EditConfiguration : IDisposable, IConfigurationActions
             return true;
         }
 
-        PageError.OnError(callResponse.GenerateErrorMessage(), new Exception());
+        _saveError = callResponse.GenerateErrorMessage();
         return false;
     }
 

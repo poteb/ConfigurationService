@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using Newtonsoft.Json.Linq;
 using pote.Config.Admin.Api.Helpers;
 using pote.Config.Admin.Api.Mappers;
 using pote.Config.Admin.Api.Model;
@@ -125,6 +126,10 @@ public class ConfigurationsController : ControllerBase
     {
         try
         {
+            var jsonErrors = ValidateConfigurationJson(header);
+            if (jsonErrors.Count > 0)
+                return BadRequest(new { errors = jsonErrors });
+
             await _dataProvider.InsertConfiguration(ConfigurationMapper.ToDb(header), cancellationToken);
             _memoryCache.Remove(DependencyGraphService.CacheName);
             await this.AuditLog(header.Id, "Insert", _auditLogHandler.AuditLogConfiguration);
@@ -136,6 +141,28 @@ public class ConfigurationsController : ControllerBase
             _logger.LogError(ex, "Error inserting configuration header, id {HeaderId}", header.Id);
             return Problem(ex.Message);
         }
+    }
+
+    private static List<string> ValidateConfigurationJson(ConfigurationHeader header)
+    {
+        var errors = new List<string>();
+        foreach (var config in header.Configurations)
+        {
+            if (string.IsNullOrWhiteSpace(config.Json))
+            {
+                errors.Add($"Configuration '{config.Id}' has empty JSON.");
+                continue;
+            }
+            try
+            {
+                JToken.Parse(config.Json);
+            }
+            catch (Exception ex)
+            {
+                errors.Add($"Configuration '{config.Id}' has invalid JSON: {ex.Message}");
+            }
+        }
+        return errors;
     }
 
     [HttpPost("delete/{id}/{permanent}")]
