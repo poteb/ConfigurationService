@@ -1,3 +1,4 @@
+@using System.Security.Cryptography
 @using pote.Config.Admin.WebClient.Model
 @using pote.Config.Admin.WebClient.Services
 <MudGrid>
@@ -23,6 +24,7 @@
                 <col style="width: 200px;"/>
                 <col style="width: 400px;"/>
                 <col style="width: 30px;"/>
+                <col style="width: 30px;"/>
             </ColGroup>
             <HeaderContent>
                 <MudTh>
@@ -39,6 +41,11 @@
                 </MudTd>
                 <MudTd Style="border: 0">
                     <MudTextField @bind-Value="@context.Key" Placeholder="enter key" Style="margin-top: 0"></MudTextField>
+                </MudTd>
+                <MudTd Style="padding-right: 0; border: 0">
+                    <MudTooltip Text="Generate key">
+                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Key" Title="Generate key" OnClick="() => GenerateKey(context)" Color="Color.Info"></MudIconButton>
+                    </MudTooltip>
                 </MudTd>
                 <MudTd DataLabel="Delete" Style="padding-right: 0; border: 0">
                     <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Delete" Title="Delete item" OnClick="() => Delete(context)" ></MudIconButton>
@@ -89,7 +96,19 @@
 
     private void AddItem()
     {
-        _apiKeys.Keys.Add(new ApiKey());
+        var apiKey = new ApiKey { Key = GenerateApiKey() };
+        _apiKeys.Keys.Add(apiKey);
+    }
+
+    private static string GenerateApiKey()
+    {
+        var bytes = RandomNumberGenerator.GetBytes(32);
+        return "csk_" + Convert.ToBase64String(bytes).Replace("+", "").Replace("/", "").Replace("=", "");
+    }
+
+    private void GenerateKey(ApiKey apiKey)
+    {
+        apiKey.Key = GenerateApiKey();
     }
 
     private void Delete(ApiKey key)
