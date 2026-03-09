@@ -2,7 +2,7 @@
 @page "/EditConfiguration/{Gid}"
 @using pote.Config.Admin.WebClient.Components
 
-<NavigationLock ConfirmExternalNavigation OnBeforeInternalNavigation="@OnBeforeInternalNavigation"/>
+<NavigationLock ConfirmExternalNavigation="HasUnsavedChanges" OnBeforeInternalNavigation="@OnBeforeInternalNavigation"/>
 
 <PageTitle>Edit configuration</PageTitle>
 
