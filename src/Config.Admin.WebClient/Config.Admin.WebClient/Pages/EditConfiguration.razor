@@ -24,6 +24,10 @@
             </MudTooltip>
         </MudItem>
     </MudGrid>
+    @if (!string.IsNullOrEmpty(_saveError))
+    {
+        <MudAlert Severity="Severity.Warning" Variant="Variant.Filled" ShowCloseIcon="true" CloseIconClicked="() => _saveError = string.Empty" Class="my-2" Style="width: 99%; white-space: pre-line">@_saveError</MudAlert>
+    }
 
     <MudGrid Style="padding: 0;margin: 0;width: 99%" Spacing="2">
         <MudItem xs="4">

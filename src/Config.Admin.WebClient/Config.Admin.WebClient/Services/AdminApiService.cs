@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Json;
+using System.Text.Json;
 using pote.Config.Admin.Api.Model.RequestResponse;
 using pote.Config.Admin.WebClient.Model;
 
@@ -201,8 +202,11 @@ namespace pote.Config.Admin.WebClient.Services
             {
                 using var client = _clientFactory.CreateClient("AdminApi");
                 var apiConfiguration = Mappers.ConfigurationMapper.ToApi(header);
-                await client.PostAsJsonAsync("Configurations", apiConfiguration);
-                return new ApiCallResponse<object> { IsSuccess = true };
+                var response = await client.PostAsJsonAsync("Configurations", apiConfiguration);
+                if (response.IsSuccessStatusCode)
+                    return new ApiCallResponse<object> { IsSuccess = true };
+                var errorMessage = await ParseErrorResponse(response);
+                return DefaultUnsuccessfulResponse(new object(), errorMessage);
             }
             catch (Exception ex)
             {
@@ -290,6 +294,22 @@ namespace pote.Config.Admin.WebClient.Services
             catch (Exception ex)
             {
                 return DefaultExceptionResponse(new object(), "Error saving secret header", ex);
+            }
+        }
+
+        private static async Task<string> ParseErrorResponse(HttpResponseMessage response)
+        {
+            try
+            {
+                var body = await response.Content.ReadAsStringAsync();
+                var json = JsonDocument.Parse(body);
+                if (json.RootElement.TryGetProperty("errors", out var errors) && errors.ValueKind == JsonValueKind.Array)
+                    return string.Join("\n", errors.EnumerateArray().Select(e => e.GetString()));
+                return $"Error saving configuration (HTTP {(int)response.StatusCode}): {body}";
+            }
+            catch
+            {
+                return $"Error saving configuration (HTTP {(int)response.StatusCode})";
             }
         }
     }
