@@ -8,15 +8,15 @@ public class ApiKeysMapper
     {
         return new Model.ApiKeys
         {
-            Keys = apiKeys.Keys.Select(k => new ApiKey {Key = k}).ToList()
+            Keys = apiKeys.Keys.Select(k => new ApiKey { Name = k.Name, Key = k.Key }).ToList()
         };
     }
-    
+
     public static Api.Model.ApiKeys ToApi(Model.ApiKeys apiKeys)
     {
         return new Api.Model.ApiKeys
         {
-            Keys = apiKeys.Keys.Select(k => k.Key).ToList()
+            Keys = apiKeys.Keys.Select(k => new Api.Model.ApiKeyEntry { Name = k.Name, Key = k.Key }).ToList()
         };
     }
 }

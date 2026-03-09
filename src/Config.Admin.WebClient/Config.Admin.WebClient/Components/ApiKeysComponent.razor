@@ -1,5 +1,8 @@
+@using System.Security.Cryptography
+@using Microsoft.JSInterop
 @using pote.Config.Admin.WebClient.Model
 @using pote.Config.Admin.WebClient.Services
+@inject IJSRuntime JsRuntime
 <MudGrid>
     <MudItem xs="2" Style="margin-left:10px">
         <MudText Typo="Typo.h6" Style="line-height: 48px">API Keys</MudText>
@@ -17,23 +20,42 @@
         </MudGrid>
     </MudItem>
     <MudItem xs="4"></MudItem>
-    <MudItem xs="6">
+    <MudItem xs="8">
         <MudTable Items="@_apiKeys.Keys" Dense="true" CanCancelEdit="true" Elevation="0">
             <ColGroup>
+                <col style="width: 200px;"/>
                 <col style="width: 400px;"/>
+                <col style="width: 30px;"/>
+                <col style="width: 30px;"/>
                 <col style="width: 30px;"/>
             </ColGroup>
             <HeaderContent>
                 <MudTh>
-                    <MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<string, object>(x => x)">Name</MudTableSortLabel>
+                    <MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<ApiKey, object>(x => x.Name)">Name</MudTableSortLabel>
                 </MudTh>
+                <MudTh>Key</MudTh>
+                <MudTh></MudTh>
+                <MudTh></MudTh>
                 <MudTh Style="margin:0;padding:0">
                     <MudIconButton Icon="@Icons.Material.Filled.Add" Title="Add item" OnClick="@AddItem" Color="Color.Success"></MudIconButton>
                 </MudTh>
             </HeaderContent>
             <RowTemplate>
                 <MudTd Style="border: 0">
-                    <MudTextField @bind-Value="@context.Key" Placeholder="enter key" Style="margin-top: 0" AutoFocus="@(string.IsNullOrEmpty(context.Key))"></MudTextField>
+                    <MudTextField @bind-Value="@context.Name" Placeholder="enter name" Style="margin-top: 0" AutoFocus="@(string.IsNullOrEmpty(context.Name))"></MudTextField>
+                </MudTd>
+                <MudTd Style="border: 0">
+                    <MudTextField @bind-Value="@context.Key" Placeholder="enter key" Style="margin-top: 0"></MudTextField>
+                </MudTd>
+                <MudTd Style="padding-right: 0; border: 0">
+                    <MudTooltip Text="Copy key to clipboard">
+                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.ContentCopy" Title="Copy key to clipboard" OnClick="() => CopyToClipboard(context.Key)" Color="Color.Default"></MudIconButton>
+                    </MudTooltip>
+                </MudTd>
+                <MudTd Style="padding-right: 0; border: 0">
+                    <MudTooltip Text="Generate key">
+                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Key" Title="Generate key" OnClick="() => GenerateKey(context)" Color="Color.Info"></MudIconButton>
+                    </MudTooltip>
                 </MudTd>
                 <MudTd DataLabel="Delete" Style="padding-right: 0; border: 0">
                     <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Delete" Title="Delete item" OnClick="() => Delete(context)" ></MudIconButton>
@@ -84,7 +106,24 @@
 
     private void AddItem()
     {
-        _apiKeys.Keys.Add(new ApiKey());
+        var apiKey = new ApiKey { Key = GenerateApiKey() };
+        _apiKeys.Keys.Add(apiKey);
+    }
+
+    private static string GenerateApiKey()
+    {
+        var bytes = RandomNumberGenerator.GetBytes(32);
+        return "csk_" + Convert.ToBase64String(bytes).Replace("+", "").Replace("/", "").Replace("=", "");
+    }
+
+    private void GenerateKey(ApiKey apiKey)
+    {
+        apiKey.Key = GenerateApiKey();
+    }
+
+    private async Task CopyToClipboard(string text)
+    {
+        await JsRuntime.InvokeVoidAsync("navigator.clipboard.writeText", text);
     }
 
     private void Delete(ApiKey key)

@@ -65,7 +65,7 @@ public class DataProvider : IDataProvider
     public async Task<ApiKeys> GetApiKeys(CancellationToken cancellationToken)
     {
         var apiKeyString = await _fileHandler.GetApiKeys(cancellationToken);
-        var apiKeys = JsonConvert.DeserializeObject<ApiKeys>(apiKeyString);
+        var apiKeys = JsonConvert.DeserializeObject<ApiKeys>(apiKeyString, new ApiKeyEntryConverter());
         return apiKeys ?? new ApiKeys();
     }
 

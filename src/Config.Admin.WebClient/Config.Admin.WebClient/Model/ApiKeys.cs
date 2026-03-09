@@ -7,5 +7,6 @@ public class ApiKeys
 
 public class ApiKey
 {
-    public string Key { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Key { get; set; } = string.Empty;
 }
