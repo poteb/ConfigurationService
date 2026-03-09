@@ -14,6 +14,6 @@ public class ApiKeyValidation : IApiKeyValidation
     {
         if (string.IsNullOrWhiteSpace(userApiKey)) return false;
         var apiKeys = await _dataProvider.GetApiKeys(CancellationToken.None);
-        return apiKeys.Keys.Any(a => a.Equals(userApiKey));
+        return apiKeys.Keys.Any(a => a.Key.Equals(userApiKey));
     }
 }

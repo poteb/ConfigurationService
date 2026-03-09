@@ -17,23 +17,28 @@
         </MudGrid>
     </MudItem>
     <MudItem xs="4"></MudItem>
-    <MudItem xs="6">
+    <MudItem xs="8">
         <MudTable Items="@_apiKeys.Keys" Dense="true" CanCancelEdit="true" Elevation="0">
             <ColGroup>
+                <col style="width: 200px;"/>
                 <col style="width: 400px;"/>
                 <col style="width: 30px;"/>
             </ColGroup>
             <HeaderContent>
                 <MudTh>
-                    <MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<string, object>(x => x)">Name</MudTableSortLabel>
+                    <MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<ApiKey, object>(x => x.Name)">Name</MudTableSortLabel>
                 </MudTh>
+                <MudTh>Key</MudTh>
                 <MudTh Style="margin:0;padding:0">
                     <MudIconButton Icon="@Icons.Material.Filled.Add" Title="Add item" OnClick="@AddItem" Color="Color.Success"></MudIconButton>
                 </MudTh>
             </HeaderContent>
             <RowTemplate>
                 <MudTd Style="border: 0">
-                    <MudTextField @bind-Value="@context.Key" Placeholder="enter key" Style="margin-top: 0" AutoFocus="@(string.IsNullOrEmpty(context.Key))"></MudTextField>
+                    <MudTextField @bind-Value="@context.Name" Placeholder="enter name" Style="margin-top: 0" AutoFocus="@(string.IsNullOrEmpty(context.Name))"></MudTextField>
+                </MudTd>
+                <MudTd Style="border: 0">
+                    <MudTextField @bind-Value="@context.Key" Placeholder="enter key" Style="margin-top: 0"></MudTextField>
                 </MudTd>
                 <MudTd DataLabel="Delete" Style="padding-right: 0; border: 0">
                     <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Delete" Title="Delete item" OnClick="() => Delete(context)" ></MudIconButton>
