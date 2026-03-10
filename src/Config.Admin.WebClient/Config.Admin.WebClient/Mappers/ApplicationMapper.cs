@@ -16,7 +16,7 @@ public class ApplicationMapper
         return new Api.Model.Application
         {
             Id = application.Id,
-            Name = application.Name
+            Name = application.Name.Trim()
         };
     }
 

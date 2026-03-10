@@ -24,7 +24,7 @@ public static class SecretMapper
         return new Api.Model.SecretHeader
         {
             Id = secret.Id,
-            Name = secret.Name,
+            Name = secret.Name.Trim(),
             CreatedUtc = secret.CreatedUtc,
             UpdateUtc = secret.UpdateUtc,
             Deleted = secret.Deleted,

@@ -16,7 +16,7 @@ public class EnvironmentMapper
         return new Api.Model.Environment
         {
             Id = environment.Id,
-            Name = environment.Name
+            Name = environment.Name.Trim()
         };
     }
 

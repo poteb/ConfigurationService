@@ -25,7 +25,7 @@ public static class ConfigurationMapper
         return new Api.Model.ConfigurationHeader
         {
             Id = header.Id,
-            Name = header.Name,
+            Name = header.Name.Trim(),
             CreatedUtc = header.CreatedUtc,
             UpdateUtc = header.UpdateUtc,
             Deleted = header.Deleted,
