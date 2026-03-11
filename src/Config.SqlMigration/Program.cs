@@ -1,3 +1,36 @@
+// ============================================================================
+// Config.SqlMigration — One-time migration tool: File provider → SQL Server
+// ============================================================================
+//
+// This console app migrates all data from the File-based DataProvider storage
+// (flat JSON files on disk) into a SQL Server database. It is intended to be
+// run once when switching the ConfigurationService from File to SqlServer mode.
+//
+// What it does:
+//   1. Runs the numbered CREATE scripts (01–14) from Config.DataProvider.SqlServer
+//      to ensure all tables exist (scripts use IF NOT EXISTS, so they are safe to re-run).
+//   2. Reads every entity from the file database directory and INSERTs it into SQL Server:
+//      - Applications, Environments
+//      - ConfigurationHeaders + Configurations + junction tables (apps/envs per config)
+//      - Configuration history snapshots (from {id}/history/*.txt subdirectories)
+//      - SecretHeaders + Secrets + junction tables
+//      - Settings, API Keys
+//   3. Prints a summary of row counts for verification.
+//
+// Usage:
+//   dotnet run                   — Full migration: create tables + migrate all data
+//   dotnet run -- --history-only — Only migrate configuration history snapshots
+//                                  (useful if the main data was already migrated)
+//
+// Prerequisites:
+//   - SQL Server running on localhost with the ConfigurationService database created
+//   - The file database directory (fileDbPath) populated with existing File provider data
+//
+// NOTE: This tool does NOT handle duplicates — running a full migration twice will
+//       fail with primary key violations. Use --history-only for incremental runs,
+//       or truncate the database before re-running.
+// ============================================================================
+
 using Dapper;
 using Microsoft.Data.SqlClient;
 using Newtonsoft.Json;
@@ -8,13 +41,18 @@ const string connectionString = "Server=localhost;Database=ConfigurationService;
 const string fileDbPath = @"D:\ConfigurationDatabase";
 const string scriptsPath = @"D:\git\ConfigurationService\src\Config.DataProvider.SqlServer\CreateScripts";
 
-// Step 1: Run CREATE scripts
-Console.WriteLine("=== Running CREATE scripts ===");
-await RunCreateScripts();
+var historyOnly = args.Contains("--history-only");
+
+if (!historyOnly)
+{
+    // Step 1: Run CREATE scripts
+    Console.WriteLine("=== Running CREATE scripts ===");
+    await RunCreateScripts();
+}
 
 // Step 2: Migrate data
 Console.WriteLine("\n=== Migrating data ===");
-await MigrateData();
+await MigrateData(historyOnly);
 
 Console.WriteLine("\n=== Migration complete! ===");
 
@@ -46,10 +84,12 @@ async Task RunCreateScripts()
     }
 }
 
-async Task MigrateData()
+async Task MigrateData(bool historyOnly = false)
 {
     await using var conn = new SqlConnection(connectionString);
     await conn.OpenAsync();
+
+    if (historyOnly) goto migrateHistory;
 
     // Migrate Applications
     var appDir = Path.Combine(fileDbPath, "applications");
@@ -118,6 +158,39 @@ async Task MigrateData()
         }
         Console.WriteLine($"  Config: {header.Name} ({header.Id}) - {header.Configurations.Count} version(s)");
     }
+
+    // Migrate Configuration History
+    migrateHistory:
+    var configDirForHistory = Path.Combine(fileDbPath, "configurations");
+    var configFilesForHistory = Directory.GetFiles(configDirForHistory, "*.txt").ToList();
+    Console.WriteLine($"\nMigrating configuration history...");
+    var historyCount = 0;
+    foreach (var file in configFilesForHistory)
+    {
+        var headerId = Path.GetFileNameWithoutExtension(file);
+        var historyDir = Path.Combine(configDirForHistory, headerId, "history");
+        if (!Directory.Exists(historyDir)) continue;
+
+        var historyFiles = Directory.GetFiles(historyDir, "*.txt").OrderBy(f => f).ToList();
+        foreach (var historyFile in historyFiles)
+        {
+            var historyJson = await File.ReadAllTextAsync(historyFile);
+            // Extract timestamp from filename for CreatedUtc (format: {id}_{yyyyMMddHHmmss}.txt or {id}_{yyyyMMddHHmmss}_deleted.txt)
+            var fileName = Path.GetFileNameWithoutExtension(historyFile);
+            var parts = fileName.Split('_');
+            DateTime createdUtc = DateTime.UtcNow;
+            if (parts.Length >= 2 && DateTime.TryParseExact(parts[1], "yyyyMMddHHmmss", null, System.Globalization.DateTimeStyles.AssumeUniversal, out var parsed))
+                createdUtc = parsed.ToUniversalTime();
+
+            await conn.ExecuteAsync(
+                "INSERT INTO [ConfigurationHeaderHistory] ([HeaderId], [Content], [CreatedUtc]) VALUES (@HeaderId, @Content, @CreatedUtc)",
+                new { HeaderId = headerId, Content = historyJson, CreatedUtc = createdUtc });
+            historyCount++;
+        }
+    }
+    Console.WriteLine($"  Migrated {historyCount} history snapshot(s)");
+
+    if (historyOnly) goto printSummary;
 
     // Migrate Secrets
     var secretDir = Path.Combine(fileDbPath, "secrets");
@@ -208,6 +281,7 @@ async Task MigrateData()
     }
 
     // Print summary counts
+    printSummary:
     Console.WriteLine("\n=== Summary ===");
     Console.WriteLine($"Applications:         {await conn.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM [Applications]")}");
     Console.WriteLine($"Environments:         {await conn.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM [Environments]")}");
@@ -221,4 +295,5 @@ async Task MigrateData()
     Console.WriteLine($"SecretEnvs junctions: {await conn.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM [SecretEnvironments]")}");
     Console.WriteLine($"ApiKeys:              {await conn.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM [ApiKeys]")}");
     Console.WriteLine($"Settings:             {await conn.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM [Settings]")}");
+    Console.WriteLine($"ConfigHistory:        {await conn.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM [ConfigurationHeaderHistory]")}");
 }

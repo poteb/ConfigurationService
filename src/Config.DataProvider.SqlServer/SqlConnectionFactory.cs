@@ -18,4 +18,11 @@ public class SqlConnectionFactory
         await connection.OpenAsync(cancellationToken);
         return connection;
     }
+
+    public virtual DbConnection CreateOpenConnectionSync()
+    {
+        var connection = new SqlConnection(_connectionString);
+        connection.Open();
+        return connection;
+    }
 }

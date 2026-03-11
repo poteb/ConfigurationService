@@ -280,44 +280,304 @@ public class SqlServerAdminDataProviderTests
     #region GetHeaderHistory / GetConfigurationHistory
 
     [Test]
-    public async Task GetHeaderHistory_ReturnsPagedConfigurations()
+    public async Task GetHeaderHistory_NoHistory_ReturnsEmptyList()
     {
+        var result = await _sut.GetHeaderHistory("h1", 1, 10, CancellationToken.None);
+
+        Assert.AreEqual(0, result.Count);
+    }
+
+    [Test]
+    public async Task GetHeaderHistory_SnapshotCreatedOnInsert()
+    {
+        // First insert creates the header (no snapshot yet since it's new)
+        var header = new ConfigurationHeader
+        {
+            Id = "h1", Name = "V1", CreatedUtc = DateTime.UtcNow, UpdateUtc = DateTime.UtcNow,
+            Configurations = new List<Configuration> { new() { Id = "c1", HeaderId = "h1", Json = "{\"v\":1}" } }
+        };
+        await _sut.InsertConfiguration(header, CancellationToken.None);
+
+        // Second insert triggers snapshot of V1 state
+        var header2 = new ConfigurationHeader
+        {
+            Id = "h1", Name = "V2", CreatedUtc = DateTime.UtcNow, UpdateUtc = DateTime.UtcNow,
+            Configurations = new List<Configuration>
+            {
+                new() { Id = "c1", HeaderId = "h1", Json = "{\"v\":1}" },
+                new() { Id = "c2", HeaderId = "h1", Json = "{\"v\":2}" }
+            }
+        };
+        await _sut.InsertConfiguration(header2, CancellationToken.None);
+
+        var history = await _sut.GetHeaderHistory("h1", 1, 10, CancellationToken.None);
+
+        Assert.AreEqual(1, history.Count);
+        Assert.AreEqual("V1", history[0].Name);
+        Assert.AreEqual(1, history[0].Configurations.Count);
+    }
+
+    [Test]
+    public async Task GetHeaderHistory_MultipleSnapshots_ReturnedNewestFirst()
+    {
+        // Insert V1
+        await _sut.InsertConfiguration(new ConfigurationHeader
+        {
+            Id = "h1", Name = "V1", CreatedUtc = DateTime.UtcNow, UpdateUtc = DateTime.UtcNow,
+            Configurations = new List<Configuration> { new() { Id = "c1", HeaderId = "h1", Json = "{\"v\":1}" } }
+        }, CancellationToken.None);
+
+        // Insert V2 (snapshots V1)
+        await _sut.InsertConfiguration(new ConfigurationHeader
+        {
+            Id = "h1", Name = "V2", CreatedUtc = DateTime.UtcNow, UpdateUtc = DateTime.UtcNow,
+            Configurations = new List<Configuration> { new() { Id = "c1", HeaderId = "h1", Json = "{\"v\":2}" } }
+        }, CancellationToken.None);
+
+        // Insert V3 (snapshots V2)
+        await _sut.InsertConfiguration(new ConfigurationHeader
+        {
+            Id = "h1", Name = "V3", CreatedUtc = DateTime.UtcNow, UpdateUtc = DateTime.UtcNow,
+            Configurations = new List<Configuration> { new() { Id = "c1", HeaderId = "h1", Json = "{\"v\":3}" } }
+        }, CancellationToken.None);
+
+        var history = await _sut.GetHeaderHistory("h1", 1, 10, CancellationToken.None);
+
+        Assert.AreEqual(2, history.Count);
+        // Newest snapshot first (V2), then V1
+        Assert.AreEqual("V2", history[0].Name);
+        Assert.AreEqual("V1", history[1].Name);
+    }
+
+    [Test]
+    public async Task GetHeaderHistory_Pagination_FirstPage()
+    {
+        // Create 3 snapshots by inserting 4 times
+        for (var i = 1; i <= 4; i++)
+        {
+            await _sut.InsertConfiguration(new ConfigurationHeader
+            {
+                Id = "h1", Name = $"V{i}", CreatedUtc = DateTime.UtcNow, UpdateUtc = DateTime.UtcNow,
+                Configurations = new List<Configuration> { new() { Id = "c1", HeaderId = "h1", Json = $"{{\"v\":{i}}}" } }
+            }, CancellationToken.None);
+        }
+
+        // 3 snapshots total (V1, V2, V3), page 1 size 2 should return V3, V2
+        var page1 = await _sut.GetHeaderHistory("h1", 1, 2, CancellationToken.None);
+        Assert.AreEqual(2, page1.Count);
+        Assert.AreEqual("V3", page1[0].Name);
+        Assert.AreEqual("V2", page1[1].Name);
+    }
+
+    [Test]
+    public async Task GetHeaderHistory_Pagination_SecondPage()
+    {
+        for (var i = 1; i <= 4; i++)
+        {
+            await _sut.InsertConfiguration(new ConfigurationHeader
+            {
+                Id = "h1", Name = $"V{i}", CreatedUtc = DateTime.UtcNow, UpdateUtc = DateTime.UtcNow,
+                Configurations = new List<Configuration> { new() { Id = "c1", HeaderId = "h1", Json = $"{{\"v\":{i}}}" } }
+            }, CancellationToken.None);
+        }
+
+        var page2 = await _sut.GetHeaderHistory("h1", 2, 2, CancellationToken.None);
+        Assert.AreEqual(1, page2.Count);
+        Assert.AreEqual("V1", page2[0].Name);
+    }
+
+    [Test]
+    public async Task GetHeaderHistory_PageBeyondData_ReturnsEmptyList()
+    {
+        await _sut.InsertConfiguration(new ConfigurationHeader
+        {
+            Id = "h1", Name = "V1", CreatedUtc = DateTime.UtcNow, UpdateUtc = DateTime.UtcNow,
+            Configurations = new List<Configuration> { new() { Id = "c1", HeaderId = "h1", Json = "{}" } }
+        }, CancellationToken.None);
+        await _sut.InsertConfiguration(new ConfigurationHeader
+        {
+            Id = "h1", Name = "V2", CreatedUtc = DateTime.UtcNow, UpdateUtc = DateTime.UtcNow,
+            Configurations = new List<Configuration> { new() { Id = "c1", HeaderId = "h1", Json = "{}" } }
+        }, CancellationToken.None);
+
+        var result = await _sut.GetHeaderHistory("h1", 5, 10, CancellationToken.None);
+        Assert.AreEqual(0, result.Count);
+    }
+
+    [Test]
+    public async Task GetHeaderHistory_PreservesJunctionTableData()
+    {
+        // Insert with junction data
+        await _sut.InsertConfiguration(new ConfigurationHeader
+        {
+            Id = "h1", Name = "V1", CreatedUtc = DateTime.UtcNow, UpdateUtc = DateTime.UtcNow,
+            Configurations = new List<Configuration>
+            {
+                new() { Id = "c1", HeaderId = "h1", Json = "{}", Applications = new List<string> { "app1", "app2" }, Environments = new List<string> { "env1" } }
+            }
+        }, CancellationToken.None);
+
+        // Second insert to trigger snapshot
+        await _sut.InsertConfiguration(new ConfigurationHeader
+        {
+            Id = "h1", Name = "V2", CreatedUtc = DateTime.UtcNow, UpdateUtc = DateTime.UtcNow,
+            Configurations = new List<Configuration> { new() { Id = "c1", HeaderId = "h1", Json = "{}" } }
+        }, CancellationToken.None);
+
+        var history = await _sut.GetHeaderHistory("h1", 1, 10, CancellationToken.None);
+        var config = history[0].Configurations[0];
+        Assert.AreEqual(2, config.Applications.Count);
+        Assert.Contains("app1", config.Applications);
+        Assert.Contains("app2", config.Applications);
+        Assert.Contains("env1", config.Environments);
+    }
+
+    [Test]
+    public async Task GetHeaderHistory_DecryptsEncryptedConfigurations()
+    {
+        // Insert with encryption enabled
+        await _sut.InsertConfiguration(new ConfigurationHeader
+        {
+            Id = "h1", Name = "V1", IsJsonEncrypted = true, CreatedUtc = DateTime.UtcNow, UpdateUtc = DateTime.UtcNow,
+            Configurations = new List<Configuration> { new() { Id = "c1", HeaderId = "h1", Json = "{\"secret\":\"data\"}" } }
+        }, CancellationToken.None);
+
+        // Second insert to create snapshot
+        await _sut.InsertConfiguration(new ConfigurationHeader
+        {
+            Id = "h1", Name = "V2", CreatedUtc = DateTime.UtcNow, UpdateUtc = DateTime.UtcNow,
+            Configurations = new List<Configuration> { new() { Id = "c1", HeaderId = "h1", Json = "{}" } }
+        }, CancellationToken.None);
+
+        var history = await _sut.GetHeaderHistory("h1", 1, 10, CancellationToken.None);
+
+        // The snapshot stored encrypted JSON; GetHeaderHistory should decrypt it
+        Assert.AreEqual("{\"secret\":\"data\"}", history[0].Configurations[0].Json);
+    }
+
+    [Test]
+    public async Task GetHeaderHistory_SnapshotCreatedOnSoftDelete()
+    {
+        await _sut.InsertConfiguration(new ConfigurationHeader
+        {
+            Id = "h1", Name = "V1", CreatedUtc = DateTime.UtcNow, UpdateUtc = DateTime.UtcNow,
+            Configurations = new List<Configuration> { new() { Id = "c1", HeaderId = "h1", Json = "{\"v\":1}" } }
+        }, CancellationToken.None);
+
+        _sut.DeleteConfiguration("h1", false);
+
+        var history = await _sut.GetHeaderHistory("h1", 1, 10, CancellationToken.None);
+        Assert.AreEqual(1, history.Count);
+        Assert.AreEqual("V1", history[0].Name);
+    }
+
+    [Test]
+    public async Task GetHeaderHistory_PermanentDelete_RemovesHistory()
+    {
+        await _sut.InsertConfiguration(new ConfigurationHeader
+        {
+            Id = "h1", Name = "V1", CreatedUtc = DateTime.UtcNow, UpdateUtc = DateTime.UtcNow,
+            Configurations = new List<Configuration> { new() { Id = "c1", HeaderId = "h1", Json = "{}" } }
+        }, CancellationToken.None);
+        await _sut.InsertConfiguration(new ConfigurationHeader
+        {
+            Id = "h1", Name = "V2", CreatedUtc = DateTime.UtcNow, UpdateUtc = DateTime.UtcNow,
+            Configurations = new List<Configuration> { new() { Id = "c1", HeaderId = "h1", Json = "{}" } }
+        }, CancellationToken.None);
+
+        _sut.DeleteConfiguration("h1", true);
+
         var conn = await _factory.CreateOpenConnection();
-        await conn.ExecuteAsync("INSERT INTO [ConfigurationHeaders] ([Id], [Name], [CreatedUtc], [UpdateUtc]) VALUES ('h1', 'Test', datetime('now'), datetime('now'))");
-        await conn.ExecuteAsync("INSERT INTO [Configurations] ([Id], [HeaderId], [Json], [CreatedUtc]) VALUES ('c1', 'h1', '{\"v\":1}', '2025-01-01')");
-        await conn.ExecuteAsync("INSERT INTO [Configurations] ([Id], [HeaderId], [Json], [CreatedUtc]) VALUES ('c2', 'h1', '{\"v\":2}', '2025-02-01')");
-        await conn.ExecuteAsync("INSERT INTO [Configurations] ([Id], [HeaderId], [Json], [CreatedUtc]) VALUES ('c3', 'h1', '{\"v\":3}', '2025-03-01')");
-
-        var result = await _sut.GetHeaderHistory("h1", 0, 2, CancellationToken.None);
-
-        Assert.AreEqual(1, result.Count);
-        Assert.AreEqual(2, result[0].Configurations.Count);
+        var historyCount = await conn.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM [ConfigurationHeaderHistory] WHERE [HeaderId] = 'h1'");
+        Assert.AreEqual(0, historyCount);
     }
 
     [Test]
     public async Task GetConfigurationHistory_ReturnsMatchingConfiguration()
     {
-        var conn = await _factory.CreateOpenConnection();
-        await conn.ExecuteAsync("INSERT INTO [ConfigurationHeaders] ([Id], [Name], [CreatedUtc], [UpdateUtc]) VALUES ('h1', 'Test', datetime('now'), datetime('now'))");
-        await conn.ExecuteAsync("INSERT INTO [Configurations] ([Id], [HeaderId], [Json], [CreatedUtc]) VALUES ('c1', 'h1', '{\"v\":1}', datetime('now'))");
-        await conn.ExecuteAsync("INSERT INTO [Configurations] ([Id], [HeaderId], [Json], [CreatedUtc]) VALUES ('c2', 'h1', '{\"v\":2}', datetime('now'))");
+        await _sut.InsertConfiguration(new ConfigurationHeader
+        {
+            Id = "h1", Name = "V1", CreatedUtc = DateTime.UtcNow, UpdateUtc = DateTime.UtcNow,
+            Configurations = new List<Configuration>
+            {
+                new() { Id = "c1", HeaderId = "h1", Json = "{\"v\":1}" },
+                new() { Id = "c2", HeaderId = "h1", Json = "{\"v\":2}" }
+            }
+        }, CancellationToken.None);
+        // Second insert to create snapshot
+        await _sut.InsertConfiguration(new ConfigurationHeader
+        {
+            Id = "h1", Name = "V2", CreatedUtc = DateTime.UtcNow, UpdateUtc = DateTime.UtcNow,
+            Configurations = new List<Configuration> { new() { Id = "c1", HeaderId = "h1", Json = "{\"v\":3}" } }
+        }, CancellationToken.None);
 
         var result = await _sut.GetConfigurationHistory("h1", "c1", 1, 10, CancellationToken.None);
 
         Assert.AreEqual(1, result.Count);
         Assert.AreEqual("c1", result[0].Id);
+        Assert.AreEqual("{\"v\":1}", result[0].Json);
     }
 
     [Test]
     public async Task GetConfigurationHistory_NoMatch_ReturnsEmptyList()
     {
-        var conn = await _factory.CreateOpenConnection();
-        await conn.ExecuteAsync("INSERT INTO [ConfigurationHeaders] ([Id], [Name], [CreatedUtc], [UpdateUtc]) VALUES ('h1', 'Test', datetime('now'), datetime('now'))");
-        await conn.ExecuteAsync("INSERT INTO [Configurations] ([Id], [HeaderId], [Json], [CreatedUtc]) VALUES ('c1', 'h1', '{}', datetime('now'))");
+        await _sut.InsertConfiguration(new ConfigurationHeader
+        {
+            Id = "h1", Name = "V1", CreatedUtc = DateTime.UtcNow, UpdateUtc = DateTime.UtcNow,
+            Configurations = new List<Configuration> { new() { Id = "c1", HeaderId = "h1", Json = "{}" } }
+        }, CancellationToken.None);
+        await _sut.InsertConfiguration(new ConfigurationHeader
+        {
+            Id = "h1", Name = "V2", CreatedUtc = DateTime.UtcNow, UpdateUtc = DateTime.UtcNow,
+            Configurations = new List<Configuration> { new() { Id = "c1", HeaderId = "h1", Json = "{}" } }
+        }, CancellationToken.None);
 
         var result = await _sut.GetConfigurationHistory("h1", "nonexistent", 1, 10, CancellationToken.None);
 
         Assert.AreEqual(0, result.Count);
+    }
+
+    [Test]
+    public async Task GetConfigurationHistory_PreservesJunctionTableData()
+    {
+        await _sut.InsertConfiguration(new ConfigurationHeader
+        {
+            Id = "h1", Name = "V1", CreatedUtc = DateTime.UtcNow, UpdateUtc = DateTime.UtcNow,
+            Configurations = new List<Configuration>
+            {
+                new() { Id = "c1", HeaderId = "h1", Json = "{}", Applications = new List<string> { "app1" }, Environments = new List<string> { "env1" } }
+            }
+        }, CancellationToken.None);
+        await _sut.InsertConfiguration(new ConfigurationHeader
+        {
+            Id = "h1", Name = "V2", CreatedUtc = DateTime.UtcNow, UpdateUtc = DateTime.UtcNow,
+            Configurations = new List<Configuration> { new() { Id = "c1", HeaderId = "h1", Json = "{}" } }
+        }, CancellationToken.None);
+
+        var result = await _sut.GetConfigurationHistory("h1", "c1", 1, 10, CancellationToken.None);
+
+        Assert.AreEqual(1, result.Count);
+        Assert.Contains("app1", result[0].Applications);
+        Assert.Contains("env1", result[0].Environments);
+    }
+
+    [Test]
+    public async Task GetConfigurationHistory_DecryptsEncryptedJson()
+    {
+        await _sut.InsertConfiguration(new ConfigurationHeader
+        {
+            Id = "h1", Name = "V1", IsJsonEncrypted = true, CreatedUtc = DateTime.UtcNow, UpdateUtc = DateTime.UtcNow,
+            Configurations = new List<Configuration> { new() { Id = "c1", HeaderId = "h1", Json = "{\"secret\":\"data\"}" } }
+        }, CancellationToken.None);
+        await _sut.InsertConfiguration(new ConfigurationHeader
+        {
+            Id = "h1", Name = "V2", CreatedUtc = DateTime.UtcNow, UpdateUtc = DateTime.UtcNow,
+            Configurations = new List<Configuration> { new() { Id = "c1", HeaderId = "h1", Json = "{}" } }
+        }, CancellationToken.None);
+
+        var result = await _sut.GetConfigurationHistory("h1", "c1", 1, 10, CancellationToken.None);
+
+        Assert.AreEqual("{\"secret\":\"data\"}", result[0].Json);
     }
 
     #endregion

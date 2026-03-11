@@ -32,6 +32,11 @@ public class InMemorySqlConnectionFactory : SqlConnectionFactory, IDisposable
         return Task.FromResult<DbConnection>(new NonDisposingConnection(_sharedConnection));
     }
 
+    public override DbConnection CreateOpenConnectionSync()
+    {
+        return new NonDisposingConnection(_sharedConnection);
+    }
+
     private void CreateSchema()
     {
         using var cmd = _sharedConnection.CreateCommand();
@@ -128,6 +133,14 @@ public class InMemorySqlConnectionFactory : SqlConnectionFactory, IDisposable
                 [CallerIp] TEXT NOT NULL,
                 [Content] TEXT NOT NULL,
                 [CreatedUtc] TEXT NOT NULL DEFAULT (datetime('now'))
+            );
+
+            CREATE TABLE [ConfigurationHeaderHistory] (
+                [Id] INTEGER PRIMARY KEY AUTOINCREMENT,
+                [HeaderId] TEXT NOT NULL,
+                [Content] TEXT NOT NULL,
+                [CreatedUtc] TEXT NOT NULL DEFAULT (datetime('now')),
+                FOREIGN KEY ([HeaderId]) REFERENCES [ConfigurationHeaders]([Id])
             );
             """;
         cmd.ExecuteNonQuery();

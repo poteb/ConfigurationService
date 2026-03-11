@@ -1,4 +1,6 @@
+using System.Data.Common;
 using Dapper;
+using Newtonsoft.Json;
 using pote.Config.DataProvider.Interfaces;
 using pote.Config.DbModel;
 using pote.Config.Encryption;
@@ -31,24 +33,33 @@ public class AdminDataProvider : IAdminDataProvider
         var headers = (await conn.QueryAsync<ConfigurationHeader>(
             new CommandDefinition("SELECT [Id], [Name], [CreatedUtc], [UpdateUtc], [Deleted], [IsActive], [IsJsonEncrypted] FROM [ConfigurationHeaders] WHERE [Deleted] = 0", cancellationToken: cancellationToken))).ToList();
 
+        var result = new List<ConfigurationHeader>();
         foreach (var header in headers)
         {
-            var configurations = (await conn.QueryAsync<Configuration>(
-                new CommandDefinition("SELECT [Id], [HeaderId], [Json], [CreatedUtc], [IsActive], [Deleted], [IsJsonEncrypted] FROM [Configurations] WHERE [HeaderId] = @Id ORDER BY [CreatedUtc] DESC", new { header.Id }, cancellationToken: cancellationToken))).ToList();
-
-            foreach (var config in configurations)
+            try
             {
-                config.Applications = (await conn.QueryAsync<string>(
-                    new CommandDefinition("SELECT [ApplicationId] FROM [ConfigurationApplications] WHERE [ConfigurationId] = @ConfigId", new { ConfigId = config.Id }, cancellationToken: cancellationToken))).ToList();
-                config.Environments = (await conn.QueryAsync<string>(
-                    new CommandDefinition("SELECT [EnvironmentId] FROM [ConfigurationEnvironments] WHERE [ConfigurationId] = @ConfigId", new { ConfigId = config.Id }, cancellationToken: cancellationToken))).ToList();
-            }
+                var configurations = (await conn.QueryAsync<Configuration>(
+                    new CommandDefinition("SELECT [Id], [HeaderId], [Json], [CreatedUtc], [IsActive], [Deleted], [IsJsonEncrypted] FROM [Configurations] WHERE [HeaderId] = @Id ORDER BY [CreatedUtc] DESC", new { header.Id }, cancellationToken: cancellationToken))).ToList();
 
-            header.Configurations = configurations;
-            EncryptionHandler.Decrypt(header.Configurations, _encryptionSettings.JsonEncryptionKey);
+                foreach (var config in configurations)
+                {
+                    config.Applications = (await conn.QueryAsync<string>(
+                        new CommandDefinition("SELECT [ApplicationId] FROM [ConfigurationApplications] WHERE [ConfigurationId] = @ConfigId", new { ConfigId = config.Id }, cancellationToken: cancellationToken))).ToList();
+                    config.Environments = (await conn.QueryAsync<string>(
+                        new CommandDefinition("SELECT [EnvironmentId] FROM [ConfigurationEnvironments] WHERE [ConfigurationId] = @ConfigId", new { ConfigId = config.Id }, cancellationToken: cancellationToken))).ToList();
+                }
+
+                header.Configurations = configurations;
+                EncryptionHandler.Decrypt(header.Configurations, _encryptionSettings.JsonEncryptionKey);
+                result.Add(header);
+            }
+            catch (Exception)
+            {
+                /* skip broken headers */
+            }
         }
 
-        return headers;
+        return result;
     }
 
     public async Task<ConfigurationHeader> GetConfiguration(string id, CancellationToken cancellationToken, bool includeHistory = true)
@@ -93,26 +104,56 @@ public class AdminDataProvider : IAdminDataProvider
 
     public async Task<List<ConfigurationHeader>> GetHeaderHistory(string id, int page, int pageSize, CancellationToken cancellationToken)
     {
-        var header = await GetConfiguration(id, cancellationToken);
-        var offset = page * pageSize;
-        header.Configurations = header.Configurations.Skip(offset).Take(pageSize).ToList();
-        return new List<ConfigurationHeader> { header };
+        await using var conn = await _connectionFactory.CreateOpenConnection(cancellationToken);
+        var rows = (await conn.QueryAsync<string>(
+            new CommandDefinition(
+                "SELECT [Content] FROM [ConfigurationHeaderHistory] WHERE [HeaderId] = @id ORDER BY [CreatedUtc] DESC",
+                new { id }, cancellationToken: cancellationToken))).ToList();
+
+        var paged = rows.Skip((page - 1) * pageSize).Take(pageSize);
+        var result = new List<ConfigurationHeader>();
+        foreach (var json in paged)
+        {
+            var header = JsonConvert.DeserializeObject<ConfigurationHeader>(json)
+                         ?? new ConfigurationHeader { Id = Guid.Empty.ToString(), Name = "Unable to read json" };
+            EncryptionHandler.Decrypt(header.Configurations, _encryptionSettings.JsonEncryptionKey);
+            result.Add(header);
+        }
+        return result;
     }
 
     public async Task<List<Configuration>> GetConfigurationHistory(string headerId, string id, int page, int pageSize, CancellationToken cancellationToken)
     {
-        var header = await GetConfiguration(headerId, cancellationToken);
-        var configuration = header.Configurations.FirstOrDefault(c => c.Id == id);
-        if (configuration == null) return new List<Configuration>();
-        return new List<Configuration> { configuration };
+        await using var conn = await _connectionFactory.CreateOpenConnection(cancellationToken);
+        var rows = (await conn.QueryAsync<string>(
+            new CommandDefinition(
+                "SELECT [Content] FROM [ConfigurationHeaderHistory] WHERE [HeaderId] = @headerId ORDER BY [CreatedUtc] DESC",
+                new { headerId }, cancellationToken: cancellationToken))).ToList();
+
+        var paged = rows.Skip((page - 1) * pageSize).Take(pageSize);
+        var result = new List<Configuration>();
+        foreach (var json in paged)
+        {
+            var header = JsonConvert.DeserializeObject<ConfigurationHeader>(json);
+            var configuration = header?.Configurations.FirstOrDefault(c => c.Id == id);
+            if (configuration == null) continue;
+            EncryptionHandler.Decrypt(configuration, _encryptionSettings.JsonEncryptionKey);
+            result.Add(configuration);
+        }
+        return result.OrderByDescending(c => c.CreatedUtc).ToList();
     }
 
     public void DeleteConfiguration(string id, bool permanent)
     {
-        using var conn = _connectionFactory.CreateOpenConnection().GetAwaiter().GetResult();
+        using var conn = _connectionFactory.CreateOpenConnectionSync();
         using var transaction = conn.BeginTransaction();
+
+        // Snapshot current state to history before deleting
+        SnapshotToHistorySync(conn, transaction, id);
+
         if (permanent)
         {
+            conn.Execute("DELETE FROM [ConfigurationHeaderHistory] WHERE [HeaderId] = @id", new { id }, transaction);
             var configIds = conn.Query<string>("SELECT [Id] FROM [Configurations] WHERE [HeaderId] = @id", new { id }, transaction).ToList();
             foreach (var configId in configIds)
             {
@@ -141,6 +182,9 @@ public class AdminDataProvider : IAdminDataProvider
 
         await using var conn = await _connectionFactory.CreateOpenConnection(cancellationToken);
         await using var transaction = await conn.BeginTransactionAsync(cancellationToken);
+
+        // Snapshot current state to history before modifying
+        await SnapshotToHistory(conn, transaction, header.Id, cancellationToken);
 
         // Upsert header
         var existingHeader = await conn.QueryFirstOrDefaultAsync<string>(
@@ -361,24 +405,33 @@ public class AdminDataProvider : IAdminDataProvider
         var headers = (await conn.QueryAsync<SecretHeader>(
             new CommandDefinition("SELECT [Id], [Name], [CreatedUtc], [UpdateUtc], [Deleted], [IsActive] FROM [SecretHeaders] WHERE [Deleted] = 0", cancellationToken: cancellationToken))).ToList();
 
+        var result = new List<SecretHeader>();
         foreach (var header in headers)
         {
-            var secrets = (await conn.QueryAsync<Secret>(
-                new CommandDefinition("SELECT [Id], [HeaderId], [Value], [ValueType], [CreatedUtc], [IsActive], [Deleted] FROM [Secrets] WHERE [HeaderId] = @Id ORDER BY [CreatedUtc] DESC", new { header.Id }, cancellationToken: cancellationToken))).ToList();
-
-            foreach (var secret in secrets)
+            try
             {
-                secret.Applications = (await conn.QueryAsync<string>(
-                    new CommandDefinition("SELECT [ApplicationId] FROM [SecretApplications] WHERE [SecretId] = @SecretId", new { SecretId = secret.Id }, cancellationToken: cancellationToken))).ToList();
-                secret.Environments = (await conn.QueryAsync<string>(
-                    new CommandDefinition("SELECT [EnvironmentId] FROM [SecretEnvironments] WHERE [SecretId] = @SecretId", new { SecretId = secret.Id }, cancellationToken: cancellationToken))).ToList();
-            }
+                var secrets = (await conn.QueryAsync<Secret>(
+                    new CommandDefinition("SELECT [Id], [HeaderId], [Value], [ValueType], [CreatedUtc], [IsActive], [Deleted] FROM [Secrets] WHERE [HeaderId] = @Id ORDER BY [CreatedUtc] DESC", new { header.Id }, cancellationToken: cancellationToken))).ToList();
 
-            header.Secrets = secrets;
-            EncryptionHandler.Decrypt(header.Secrets, _encryptionSettings.JsonEncryptionKey);
+                foreach (var secret in secrets)
+                {
+                    secret.Applications = (await conn.QueryAsync<string>(
+                        new CommandDefinition("SELECT [ApplicationId] FROM [SecretApplications] WHERE [SecretId] = @SecretId", new { SecretId = secret.Id }, cancellationToken: cancellationToken))).ToList();
+                    secret.Environments = (await conn.QueryAsync<string>(
+                        new CommandDefinition("SELECT [EnvironmentId] FROM [SecretEnvironments] WHERE [SecretId] = @SecretId", new { SecretId = secret.Id }, cancellationToken: cancellationToken))).ToList();
+                }
+
+                header.Secrets = secrets;
+                EncryptionHandler.Decrypt(header.Secrets, _encryptionSettings.JsonEncryptionKey);
+                result.Add(header);
+            }
+            catch (Exception)
+            {
+                /* skip broken headers */
+            }
         }
 
-        return headers;
+        return result;
     }
 
     public async Task<SecretHeader> GetSecret(string id, CancellationToken cancellationToken, bool includeHistory = true)
@@ -402,5 +455,59 @@ public class AdminDataProvider : IAdminDataProvider
         header.Secrets = secrets;
         EncryptionHandler.Decrypt(header.Secrets, _encryptionSettings.JsonEncryptionKey);
         return header;
+    }
+
+    /// <summary>
+    /// Snapshots the current state of a ConfigurationHeader (with all its configurations and junction data)
+    /// into the ConfigurationHeaderHistory table. No-op if the header doesn't exist yet.
+    /// </summary>
+    private async Task SnapshotToHistory(DbConnection conn, DbTransaction transaction, string headerId, CancellationToken cancellationToken)
+    {
+        var header = await conn.QueryFirstOrDefaultAsync<ConfigurationHeader>(
+            new CommandDefinition("SELECT [Id], [Name], [CreatedUtc], [UpdateUtc], [Deleted], [IsActive], [IsJsonEncrypted] FROM [ConfigurationHeaders] WHERE [Id] = @headerId", new { headerId }, transaction, cancellationToken: cancellationToken));
+        if (header == null) return;
+
+        var configurations = (await conn.QueryAsync<Configuration>(
+            new CommandDefinition("SELECT [Id], [HeaderId], [Json], [CreatedUtc], [IsActive], [Deleted], [IsJsonEncrypted] FROM [Configurations] WHERE [HeaderId] = @headerId ORDER BY [CreatedUtc] DESC", new { headerId }, transaction, cancellationToken: cancellationToken))).ToList();
+
+        foreach (var config in configurations)
+        {
+            config.Applications = (await conn.QueryAsync<string>(
+                new CommandDefinition("SELECT [ApplicationId] FROM [ConfigurationApplications] WHERE [ConfigurationId] = @ConfigId", new { ConfigId = config.Id }, transaction, cancellationToken: cancellationToken))).ToList();
+            config.Environments = (await conn.QueryAsync<string>(
+                new CommandDefinition("SELECT [EnvironmentId] FROM [ConfigurationEnvironments] WHERE [ConfigurationId] = @ConfigId", new { ConfigId = config.Id }, transaction, cancellationToken: cancellationToken))).ToList();
+        }
+
+        header.Configurations = configurations;
+        var content = JsonConvert.SerializeObject(header);
+
+        await conn.ExecuteAsync(new CommandDefinition(
+            "INSERT INTO [ConfigurationHeaderHistory] ([HeaderId], [Content], [CreatedUtc]) VALUES (@HeaderId, @Content, @CreatedUtc)",
+            new { HeaderId = headerId, Content = content, CreatedUtc = DateTime.UtcNow }, transaction, cancellationToken: cancellationToken));
+    }
+
+    private void SnapshotToHistorySync(DbConnection conn, DbTransaction transaction, string headerId)
+    {
+        var header = conn.QueryFirstOrDefault<ConfigurationHeader>(
+            "SELECT [Id], [Name], [CreatedUtc], [UpdateUtc], [Deleted], [IsActive], [IsJsonEncrypted] FROM [ConfigurationHeaders] WHERE [Id] = @headerId", new { headerId }, transaction);
+        if (header == null) return;
+
+        var configurations = conn.Query<Configuration>(
+            "SELECT [Id], [HeaderId], [Json], [CreatedUtc], [IsActive], [Deleted], [IsJsonEncrypted] FROM [Configurations] WHERE [HeaderId] = @headerId ORDER BY [CreatedUtc] DESC", new { headerId }, transaction).ToList();
+
+        foreach (var config in configurations)
+        {
+            config.Applications = conn.Query<string>(
+                "SELECT [ApplicationId] FROM [ConfigurationApplications] WHERE [ConfigurationId] = @ConfigId", new { ConfigId = config.Id }, transaction).ToList();
+            config.Environments = conn.Query<string>(
+                "SELECT [EnvironmentId] FROM [ConfigurationEnvironments] WHERE [ConfigurationId] = @ConfigId", new { ConfigId = config.Id }, transaction).ToList();
+        }
+
+        header.Configurations = configurations;
+        var content = JsonConvert.SerializeObject(header);
+
+        conn.Execute(
+            "INSERT INTO [ConfigurationHeaderHistory] ([HeaderId], [Content], [CreatedUtc]) VALUES (@HeaderId, @Content, @CreatedUtc)",
+            new { HeaderId = headerId, Content = content, CreatedUtc = DateTime.UtcNow }, transaction);
     }
 }
