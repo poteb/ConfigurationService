@@ -20,6 +20,7 @@
     <ProjectReference Include="..\Config.Admin.Api.Model\Config.Admin.Api.Model.csproj" />
     <ProjectReference Include="..\Config.Auth\Config.Auth.csproj" />
     <ProjectReference Include="..\Config.DataProvider.File\Config.DataProvider.File.csproj" />
+    <ProjectReference Include="..\Config.DataProvider.SqlServer\Config.DataProvider.SqlServer.csproj" />
     <ProjectReference Include="..\Config.Parser\Config.Parser.csproj" />
     <ProjectReference Include="..\Config.Shared\Config.Shared.csproj" />
   </ItemGroup>
