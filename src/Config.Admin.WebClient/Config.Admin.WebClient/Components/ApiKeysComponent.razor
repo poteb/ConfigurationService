@@ -123,7 +123,7 @@
 
     private async Task CopyToClipboard(string text)
     {
-        await JsRuntime.InvokeVoidAsync("navigator.clipboard.writeText", text);
+        await JsRuntime.InvokeVoidAsync("copyToClipboard", text);
     }
 
     private void Delete(ApiKey key)
