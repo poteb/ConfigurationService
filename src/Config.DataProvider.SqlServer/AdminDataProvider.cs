@@ -30,6 +30,24 @@ public class AdminDataProvider : IAdminDataProvider
         await using var conn = await _connectionFactory.CreateOpenConnection(cancellationToken);
         var headers = (await conn.QueryAsync<ConfigurationHeader>(
             new CommandDefinition("SELECT [Id], [Name], [CreatedUtc], [UpdateUtc], [Deleted], [IsActive], [IsJsonEncrypted] FROM [ConfigurationHeaders] WHERE [Deleted] = 0", cancellationToken: cancellationToken))).ToList();
+
+        foreach (var header in headers)
+        {
+            var configurations = (await conn.QueryAsync<Configuration>(
+                new CommandDefinition("SELECT [Id], [HeaderId], [Json], [CreatedUtc], [IsActive], [Deleted], [IsJsonEncrypted] FROM [Configurations] WHERE [HeaderId] = @Id ORDER BY [CreatedUtc] DESC", new { header.Id }, cancellationToken: cancellationToken))).ToList();
+
+            foreach (var config in configurations)
+            {
+                config.Applications = (await conn.QueryAsync<string>(
+                    new CommandDefinition("SELECT [ApplicationId] FROM [ConfigurationApplications] WHERE [ConfigurationId] = @ConfigId", new { ConfigId = config.Id }, cancellationToken: cancellationToken))).ToList();
+                config.Environments = (await conn.QueryAsync<string>(
+                    new CommandDefinition("SELECT [EnvironmentId] FROM [ConfigurationEnvironments] WHERE [ConfigurationId] = @ConfigId", new { ConfigId = config.Id }, cancellationToken: cancellationToken))).ToList();
+            }
+
+            header.Configurations = configurations;
+            EncryptionHandler.Decrypt(header.Configurations, _encryptionSettings.JsonEncryptionKey);
+        }
+
         return headers;
     }
 
@@ -342,6 +360,24 @@ public class AdminDataProvider : IAdminDataProvider
         await using var conn = await _connectionFactory.CreateOpenConnection(cancellationToken);
         var headers = (await conn.QueryAsync<SecretHeader>(
             new CommandDefinition("SELECT [Id], [Name], [CreatedUtc], [UpdateUtc], [Deleted], [IsActive] FROM [SecretHeaders] WHERE [Deleted] = 0", cancellationToken: cancellationToken))).ToList();
+
+        foreach (var header in headers)
+        {
+            var secrets = (await conn.QueryAsync<Secret>(
+                new CommandDefinition("SELECT [Id], [HeaderId], [Value], [ValueType], [CreatedUtc], [IsActive], [Deleted] FROM [Secrets] WHERE [HeaderId] = @Id ORDER BY [CreatedUtc] DESC", new { header.Id }, cancellationToken: cancellationToken))).ToList();
+
+            foreach (var secret in secrets)
+            {
+                secret.Applications = (await conn.QueryAsync<string>(
+                    new CommandDefinition("SELECT [ApplicationId] FROM [SecretApplications] WHERE [SecretId] = @SecretId", new { SecretId = secret.Id }, cancellationToken: cancellationToken))).ToList();
+                secret.Environments = (await conn.QueryAsync<string>(
+                    new CommandDefinition("SELECT [EnvironmentId] FROM [SecretEnvironments] WHERE [SecretId] = @SecretId", new { SecretId = secret.Id }, cancellationToken: cancellationToken))).ToList();
+            }
+
+            header.Secrets = secrets;
+            EncryptionHandler.Decrypt(header.Secrets, _encryptionSettings.JsonEncryptionKey);
+        }
+
         return headers;
     }
 
