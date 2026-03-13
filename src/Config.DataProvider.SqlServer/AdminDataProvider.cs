@@ -313,6 +313,7 @@ public class AdminDataProvider : IAdminDataProvider
 
     public async Task SaveApiKeys(ApiKeys apiKeys, CancellationToken cancellationToken)
     {
+        EncryptionHandler.Encrypt(apiKeys, _encryptionSettings.JsonEncryptionKey);
         await using var conn = await _connectionFactory.CreateOpenConnection(cancellationToken);
         await using var transaction = await conn.BeginTransactionAsync(cancellationToken);
         await conn.ExecuteAsync(new CommandDefinition("DELETE FROM [ApiKeys]", transaction: transaction, cancellationToken: cancellationToken));

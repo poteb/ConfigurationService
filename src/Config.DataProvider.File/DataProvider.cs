@@ -66,7 +66,9 @@ public class DataProvider : IDataProvider
     {
         var apiKeyString = await _fileHandler.GetApiKeys(cancellationToken);
         var apiKeys = JsonConvert.DeserializeObject<ApiKeys>(apiKeyString, new ApiKeyEntryConverter());
-        return apiKeys ?? new ApiKeys();
+        if (apiKeys == null) return new ApiKeys();
+        EncryptionHandler.Decrypt(apiKeys, _encryptionSettings.JsonEncryptionKey);
+        return apiKeys;
     }
 
     public async Task<string> GetSecretValue(string name, string applicationId, string environmentId, CancellationToken cancellationToken)

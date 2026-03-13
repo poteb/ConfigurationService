@@ -37,7 +37,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using pote.Config.DbModel;
 
-const string connectionString = "Data Source=SQLT01;Database=ConfigurationService;Integrated Security=true;Encrypt=False";
+const string connectionString = "Data Source=.;Database=ConfigurationService;Integrated Security=true;Encrypt=False";
 const string fileDbPath = @"D:\ConfigurationDatabase";
 const string scriptsPath = @"D:\git\ConfigurationService\src\Config.DataProvider.SqlServer\CreateScripts";
 
