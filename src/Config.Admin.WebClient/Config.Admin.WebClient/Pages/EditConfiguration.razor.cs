@@ -24,6 +24,7 @@ public partial class EditConfiguration : IDisposable, IConfigurationActions
     private bool _disableReorderButtons => Header.Configurations.Count <= 1;
     private Settings _settings = new();
     private string _saveError = string.Empty;
+    private bool _loaded;
 
     [Inject] protected IJSRuntime JsRuntime { get; set; } = null!;
     [Parameter] public string Gid { get; set; } = string.Empty;
@@ -51,6 +52,8 @@ public partial class EditConfiguration : IDisposable, IConfigurationActions
     protected override async Task OnParametersSetAsync()
     {
         if (Gid == Header.Id) return;
+        if (_loaded && IsNew) return;
+        _loaded = true;
         await Load();
         _unsavedChangesTimer = new Timer(_ => { UpdateHasUnsavedChanges(); }, new AutoResetEvent(false), 1000, 1000);
         await LoadAllHeaders();

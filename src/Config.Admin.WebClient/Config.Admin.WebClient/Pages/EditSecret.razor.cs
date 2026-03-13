@@ -23,6 +23,7 @@ public partial class EditSecret : IDisposable, ISecretActions
     private bool _loadingHistory;
     private bool _disableReorderButtons => Header.Secrets.Count <= 1;
     private Settings _settings = new();
+    private bool _loaded;
     
     [Inject] protected IJSRuntime JsRuntime { get; set; } = null!;
     [Parameter] public string Gid { get; set; } = string.Empty;
@@ -50,6 +51,8 @@ public partial class EditSecret : IDisposable, ISecretActions
     protected override async Task OnParametersSetAsync()
     {
         if (Gid == Header.Id) return;
+        if (_loaded && IsNew) return;
+        _loaded = true;
         await Load();
         _unsavedChangesTimer = new Timer(_ => { UpdateHasUnsavedChanges(); }, new AutoResetEvent(false), 1000, 1000);
         await LoadAllHeaders();
