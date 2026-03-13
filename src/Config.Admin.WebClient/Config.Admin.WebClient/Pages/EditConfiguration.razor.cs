@@ -71,7 +71,7 @@ public partial class EditConfiguration : IDisposable, IConfigurationActions
         if (IsNew)
         {
             Header = new();
-            Header.Configurations.Add(new Configuration());
+            Header.Configurations.Add(new Configuration { HeaderId = Header.Id });
         }
         else
         {

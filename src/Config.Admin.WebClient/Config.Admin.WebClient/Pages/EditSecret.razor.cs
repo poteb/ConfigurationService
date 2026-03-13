@@ -70,7 +70,7 @@ public partial class EditSecret : IDisposable, ISecretActions
         if (IsNew)
         {
             Header = new();
-            Header.Secrets.Add(new Secret());
+            Header.Secrets.Add(new Secret { HeaderId = Header.Id });
         }
         else
         {

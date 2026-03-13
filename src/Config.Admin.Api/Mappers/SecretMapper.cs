@@ -7,7 +7,7 @@ public static class SecretMapper
 {
     public static DbModel.SecretHeader ToDb(SecretHeader apiHeader)
     {
-        return new DbModel.SecretHeader
+        var dbHeader = new DbModel.SecretHeader
         {
             Id = apiHeader.Id,
             Name = apiHeader.Name,
@@ -17,6 +17,8 @@ public static class SecretMapper
             IsActive = apiHeader.IsActive,
             Secrets = ToDb(apiHeader.Secrets)
         };
+        dbHeader.Secrets.ForEach(s => s.HeaderId = dbHeader.Id);
+        return dbHeader;
     }
 
     public static SecretHeader ToApi(DbModel.SecretHeader dbHeader, List<DbModel.Application> applications, List<DbModel.Environment> environments)
