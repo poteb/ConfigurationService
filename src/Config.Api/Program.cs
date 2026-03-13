@@ -5,7 +5,10 @@ using Microsoft.OpenApi.Models;
 using pote.Config.Auth;
 using pote.Config.DataProvider.File;
 using pote.Config.DataProvider.Interfaces;
+using pote.Config.DataProvider.SqlServer;
 using Serilog;
+using FileDataProvider = pote.Config.DataProvider.File.DataProvider;
+using SqlServerDataProvider = pote.Config.DataProvider.SqlServer.DataProvider;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,12 +37,26 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IParser, Parser>();
-var fileDb = builder.Configuration.GetSection("FileDatabase").GetSection("Directory").Value;
-builder.Services.AddScoped<IFileHandler>(_ => new FileHandler(fileDb));
-builder.Services.AddScoped<IDataProvider, DataProvider>();
-builder.Services.AddScoped<IApplicationDataAccess, ApplicationDataAccess>();
-builder.Services.AddScoped<IEnvironmentDataAccess, EnvironmentDataAccess>();
-builder.Services.AddScoped<ISecretDataAccess, SecretDataAccess>();
+
+var dataProviderType = builder.Configuration["DataProvider"] ?? "File";
+if (dataProviderType.Equals("SqlServer", StringComparison.OrdinalIgnoreCase))
+{
+    var connStr = builder.Configuration["SqlServer:ConnectionString"];
+    builder.Services.AddSingleton(new SqlConnectionFactory(connStr!));
+    builder.Services.AddScoped<IDataProvider, SqlServerDataProvider>();
+    builder.Services.AddScoped<IApplicationDataAccess, pote.Config.DataProvider.SqlServer.ApplicationDataAccess>();
+    builder.Services.AddScoped<IEnvironmentDataAccess, pote.Config.DataProvider.SqlServer.EnvironmentDataAccess>();
+    builder.Services.AddScoped<ISecretDataAccess, pote.Config.DataProvider.SqlServer.SecretDataAccess>();
+}
+else
+{
+    var fileDb = builder.Configuration.GetSection("FileDatabase").GetSection("Directory").Value;
+    builder.Services.AddScoped<IFileHandler>(_ => new FileHandler(fileDb!));
+    builder.Services.AddScoped<IDataProvider, FileDataProvider>();
+    builder.Services.AddScoped<IApplicationDataAccess, pote.Config.DataProvider.File.ApplicationDataAccess>();
+    builder.Services.AddScoped<IEnvironmentDataAccess, pote.Config.DataProvider.File.EnvironmentDataAccess>();
+    builder.Services.AddScoped<ISecretDataAccess, pote.Config.DataProvider.File.SecretDataAccess>();
+}
 
 builder.Services.AddScoped<IApiKeyValidation, ApiKeyValidation>();
 builder.Services.AddScoped<ApiKeyAuthenticationFilter>();

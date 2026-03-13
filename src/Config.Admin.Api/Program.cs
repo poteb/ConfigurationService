@@ -6,8 +6,11 @@ using pote.Config.Admin.Api.Services;
 using pote.Config.Auth;
 using pote.Config.DataProvider.File;
 using pote.Config.DataProvider.Interfaces;
+using pote.Config.DataProvider.SqlServer;
 using pote.Config.Parser;
 using pote.Config.Shared;
+using FileDataProvider = pote.Config.DataProvider.File.DataProvider;
+using SqlServerDataProvider = pote.Config.DataProvider.SqlServer.DataProvider;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -64,16 +67,30 @@ builder.Services.AddCors(p => p.AddPolicy("allowall", policy =>
 
 builder.Services.AddConfiguration<EncryptionSettings>(builder.Configuration);
 
-var fileDb = builder.Configuration.GetSection("FileDatabase").GetSection("Directory").Value;
-builder.Services.AddScoped<IFileHandler>(_ => new FileHandler(fileDb));
-builder.Services.AddScoped<IApplicationDataAccess, ApplicationDataAccess>();
-builder.Services.AddScoped<IEnvironmentDataAccess, EnvironmentDataAccess>();
-builder.Services.AddScoped<ISecretDataAccess, SecretDataAccess>();
-builder.Services.AddScoped<IAdminDataProvider, AdminDataProvider>();
+var dataProviderType = builder.Configuration["DataProvider"] ?? "File";
+if (dataProviderType.Equals("SqlServer", StringComparison.OrdinalIgnoreCase))
+{
+    var connStr = builder.Configuration["SqlServer:ConnectionString"];
+    builder.Services.AddSingleton(new SqlConnectionFactory(connStr!));
+    builder.Services.AddScoped<IApplicationDataAccess, pote.Config.DataProvider.SqlServer.ApplicationDataAccess>();
+    builder.Services.AddScoped<IEnvironmentDataAccess, pote.Config.DataProvider.SqlServer.EnvironmentDataAccess>();
+    builder.Services.AddScoped<ISecretDataAccess, pote.Config.DataProvider.SqlServer.SecretDataAccess>();
+    builder.Services.AddScoped<IAdminDataProvider, pote.Config.DataProvider.SqlServer.AdminDataProvider>();
+    builder.Services.AddScoped<IAuditLogHandler, pote.Config.DataProvider.SqlServer.AuditLogHandler>();
+    builder.Services.AddScoped<IDataProvider, SqlServerDataProvider>();
+}
+else
+{
+    var fileDb = builder.Configuration.GetSection("FileDatabase").GetSection("Directory").Value;
+    builder.Services.AddScoped<IFileHandler>(_ => new FileHandler(fileDb));
+    builder.Services.AddScoped<IApplicationDataAccess, pote.Config.DataProvider.File.ApplicationDataAccess>();
+    builder.Services.AddScoped<IEnvironmentDataAccess, pote.Config.DataProvider.File.EnvironmentDataAccess>();
+    builder.Services.AddScoped<ISecretDataAccess, pote.Config.DataProvider.File.SecretDataAccess>();
+    builder.Services.AddScoped<IAdminDataProvider, pote.Config.DataProvider.File.AdminDataProvider>();
+    builder.Services.AddScoped<IAuditLogHandler, pote.Config.DataProvider.File.AuditLogHandler>();
+    builder.Services.AddScoped<IDataProvider, FileDataProvider>();
+}
 builder.Services.AddScoped<IDependencyGraphService, DependencyGraphService>();
-builder.Services.AddScoped<IAuditLogHandler, AuditLogHandler>();
-
-builder.Services.AddScoped<IDataProvider, DataProvider>();
 builder.Services.AddScoped<IParser, Parser>();
 
 builder.Services.AddScoped<IApiKeyValidation, ApiKeyValidation>();

@@ -11,11 +11,14 @@
 	<ItemGroup>
 	  <PackageReference Include="dapper" Version="2.0.123" />
 	  <PackageReference Include="Dapper.Contrib" Version="2.0.78" />
-	  <PackageReference Include="microsoft.data.sqlclient" Version="4.0.5" />
+	  <PackageReference Include="microsoft.data.sqlclient" Version="6.1.4" />
 	  <PackageReference Include="newtonsoft.json" Version="13.0.2" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\Config.DataProvider.Interfaces\Config.DataProvider.Interfaces.csproj" />
+		<ProjectReference Include="..\Config.DbModel\Config.DbModel.csproj" />
+		<ProjectReference Include="..\Config.Encryption\Config.Encryption.csproj" />
 		<ProjectReference Include="..\Config.Shared\Config.Shared.csproj" />
 	</ItemGroup>
 

@@ -1,0 +1,5 @@
+CREATE TABLE [dbo].[ApiKeys] (
+    [Name] NVARCHAR(200) NOT NULL,
+    [Key]  NVARCHAR(500) NOT NULL,
+    CONSTRAINT [PK_ApiKeys] PRIMARY KEY CLUSTERED ([Name])
+);
