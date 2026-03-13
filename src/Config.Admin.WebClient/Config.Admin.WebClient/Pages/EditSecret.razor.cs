@@ -166,24 +166,27 @@ public partial class EditSecret : IDisposable, ISecretActions
         PageError.Reset();
         Header.CreatedUtc = DateTime.UtcNow;
         var reload = Header.Secrets.Any(c => c.Deleted);
+        var savedSecrets = Header.Secrets;
         Header.Secrets = Header.Secrets.Where(c => !c.Deleted).ToList();
         var callResponse = await AdminApiService.SaveSecret(Header);
         if (callResponse.IsSuccess)
         {
             UpdateUnhandledApplications();
             UpdateUnhandledEnvironments();
-            if (IsNew)
-                Gid = Header.Id;
             if (reload)
                 await Load();
             else
-            {
                 OriginalHeader = SecretMapper.Copy(Header);
+            if (IsNew)
+            {
+                Gid = Header.Id;
+                NavigationManager.NavigateTo($"EditSecret/{Header.Id}", new NavigationOptions { ReplaceHistoryEntry = true });
             }
 
             return true;
         }
 
+        Header.Secrets = savedSecrets;
         PageError.OnError(callResponse.GenerateErrorMessage(), new Exception());
         return false;
     }

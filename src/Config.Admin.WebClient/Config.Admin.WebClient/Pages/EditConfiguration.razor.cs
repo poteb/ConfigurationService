@@ -173,24 +173,27 @@ public partial class EditConfiguration : IDisposable, IConfigurationActions
         PageError.Reset();
         Header.CreatedUtc = DateTime.UtcNow;
         var reload = Header.Configurations.Any(c => c.Deleted);
+        var savedConfigurations = Header.Configurations;
         Header.Configurations = Header.Configurations.Where(c => !c.Deleted).ToList();
         var callResponse = await AdminApiService.SaveConfiguration(Header);
         if (callResponse.IsSuccess)
         {
             UpdateUnhandledApplications();
             UpdateUnhandledEnvironments();
-            if (IsNew)
-                Gid = Header.Id;
             if (reload)
                 await Load();
             else
-            {
                 OriginalHeader = ConfigurationMapper.Copy(Header);
+            if (IsNew)
+            {
+                Gid = Header.Id;
+                NavigationManager.NavigateTo($"EditConfiguration/{Header.Id}", new NavigationOptions { ReplaceHistoryEntry = true });
             }
 
             return true;
         }
 
+        Header.Configurations = savedConfigurations;
         _saveError = callResponse.GenerateErrorMessage();
         return false;
     }
