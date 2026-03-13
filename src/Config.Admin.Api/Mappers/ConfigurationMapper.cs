@@ -7,7 +7,7 @@ public class ConfigurationMapper
 {
     public static DbModel.ConfigurationHeader ToDb(ConfigurationHeader apiHeader)
     {
-        return new DbModel.ConfigurationHeader
+        var dbHeader = new DbModel.ConfigurationHeader
         {
             Id = apiHeader.Id,
             Name = apiHeader.Name,
@@ -18,6 +18,8 @@ public class ConfigurationMapper
             Configurations = ToDb(apiHeader.Configurations),
             IsJsonEncrypted = apiHeader.IsJsonEncrypted
         };
+        dbHeader.Configurations.ForEach(c => c.HeaderId = dbHeader.Id);
+        return dbHeader;
     }
 
     public static ConfigurationHeader ToApi(DbModel.ConfigurationHeader dbHeader, List<DbModel.Application> applications, List<DbModel.Environment> environments)
