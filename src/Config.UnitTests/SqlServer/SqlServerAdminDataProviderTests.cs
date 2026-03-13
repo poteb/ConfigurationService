@@ -703,9 +703,15 @@ public class SqlServerAdminDataProviderTests
         Assert.AreEqual(2, count);
 
         var keys = (await conn.QueryAsync<string>("SELECT [Key] FROM [ApiKeys]")).ToList();
-        Assert.Contains("new-key-1", keys);
-        Assert.Contains("new-key-2", keys);
+        Assert.IsFalse(keys.Contains("new-key-1"), "Keys should be stored encrypted, not as plaintext");
+        Assert.IsFalse(keys.Contains("new-key-2"), "Keys should be stored encrypted, not as plaintext");
         Assert.IsFalse(keys.Contains("old-key"));
+
+        // Verify round-trip: reading back should decrypt to original values
+        var result = await _sut.GetApiKeys(CancellationToken.None);
+        Assert.AreEqual(2, result.Keys.Count);
+        Assert.IsTrue(result.Keys.Any(k => k.Key == "new-key-1"));
+        Assert.IsTrue(result.Keys.Any(k => k.Key == "new-key-2"));
     }
 
     #endregion

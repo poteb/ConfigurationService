@@ -85,9 +85,32 @@ public static class EncryptionHandler
     
     public static IReadOnlyList<Secret> Decrypt(IReadOnlyList<Secret> secrets, string key)
     {
-        foreach (var secret in secrets) 
+        foreach (var secret in secrets)
             Decrypt(secret, key);
         return secrets;
+    }
+
+    public static ApiKeys Encrypt(ApiKeys apiKeys, string key)
+    {
+        foreach (var entry in apiKeys.Keys)
+            entry.Key = Encrypt(entry.Key, key);
+        return apiKeys;
+    }
+
+    public static ApiKeys Decrypt(ApiKeys apiKeys, string key)
+    {
+        foreach (var entry in apiKeys.Keys)
+        {
+            try
+            {
+                entry.Key = Decrypt(entry.Key, key);
+            }
+            catch (Exception)
+            {
+                // Key is not encrypted (pre-existing plaintext key), leave as-is
+            }
+        }
+        return apiKeys;
     }
 
     private static bool IsStringEncrypted(ReadOnlySpan<char> text)

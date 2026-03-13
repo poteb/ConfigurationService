@@ -554,7 +554,7 @@ public class FileAdminDataProviderTests
 
         await _sut.SaveApiKeys(apiKeys, CancellationToken.None);
 
-        await _fileHandler.Received(1).SaveApiKeys(Arg.Is<string>(s => s.Contains("key123")), Arg.Any<CancellationToken>());
+        await _fileHandler.Received(1).SaveApiKeys(Arg.Is<string>(s => !s.Contains("key123") && s.Contains("Test")), Arg.Any<CancellationToken>());
     }
 
     #endregion

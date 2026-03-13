@@ -58,7 +58,9 @@ public class DataProvider : IDataProvider
     {
         await using var conn = await _connectionFactory.CreateOpenConnection(cancellationToken);
         var keys = await conn.QueryAsync<ApiKeyEntry>(new CommandDefinition("SELECT [Name], [Key] FROM [ApiKeys]", cancellationToken: cancellationToken));
-        return new ApiKeys { Keys = keys.ToList() };
+        var apiKeys = new ApiKeys { Keys = keys.ToList() };
+        EncryptionHandler.Decrypt(apiKeys, _encryptionSettings.JsonEncryptionKey);
+        return apiKeys;
     }
 
     public async Task<string> GetSecretValue(string name, string applicationId, string environmentId, CancellationToken cancellationToken)
