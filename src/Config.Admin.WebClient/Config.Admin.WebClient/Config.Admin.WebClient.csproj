@@ -30,6 +30,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Config.Admin.Api.Model\Config.Admin.Api.Model.csproj" />
     <ProjectReference Include="..\..\Config.Shared\Config.Shared.csproj" />
+    <ProjectReference Include="..\..\..\..\BlazorJsonEditor\src\BlazorJsonEditor\BlazorJsonEditor.csproj" />
   </ItemGroup>
 
 </Project>

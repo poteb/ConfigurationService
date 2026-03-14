@@ -38,7 +38,7 @@
                                     Environment: @configuration.EnvironmentsAsText
                                 </MudItem>
                                 <MudItem xs="12" Style="padding: 0">
-                                    <MudTextField ReadOnly="true" T="string" Text="@FormatJsonHelper.FormatJson(configuration.Json)" Variant="Variant.Outlined" Lines="@jsonLines" Style="width: calc(100% - 25px)"></MudTextField>
+                                    <JsonEditor Value="@FormatJsonHelper.FormatJson(configuration.Json)" Options="@(new BlazorJsonEditor.Models.JsonEditorOptions { ReadOnly = true, Height = $"{jsonLines * 22}px" })"></JsonEditor>
                                 </MudItem>
                             </MudGrid>
                         </MudItem>

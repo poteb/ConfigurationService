@@ -309,6 +309,22 @@ public partial class EditConfiguration : IDisposable, IConfigurationActions
         }
     }
 
+    public void NavigateToReference(string configName, bool openInNewTab = false)
+    {
+        var header = _headers.FirstOrDefault(h => string.Equals(h.Name, configName, StringComparison.OrdinalIgnoreCase));
+        if (header == null) return;
+
+        var url = $"EditConfiguration/{header.Id}";
+        if (openInNewTab)
+        {
+            _ = JsRuntime.InvokeVoidAsync("open", NavigationManager.ToAbsoluteUri(url).ToString(), "_blank");
+        }
+        else
+        {
+            NavigationManager.NavigateTo(url);
+        }
+    }
+
     public void Dispose() => _unsavedChangesTimer?.Dispose();
 
     private string ValidateHeaderName(string s)
@@ -321,13 +337,17 @@ public partial class EditConfiguration : IDisposable, IConfigurationActions
     private async Task OnBeforeInternalNavigation(LocationChangingContext context)
     {
         UpdateHasUnsavedChanges();
-        if (!HasUnsavedChanges) return;
-        var isConfirmed = await JsRuntime.InvokeAsync<bool>("confirm", "You have unsaved changes. Click OK to lose the changes and continue. Click Cancel to stay on the page.");
-
-        if (!isConfirmed)
+        if (HasUnsavedChanges)
         {
-            context.PreventNavigation();
+            var isConfirmed = await JsRuntime.InvokeAsync<bool>("confirm", "You have unsaved changes. Click OK to lose the changes and continue. Click Cancel to stay on the page.");
+            if (!isConfirmed)
+            {
+                context.PreventNavigation();
+                return;
+            }
         }
+
+        _expansionPanels.CollapseAll();
     }
 
     private async Task LoadHistory()

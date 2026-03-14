@@ -67,7 +67,7 @@
                                             </MudGrid>
                                         </TitleContent>
                                         <ChildContent>
-                                            <MudTextField ReadOnly="true" T="string" Text="@FormatJsonHelper.FormatJson(json)" Variant="Variant.Outlined" Lines="@jsonLines" Style="width: calc(100% - 25px);font-size: 10pt" ></MudTextField>
+                                            <JsonEditor Value="@FormatJsonHelper.FormatJson(json)" Options="@(new BlazorJsonEditor.Models.JsonEditorOptions { ReadOnly = true, Height = $"{jsonLines * 22}px" })"></JsonEditor>
                                         </ChildContent>
                                     </MudExpansionPanel>
                                 </MudExpansionPanels>
