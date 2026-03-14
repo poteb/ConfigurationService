@@ -23,6 +23,7 @@ public partial class EditSecret : IDisposable, ISecretActions
     private bool _loadingHistory;
     private bool _disableReorderButtons => Header.Secrets.Count <= 1;
     private Settings _settings = new();
+    private bool _loaded;
     
     [Inject] protected IJSRuntime JsRuntime { get; set; } = null!;
     [Parameter] public string Gid { get; set; } = string.Empty;
@@ -50,6 +51,8 @@ public partial class EditSecret : IDisposable, ISecretActions
     protected override async Task OnParametersSetAsync()
     {
         if (Gid == Header.Id) return;
+        if (_loaded && IsNew) return;
+        _loaded = true;
         await Load();
         _unsavedChangesTimer = new Timer(_ => { UpdateHasUnsavedChanges(); }, new AutoResetEvent(false), 1000, 1000);
         await LoadAllHeaders();
@@ -166,24 +169,27 @@ public partial class EditSecret : IDisposable, ISecretActions
         PageError.Reset();
         Header.CreatedUtc = DateTime.UtcNow;
         var reload = Header.Secrets.Any(c => c.Deleted);
+        var savedSecrets = Header.Secrets;
         Header.Secrets = Header.Secrets.Where(c => !c.Deleted).ToList();
         var callResponse = await AdminApiService.SaveSecret(Header);
         if (callResponse.IsSuccess)
         {
             UpdateUnhandledApplications();
             UpdateUnhandledEnvironments();
-            if (IsNew)
-                Gid = Header.Id;
             if (reload)
                 await Load();
             else
-            {
                 OriginalHeader = SecretMapper.Copy(Header);
+            if (IsNew)
+            {
+                Gid = Header.Id;
+                NavigationManager.NavigateTo($"EditSecret/{Header.Id}", new NavigationOptions { ReplaceHistoryEntry = true });
             }
 
             return true;
         }
 
+        Header.Secrets = savedSecrets;
         PageError.OnError(callResponse.GenerateErrorMessage(), new Exception());
         return false;
     }

@@ -24,6 +24,7 @@ public partial class EditConfiguration : IDisposable, IConfigurationActions
     private bool _disableReorderButtons => Header.Configurations.Count <= 1;
     private Settings _settings = new();
     private string _saveError = string.Empty;
+    private bool _loaded;
 
     [Inject] protected IJSRuntime JsRuntime { get; set; } = null!;
     [Parameter] public string Gid { get; set; } = string.Empty;
@@ -51,6 +52,8 @@ public partial class EditConfiguration : IDisposable, IConfigurationActions
     protected override async Task OnParametersSetAsync()
     {
         if (Gid == Header.Id) return;
+        if (_loaded && IsNew) return;
+        _loaded = true;
         await Load();
         _unsavedChangesTimer = new Timer(_ => { UpdateHasUnsavedChanges(); }, new AutoResetEvent(false), 1000, 1000);
         await LoadAllHeaders();
@@ -173,24 +176,27 @@ public partial class EditConfiguration : IDisposable, IConfigurationActions
         PageError.Reset();
         Header.CreatedUtc = DateTime.UtcNow;
         var reload = Header.Configurations.Any(c => c.Deleted);
+        var savedConfigurations = Header.Configurations;
         Header.Configurations = Header.Configurations.Where(c => !c.Deleted).ToList();
         var callResponse = await AdminApiService.SaveConfiguration(Header);
         if (callResponse.IsSuccess)
         {
             UpdateUnhandledApplications();
             UpdateUnhandledEnvironments();
-            if (IsNew)
-                Gid = Header.Id;
             if (reload)
                 await Load();
             else
-            {
                 OriginalHeader = ConfigurationMapper.Copy(Header);
+            if (IsNew)
+            {
+                Gid = Header.Id;
+                NavigationManager.NavigateTo($"EditConfiguration/{Header.Id}", new NavigationOptions { ReplaceHistoryEntry = true });
             }
 
             return true;
         }
 
+        Header.Configurations = savedConfigurations;
         _saveError = callResponse.GenerateErrorMessage();
         return false;
     }
