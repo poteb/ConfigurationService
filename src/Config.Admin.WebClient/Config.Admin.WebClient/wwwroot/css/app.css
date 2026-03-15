@@ -1,4 +1,8 @@
-﻿.ErrorBox {
+﻿html {
+    overflow-x: hidden;
+}
+
+.ErrorBox {
     border: 1px solid #000;
     padding: 4px;
     margin: 5px !important;
