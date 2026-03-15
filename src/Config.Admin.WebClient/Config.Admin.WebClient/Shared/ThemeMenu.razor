@@ -1,0 +1,41 @@
+@using pote.Config.Admin.WebClient.Services
+@inject ThemeService ThemeService
+
+<div style="padding: 8px 16px 16px">
+    <MudButton StartIcon="@Icons.Material.Filled.Menu"
+               Variant="Variant.Text"
+               FullWidth="true"
+               OnClick="() => _open = !_open">
+        Theme
+    </MudButton>
+    <MudPopover Open="_open" AnchorOrigin="Origin.TopCenter" TransformOrigin="Origin.BottomCenter" Style="min-width: 160px">
+        <MudList T="string" Dense="true" Class="py-1" Style="cursor: pointer">
+            <MudListItem T="string" OnClick="@(() => SetTheme(ThemeChoice.Light))"
+                         Icon="@Icons.Material.Filled.LightMode"
+                         Disabled="@(ThemeService.Choice == ThemeChoice.Light)">
+                Light
+            </MudListItem>
+            <MudListItem T="string" OnClick="@(() => SetTheme(ThemeChoice.Dark))"
+                         Icon="@Icons.Material.Filled.DarkMode"
+                         Disabled="@(ThemeService.Choice == ThemeChoice.Dark)">
+                Dark
+            </MudListItem>
+            <MudListItem T="string" OnClick="@(() => SetTheme(ThemeChoice.System))"
+                         Icon="@Icons.Material.Filled.SettingsBrightness"
+                         Disabled="@(ThemeService.Choice == ThemeChoice.System)">
+                System
+            </MudListItem>
+        </MudList>
+    </MudPopover>
+    <MudOverlay Visible="_open" OnClick="() => _open = false" />
+</div>
+
+@code {
+    private bool _open;
+
+    private async Task SetTheme(ThemeChoice choice)
+    {
+        _open = false;
+        await ThemeService.SetThemeAsync(choice);
+    }
+}

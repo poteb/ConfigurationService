@@ -24,6 +24,7 @@ builder.Services.AddHttpClient("Api", client =>
 });
 
 builder.Services.AddMudServices();
+builder.Services.AddScoped<ThemeService>();
 
 builder.Services.AddScoped<IAdminApiService, AdminApiService>();
 builder.Services.AddScoped<IApiService, ApiService>();

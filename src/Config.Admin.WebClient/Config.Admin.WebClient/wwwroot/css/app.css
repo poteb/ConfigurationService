@@ -11,6 +11,20 @@
     font-weight: bold !important;
 }
 
+/* === Alternating expansion panel backgrounds === */
+.panel-even {
+    background-color: #E8EAF6 !important; /* Indigo Lighten5 */
+}
+.panel-odd {
+    background-color: #E0F2F1 !important; /* Teal Lighten5 */
+}
+.app-dark .panel-even {
+    background-color: #1a1a2e !important;
+}
+.app-dark .panel-odd {
+    background-color: #1a2e2a !important;
+}
+
 /* === BlazorJsonEditor — MudBlazor default theme === */
 .bje-container {
     --bje-bg: #ffffff;                             /* Surface */
@@ -56,4 +70,49 @@
     --bje-error-border: rgba(0, 0, 0, 0.12);      /* Divider */
     --bje-error-fg: #f44336;                       /* Error */
     --bje-error-location: rgba(0, 0, 0, 0.54);    /* TextSecondary */
+}
+
+/* === BlazorJsonEditor — MudBlazor dark theme === */
+.app-dark .bje-container {
+    --bje-bg: #32333d;                             /* Surface dark */
+    --bje-fg: rgba(255, 255, 255, 0.87);           /* TextPrimary dark */
+    --bje-border: rgba(255, 255, 255, 0.12);       /* Divider dark */
+
+    --bje-toolbar-bg: #27272f;                     /* Background dark */
+    --bje-toolbar-border: rgba(255, 255, 255, 0.12);
+    --bje-btn-bg: #32333d;
+    --bje-btn-fg: rgba(255, 255, 255, 0.87);
+    --bje-btn-border: rgba(255, 255, 255, 0.23);
+    --bje-btn-hover-bg: #3d3e4a;
+    --bje-btn-hover-border: rgba(255, 255, 255, 0.23);
+    --bje-btn-active-bg: #4a4b57;
+    --bje-icon-btn-fg: #7e6cef;                    /* Primary lightened for dark */
+    --bje-icon-btn-hover-bg: rgba(126, 108, 239, 0.12);
+    --bje-icon-btn-active-bg: rgba(126, 108, 239, 0.2);
+
+    --bje-status-valid: #00e676;                   /* Success light */
+    --bje-status-invalid: #ff5252;                 /* Error light */
+    --bje-status-empty: rgba(255, 255, 255, 0.38);
+
+    --bje-line-numbers-bg: #27272f;
+    --bje-line-numbers-fg: rgba(255, 255, 255, 0.38);
+    --bje-line-numbers-border: rgba(255, 255, 255, 0.12);
+
+    --bje-caret: rgba(255, 255, 255, 0.87);
+    --bje-selection: rgba(126, 108, 239, 0.25);
+    --bje-placeholder: rgba(255, 255, 255, 0.38);
+
+    --bje-key: #7e6cef;                            /* Primary lightened */
+    --bje-string: #00e676;                         /* Success light */
+    --bje-number: #ffb74d;                         /* Warning light */
+    --bje-boolean: #ce93d8;                        /* Purple light */
+    --bje-null: #ff5252;                           /* Error light */
+
+    --bje-ref-link: #64b5f6;                       /* Info light */
+    --bje-ref-link-hover: #90caf9;                 /* Info lighter */
+
+    --bje-error-bg: #3e2723;                       /* Dark red-brown */
+    --bje-error-border: rgba(255, 255, 255, 0.12);
+    --bje-error-fg: #ff5252;
+    --bje-error-location: rgba(255, 255, 255, 0.54);
 }

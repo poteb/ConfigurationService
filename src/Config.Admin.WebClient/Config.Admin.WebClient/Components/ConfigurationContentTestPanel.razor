@@ -56,7 +56,7 @@
                                                         <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ThumbDown" Color="Color.Error"/>
                                                         @foreach (var problem in result.Problems)
                                                         {
-                                                            <MudItem Style="color: red">• @problem</MudItem>
+                                                            <MudItem><MudText Color="Color.Error">• @problem</MudText></MudItem>
                                                         }
                                                     }
                                                     else
