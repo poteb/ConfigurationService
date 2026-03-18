@@ -6,7 +6,7 @@
 @using pote.Config.Shared
 @using System.Collections.ObjectModel
 @using pote.Config.Admin.WebClient.Misc
-@using BlazorJsonEditor.Models
+@using pote.BlazorJsonEditor.Models
 <MudExpansionPanel Class="@(Configuration.Index % 2 == 0 ? "panel-even" : "panel-odd")" Disabled="@Configuration.Deleted" @ref="_expansionPanel">
     <TitleContent>
         <MudGrid Style="padding: 0; margin: 0; width: 99%">
