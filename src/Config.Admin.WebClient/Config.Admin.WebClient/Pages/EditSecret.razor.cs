@@ -20,7 +20,6 @@ public partial class EditSecret : IDisposable, ISecretActions
     private IReadOnlyList<SecretHeader> _headers = new List<SecretHeader>();
     private MudForm _form = null!;
     private bool _formIsValid;
-    private bool _loadingHistory;
     private bool _disableReorderButtons => Header.Secrets.Count <= 1;
     private Settings _settings = new();
     private bool _loaded;

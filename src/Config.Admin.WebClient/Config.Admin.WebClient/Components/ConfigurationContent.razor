@@ -6,7 +6,8 @@
 @using pote.Config.Shared
 @using System.Collections.ObjectModel
 @using pote.Config.Admin.WebClient.Misc
-<MudExpansionPanel Style="@($"background-color:{(Configuration.Index % 2 == 0 ? Colors.Indigo.Lighten5 : Colors.Teal.Lighten5)}")" Disabled="@Configuration.Deleted" @ref="_expansionPanel">
+@using pote.BlazorJsonEditor.Models
+<MudExpansionPanel Class="@(Configuration.Index % 2 == 0 ? "panel-even" : "panel-odd")" Disabled="@Configuration.Deleted" @ref="_expansionPanel">
     <TitleContent>
         <MudGrid Style="padding: 0; margin: 0; width: 99%">
             <MudItem xs="10" Style="padding-bottom: 0">
@@ -49,7 +50,7 @@
             <MudGrid Style="padding: 0; margin: 0; width: 99%" Spacing="2">
                 <MudItem xs="12" Class="d-flex align-center" Style="padding:0">
                     <MudItem xs="3" Style="padding-right:8px">
-                        <MudSelect T="ConfigEnvironment" Style="background-color: white" Dense="true" Variant="Variant.Outlined" Margin="Margin.Dense" Label="Environments" MultiSelection="true" @bind-SelectedValues="SelectedEnvironments" SelectAll="true" AnchorOrigin="Origin.BottomCenter">
+                        <MudSelect T="ConfigEnvironment" Dense="true" Variant="Variant.Outlined" Margin="Margin.Dense" Label="Environments" MultiSelection="true" @bind-SelectedValues="SelectedEnvironments" SelectAll="true" AnchorOrigin="Origin.BottomCenter">
                             @foreach (var environment in AllEnvironments)
                             {
                                 <MudSelectItem T="ConfigEnvironment" Value="environment" Style="white-space: nowrap !important">@environment.Name</MudSelectItem>
@@ -57,7 +58,7 @@
                         </MudSelect>
                     </MudItem>
                     <MudItem xs="3">
-                        <MudSelect T="Application" Style="background-color: white" Dense="true" Variant="Variant.Outlined" Margin="Margin.Dense" Label="Applications" MultiSelection="true" @bind-SelectedValues="SelectedApplications" SelectAll="true" AnchorOrigin="Origin.BottomCenter">
+                        <MudSelect T="Application" Dense="true" Variant="Variant.Outlined" Margin="Margin.Dense" Label="Applications" MultiSelection="true" @bind-SelectedValues="SelectedApplications" SelectAll="true" AnchorOrigin="Origin.BottomCenter">
                             @foreach (var application in AllApplications)
                             {
                                 <MudSelectItem T="Application" Value="application" Style="white-space: nowrap !important">@application.Name</MudSelectItem>
@@ -67,15 +68,12 @@
                 </MudItem>
             </MudGrid>
             <MudItem xs="12" Class="d-flex align-center" Style="padding-top:5px">
-                <MudTooltip Text="Format JSON">
-                    <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.FormatIndentIncrease" Color="Color.Info" OnClick="FormatJson"></MudIconButton>
-                </MudTooltip>
                 <MudTooltip Text="@IsJsonEncryptedCheckboxText()">
                     <MudCheckBox Size="Size.Small" @bind-Checked="@Configuration.IsJsonEncrypted" Disabled="@Configuration.IsJsonEncryptedForced" Color="Color.Info" CheckedIcon="@Icons.Material.Filled.Shield" UncheckedIcon="@Icons.Material.Outlined.Shield"></MudCheckBox>
                 </MudTooltip>
                 <MudText Style="padding-left: 10px" Color="Color.Error">@_jsonValidationError</MudText>
             </MudItem>
-            <MudTextField @bind-Text="Configuration.Json" T="string" Variant="Variant.Outlined" Lines="@_jsonLines" Style="background-color:#fff"></MudTextField>
+            <JsonEditor Value="@Configuration.Json" ValueChanged="OnJsonChanged" OnRefClicked="OnRefClicked" Options="_jsonEditorOptions"></JsonEditor>
 
             <ConfigurationContentTestPanel @ref="_testPanel" AllEnvironments="_allEnvironments" AllApplications="_allApplications" Configuration="Configuration"></ConfigurationContentTestPanel>
             
@@ -87,11 +85,11 @@
 @code {
     private MudExpansionPanel _expansionPanel = null!;
     private ConfigurationContentTestPanel _testPanel = null!;
-    private int _jsonLines = 10;
     private string _jsonValidationError = string.Empty;
     private List<Application> _allApplications = new();
     private List<ConfigEnvironment> _allEnvironments = new();
     private Configuration _originalConfiguration = new();
+    private readonly JsonEditorOptions _jsonEditorOptions = new() { Height = "400px" };
 
     [Inject] IDialogService DialogService { get; set; } = null!;
     [Inject] IApiService ApiService { get; set; } = null!;
@@ -147,21 +145,14 @@
         base.OnAfterRender(firstRender);
     }
 
-    private void FormatJson()
+    private void OnJsonChanged(string value)
     {
-        try
-        {
-            _jsonValidationError = string.Empty;
-            dynamic parsedJson = JsonConvert.DeserializeObject(Configuration.Json)!;
-            if (parsedJson == null) return;
-            Configuration.Json = JsonConvert.SerializeObject(parsedJson, Formatting.Indented);
-            var lines = Configuration.Json.Split('\n').Length;
-            _jsonLines = lines < 10 ? 10 : (lines > 30 ? 30 : lines);
-        }
-        catch (Exception ex)
-        {
-            _jsonValidationError = ex.Message;
-        }
+        Configuration.Json = value;
+    }
+
+    private void OnRefClicked(JsonRef jsonRef)
+    {
+        ConfigurationActions.NavigateToReference(jsonRef.File, jsonRef.OpenInNewTab);
     }
 
     private void DeleteConfiguration(bool delete)

@@ -5,7 +5,11 @@
       "Bash(dotnet build:*)",
       "Bash(dotnet test:*)",
       "Bash(xargs basename -a)",
-      "Bash(gh issue view *)"
+      "Bash(gh issue view *)",
+      "Bash(xargs ls:*)",
+      "Bash(grep -r \"MudTheme\\\\|\\\\.Palette\\\\|\\\\.Primary\\\\|\\\\.Secondary\\\\|\\\\.Surface\" /d/git/ConfigurationService/src/Config.Admin.WebClient --include=*.cs --include=*.razor)",
+      "Bash(grep -E \"\\(#[0-9A-Fa-f]{3,6}|Colors\\\\.|Color\\\\.|background-color|style.*color\\)\")",
+      "Bash(dotnet nuget:*)"
     ]
   }
 }

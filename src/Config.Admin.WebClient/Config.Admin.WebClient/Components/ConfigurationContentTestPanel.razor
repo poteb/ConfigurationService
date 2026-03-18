@@ -56,7 +56,7 @@
                                                         <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ThumbDown" Color="Color.Error"/>
                                                         @foreach (var problem in result.Problems)
                                                         {
-                                                            <MudItem Style="color: red">• @problem</MudItem>
+                                                            <MudItem><MudText Color="Color.Error">• @problem</MudText></MudItem>
                                                         }
                                                     }
                                                     else
@@ -67,7 +67,7 @@
                                             </MudGrid>
                                         </TitleContent>
                                         <ChildContent>
-                                            <MudTextField ReadOnly="true" T="string" Text="@FormatJsonHelper.FormatJson(json)" Variant="Variant.Outlined" Lines="@jsonLines" Style="width: calc(100% - 25px);font-size: 10pt" ></MudTextField>
+                                            <JsonEditor Value="@FormatJsonHelper.FormatJson(json)" Options="@(new pote.BlazorJsonEditor.Models.JsonEditorOptions { ReadOnly = true, Height = $"{jsonLines * 22}px" })"></JsonEditor>
                                         </ChildContent>
                                     </MudExpansionPanel>
                                 </MudExpansionPanels>

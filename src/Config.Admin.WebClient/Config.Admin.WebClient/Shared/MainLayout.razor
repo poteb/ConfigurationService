@@ -1,8 +1,11 @@
-﻿@using pote.Config.Admin.WebClient.Model
+@using pote.Config.Admin.WebClient.Model
+@using pote.Config.Admin.WebClient.Services
 
 @inherits LayoutComponentBase
+@inject ThemeService ThemeService
+@implements IDisposable
 
-<MudThemeProvider />
+<MudThemeProvider @ref="_themeProvider" IsDarkMode="@ThemeService.IsDarkMode" />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
@@ -13,6 +16,8 @@
                 <MudText Typo="Typo.h5" Class="mt-1" Style="padding-top: 3px">Config Service</MudText>
             </MudDrawerHeader>
             <NavMenu />
+            <div style="flex: 1"></div>
+            <ThemeMenu />
         </MudDrawer>
     </MudHidden>
     <MudHidden Breakpoint="Breakpoint.MdAndUp">
@@ -32,16 +37,32 @@
 </MudLayout>
 
 @code {
+    private MudThemeProvider _themeProvider = null!;
     public readonly PageError PageError = new();
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
         PageError.SetStateHasChangedCallback(this.StateHasChanged);
+        ThemeService.OnChange += StateHasChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await ThemeService.InitializeAsync();
+            StateHasChanged();
+        }
     }
 
     protected override void OnParametersSet()
     {
         PageError.IsError = false;
+    }
+
+    public void Dispose()
+    {
+        ThemeService.OnChange -= StateHasChanged;
     }
 }

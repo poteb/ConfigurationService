@@ -6,7 +6,7 @@
 @if (HeaderTestContainer == null! || HeaderTestContainer.TestStage == TestStages.NotStarted)
 {
     <MudTooltip Text="Not tested, click to test">
-        <MudIconButton Icon="@Icons.Material.Filled.Check" Size="Size.Small" Style="@($"color:{Colors.Grey.Lighten2}")" OnClick="Test"></MudIconButton>
+        <MudIconButton Icon="@Icons.Material.Filled.Check" Size="Size.Small" Color="Color.Default" OnClick="Test"></MudIconButton>
     </MudTooltip>
 }
 else if (HeaderTestContainer.TestStage == TestStages.InProgress)
