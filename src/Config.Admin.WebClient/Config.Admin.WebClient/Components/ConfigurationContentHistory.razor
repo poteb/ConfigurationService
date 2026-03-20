@@ -1,4 +1,4 @@
-﻿@using pote.Config.Admin.WebClient.Model
+@using pote.Config.Admin.WebClient.Model
 @using pote.Config.Admin.WebClient.Services
 @using pote.Config.Admin.WebClient.Misc
 @using pote.Config.Admin.WebClient.Mappers
@@ -38,7 +38,7 @@
                                     Environment: @configuration.EnvironmentsAsText
                                 </MudItem>
                                 <MudItem xs="12" Style="padding: 0">
-                                    <JsonEditor Value="@FormatJsonHelper.FormatJson(configuration.Json)" Options="@(new pote.BlazorJsonEditor.Models.JsonEditorOptions { ReadOnly = true, Height = $"{jsonLines * 22}px" })"></JsonEditor>
+                                    <JsonEditor Value="@FormatJsonHelper.FormatJson(configuration.Json)" Options="@(new pote.BlazorJsonEditor.Models.JsonEditorOptions { ReadOnly = true, Height = $"{jsonLines * 22 + 55}px" })"></JsonEditor>
                                 </MudItem>
                             </MudGrid>
                         </MudItem>

@@ -1,4 +1,4 @@
-﻿@using Newtonsoft.Json
+@using Newtonsoft.Json
 @using pote.Config.Admin.WebClient.Misc
 @using pote.Config.Admin.WebClient.Model
 @using pote.Config.Admin.WebClient.Services
@@ -67,7 +67,7 @@
                                             </MudGrid>
                                         </TitleContent>
                                         <ChildContent>
-                                            <JsonEditor Value="@FormatJsonHelper.FormatJson(json)" Options="@(new pote.BlazorJsonEditor.Models.JsonEditorOptions { ReadOnly = true, Height = $"{jsonLines * 22}px" })"></JsonEditor>
+                                            <JsonEditor Value="@FormatJsonHelper.FormatJson(json)" Options="@(new pote.BlazorJsonEditor.Models.JsonEditorOptions { ReadOnly = true, Height = $"{jsonLines * 22 + 55}px" })"></JsonEditor>
                                         </ChildContent>
                                     </MudExpansionPanel>
                                 </MudExpansionPanels>
