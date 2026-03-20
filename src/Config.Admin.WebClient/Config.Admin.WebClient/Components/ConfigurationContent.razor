@@ -73,7 +73,7 @@
                 </MudTooltip>
                 <MudText Style="padding-left: 10px" Color="Color.Error">@_jsonValidationError</MudText>
             </MudItem>
-            <JsonEditor Value="@Configuration.Json" ValueChanged="OnJsonChanged" OnRefClicked="OnRefClicked" Options="_jsonEditorOptions"></JsonEditor>
+            <JsonEditor Value="@Configuration.Json" ValueChanged="OnJsonChanged" OnRefClicked="OnRefClicked" Options="_jsonEditorOptions" OnRefNameSuggestionsRequested="GetRefNameSuggestions" OnRefPathSuggestionsRequested="GetRefPathSuggestions"></JsonEditor>
 
             <ConfigurationContentTestPanel @ref="_testPanel" AllEnvironments="_allEnvironments" AllApplications="_allApplications" Configuration="Configuration"></ConfigurationContentTestPanel>
             
@@ -178,6 +178,24 @@
         ConfigurationActions.DuplicateConfiguration(Configuration);
     }
     
+    private Task<IEnumerable<string>> GetRefNameSuggestions(string filterText)
+    {
+        IEnumerable<string> suggestions = ConfigurationActions.GetConfigurationNames()
+            .Where(name => name.Contains(filterText, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(name => !name.StartsWith(filterText, StringComparison.OrdinalIgnoreCase))
+            .ThenBy(name => name);
+        return Task.FromResult(suggestions);
+    }
+
+    private Task<IEnumerable<string>> GetRefPathSuggestions(string configName, string filterText)
+    {
+        IEnumerable<string> paths = ConfigurationActions.GetConfigurationPropertyPaths(configName)
+            .Where(p => p.Contains(filterText, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(p => !p.StartsWith(filterText, StringComparison.OrdinalIgnoreCase))
+            .ThenBy(p => p);
+        return Task.FromResult(paths);
+    }
+
     private string IsJsonEncryptedCheckboxText()
     {
         return Configuration.IsJsonEncrypted ? "Encryption (ON)" : "Encryption (OFF)";

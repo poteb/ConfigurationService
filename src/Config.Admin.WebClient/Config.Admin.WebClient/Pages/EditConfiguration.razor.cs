@@ -325,6 +325,47 @@ public partial class EditConfiguration : IDisposable, IConfigurationActions
         }
     }
 
+    public IEnumerable<string> GetConfigurationNames()
+    {
+        return _headers.Select(h => h.Name);
+    }
+
+    public IEnumerable<string> GetConfigurationPropertyPaths(string configName)
+    {
+        var header = _headers.FirstOrDefault(h => string.Equals(h.Name, configName, StringComparison.OrdinalIgnoreCase));
+        if (header == null) return [];
+
+        var config = header.Configurations.FirstOrDefault();
+        if (config == null || string.IsNullOrWhiteSpace(config.Json)) return [];
+
+        try
+        {
+            using var doc = System.Text.Json.JsonDocument.Parse(config.Json);
+            return ExtractPropertyPaths(doc.RootElement, "").ToList();
+        }
+        catch
+        {
+            return [];
+        }
+    }
+
+    private static IEnumerable<string> ExtractPropertyPaths(System.Text.Json.JsonElement element, string prefix)
+    {
+        if (element.ValueKind != System.Text.Json.JsonValueKind.Object) yield break;
+
+        foreach (var property in element.EnumerateObject())
+        {
+            var path = string.IsNullOrEmpty(prefix) ? property.Name : $"{prefix}/{property.Name}";
+            yield return path;
+
+            if (property.Value.ValueKind == System.Text.Json.JsonValueKind.Object)
+            {
+                foreach (var nested in ExtractPropertyPaths(property.Value, path))
+                    yield return nested;
+            }
+        }
+    }
+
     public void Dispose() => _unsavedChangesTimer?.Dispose();
 
     private string ValidateHeaderName(string s)

@@ -6,4 +6,6 @@ public interface IConfigurationActions
 {
     void DuplicateConfiguration(Configuration configuration);
     void NavigateToReference(string configName, bool openInNewTab = false);
+    IEnumerable<string> GetConfigurationNames();
+    IEnumerable<string> GetConfigurationPropertyPaths(string configName);
 }
