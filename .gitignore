@@ -353,3 +353,5 @@ MigrationBackup/
 .idea/
 
 src/Config.Middleware/Config.Middleware.TestApi/appsettings.Development.Parsed.json
+
+src/.claude/worktrees/
