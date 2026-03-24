@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace pote.Config.Auth;
@@ -15,6 +16,9 @@ public class ApiKeyAuthenticationFilter : IAsyncAuthorizationFilter
 
     public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
     {
+        if (HttpMethods.IsOptions(context.HttpContext.Request.Method))
+            return;
+
         var userApiKey = context.HttpContext.Request.Headers[ApiKeyHeaderName].ToString();
 
         if (string.IsNullOrWhiteSpace(userApiKey))
