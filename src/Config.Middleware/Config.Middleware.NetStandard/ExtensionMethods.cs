@@ -8,7 +8,7 @@ namespace pote.Config.Middleware;
 
 public static class ExtensionMethods
 {
-    public static async Task<IConfigurationBuilder> AddConfigurationFromApi(this IConfigurationBuilder builder, BuilderConfiguration configuration, string inputJson, Func<HttpClient> clientProvider, Action<string, Exception> errorOutput = null!)
+    public static async Task<IConfigurationBuilder> AddConfigurationFromApi(this IConfigurationBuilder builder, BuilderConfiguration configuration, string inputJson, Func<HttpClient> clientProvider, Action<string, Exception> errorOutput)
     {
         var parsedJsonFile = Path.Combine(configuration.WorkingDirectory, $"appsettings.{configuration.Environment}.Parsed.json");
         try
@@ -23,7 +23,7 @@ public static class ExtensionMethods
         }
         catch (Exception ex)
         {
-            errorOutput("Error getting configuration from API. Loading previously parsed configuration.", ex);
+            errorOutput?.Invoke("Error getting configuration from API. Loading previously parsed configuration.", ex);
             return builder.AddFallbackConfiguration(parsedJsonFile, configuration, errorOutput);
         }
     }
