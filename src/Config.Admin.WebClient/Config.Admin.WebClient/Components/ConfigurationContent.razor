@@ -77,7 +77,7 @@
 
             <ConfigurationContentTestPanel @ref="_testPanel" AllEnvironments="_allEnvironments" AllApplications="_allApplications" Configuration="Configuration"></ConfigurationContentTestPanel>
             
-            <ConfigurationContentHistory AllEnvironments="_allEnvironments" AllApplications="_allApplications" Configuration="Configuration"></ConfigurationContentHistory>
+            <ConfigurationContentHistory @ref="_historyPanel" AllEnvironments="_allEnvironments" AllApplications="_allApplications" Configuration="Configuration"></ConfigurationContentHistory>
         }
     </ChildContent>
 </MudExpansionPanel>
@@ -85,6 +85,7 @@
 @code {
     private MudExpansionPanel _expansionPanel = null!;
     private ConfigurationContentTestPanel _testPanel = null!;
+    private ConfigurationContentHistory _historyPanel = null!;
     private string _jsonValidationError = string.Empty;
     private List<Application> _allApplications = new();
     private List<ConfigEnvironment> _allEnvironments = new();
@@ -152,6 +153,8 @@
 
     private void OnRefClicked(JsonRef jsonRef)
     {
+        _testPanel?.Collapse();
+        _historyPanel?.Collapse();
         ConfigurationActions.NavigateToReference(jsonRef.File, jsonRef.OpenInNewTab);
     }
 
