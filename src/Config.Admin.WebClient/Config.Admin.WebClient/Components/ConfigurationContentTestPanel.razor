@@ -83,12 +83,28 @@
     private bool _runningTests;
     private List<ParseResponse> _testResults = new();
     private MudExpansionPanel _expansionPanel = null!;
+    private string _lastConfigurationId = string.Empty;
 
     [Parameter] public Configuration Configuration { get; set; } = null!;
     [Parameter] public List<Application> AllApplications { get; set; } = null!;
     [Parameter] public List<ConfigEnvironment> AllEnvironments { get; set; } = null!;
     [Inject] public IApiService ApiService { get; set; } = null!;
     [Inject] public IConfigurationTestService ConfigurationTestService { get; set; } = null!;
+
+    public void Collapse()
+    {
+        if (_expansionPanel.IsExpanded)
+            _expansionPanel.Collapse();
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (Configuration.Id != _lastConfigurationId)
+        {
+            _testResults.Clear();
+            _lastConfigurationId = Configuration.Id;
+        }
+    }
 
     public async Task RunTests()
     {

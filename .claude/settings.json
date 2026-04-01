@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la /d/git/ConfigurationService/src/Config.Admin.WebClient/Config.Admin.WebClient/Pages/EditConfiguration.razor* /d/git/ConfigurationService/src/Config.Admin.WebClient/Config.Admin.WebClient/Components/ConfigurationContent* /d/git/ConfigurationService/src/Config.Admin.WebClient/Config.Admin.WebClient/Services/ConfigurationTestService.cs)"
+    ]
+  }
+}

@@ -59,6 +59,12 @@
     [Inject] public IAdminApiService AdminApiService { get; set; } = null!;
     [CascadingParameter] public PageError PageError { get; set; } = null!;
 
+    public void Collapse()
+    {
+        if (_expansionPanel.IsExpanded)
+            _expansionPanel.Collapse();
+    }
+
     private async Task LoadHistory()
     {
         Configuration.History.Clear();

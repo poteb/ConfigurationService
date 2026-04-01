@@ -1,0 +1,32 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Admin.Api",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-admin-api",
+            "program": "${workspaceFolder}/src/Config.Admin.Api/bin/Debug/net10.0/pote.Config.Admin.Api.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/Config.Admin.Api",
+            "stopAtEntry": false,
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            }
+        },
+        {
+            "name": "Admin.WebClient",
+            "type": "blazorwasm",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/src/Config.Admin.WebClient/Config.Admin.WebClient",
+            "url": "http://localhost:5071",
+            "browser": "edge"
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Admin.Api + WebClient",
+            "configurations": ["Admin.Api", "Admin.WebClient"]
+        }
+    ]
+}
