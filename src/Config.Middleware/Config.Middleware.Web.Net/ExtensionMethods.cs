@@ -1,3 +1,6 @@
+using System;
+using System.IO;
+using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,32 +30,74 @@ public static class ExtensionMethods
             if (response == null)  throw new InvalidDataException("Response from API was empty.");
             var json = response.GetJson();
             await File.WriteAllTextAsync(parsedJsonFile, json);
+            await SaveToPersistentCacheAsync(configuration, json, errorOutput);
             builder.Configuration.AddJsonFile(parsedJsonFile, false, false);
             return builder;
         }
         catch (Exception ex)
         {
             errorOutput("Error getting configuration from API. Loading previously parsed configuration.", ex);
-            return builder.AddPreviouslyParsedConfiguration(parsedJsonFile);
+            return builder.AddFallbackConfiguration(parsedJsonFile, configuration, errorOutput);
         }
     }
-    
-    // /// <summary>
-    // /// Reads the options from appsettings, adds the SecretResolver to the options and adds the options to the DI container.
-    // /// </summary>
-    // /// <param name="services">The IServiceCollection to add the options to.</param>
-    // /// <param name="configuration">The IConfiguration to read the options from.</param>
-    // /// <param name="secretResolver">The SecretResolver that was created in AddSecretsResolver.</param>
-    // /// <typeparam name="T">The options type that are being read from appsettings.</typeparam>
-    // /// <returns>Returns the options so that they can be used in during startup.</returns>
-    // public static T AddSecretConfiguration<T>(this IServiceCollection services, IConfiguration configuration, ISecretResolver secretResolver) where T : class, ISecretSettings
-    // {
-    //     var settings = configuration.GetSection(typeof (T).Name).Get<T>()!;
-    //     settings.SecretResolver = secretResolver;
-    //     services.AddSingleton<T>(_ => settings);
-    //     return settings;
-    // }
-    
+
+    private static WebApplicationBuilder AddFallbackConfiguration(this WebApplicationBuilder builder, string parsedJsonFile, BuilderConfiguration configuration, Action<string, Exception> errorOutput)
+    {
+        if (File.Exists(parsedJsonFile))
+        {
+            builder.Configuration.AddJsonFile(parsedJsonFile, false, true);
+            return builder;
+        }
+
+        var persistentFile = GetPersistentCachePath(configuration);
+        if (persistentFile != null && File.Exists(persistentFile))
+        {
+            errorOutput?.Invoke($"Local parsed configuration not found. Loading from persistent cache: {persistentFile}", null!);
+            builder.Configuration.AddJsonFile(persistentFile, false, true);
+            return builder;
+        }
+
+        throw new FileNotFoundException(
+            $"No configuration found. Tried:{Environment.NewLine}" +
+            $"  1. Config service API at {configuration.RootApiUri}{Environment.NewLine}" +
+            $"  2. Local file: {parsedJsonFile}{Environment.NewLine}" +
+            $"  3. Persistent cache: {persistentFile ?? "(disabled)"}");
+    }
+
+    private static async Task SaveToPersistentCacheAsync(BuilderConfiguration configuration, string json, Action<string, Exception> errorOutput)
+    {
+        try
+        {
+            var persistentFile = GetPersistentCachePath(configuration);
+            if (persistentFile == null) return;
+
+            var dir = Path.GetDirectoryName(persistentFile)!;
+            if (!Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+
+            await File.WriteAllTextAsync(persistentFile, json);
+        }
+        catch (Exception ex)
+        {
+            errorOutput?.Invoke("Failed to save persistent configuration cache. This is non-fatal.", ex);
+        }
+    }
+
+    private static string? GetPersistentCachePath(BuilderConfiguration configuration)
+    {
+        if (!configuration.EnablePersistentCache) return null;
+
+        var app = SanitizeDirectoryName(configuration.Application);
+        var env = SanitizeDirectoryName(configuration.Environment);
+        return Path.Combine(configuration.PersistentCacheBaseDirectory, app, env, $"appsettings.{env}.Parsed.json");
+    }
+
+    private static string SanitizeDirectoryName(string name)
+    {
+        var invalid = Path.GetInvalidFileNameChars();
+        return new string(name.Where(c => !invalid.Contains(c)).ToArray()).ToLowerInvariant();
+    }
+
     /// <summary>Adds the BuilderConfiguration to the DI container.</summary>
     /// <param name="services">The IServiceCollection to add the BuilderConfiguration to.</param>
     /// <param name="application">The name of the application that is being configured.</param>
@@ -72,28 +117,11 @@ public static class ExtensionMethods
         services.AddSingleton(configSettings);
         return configSettings;
     }
-    
+
     private static HttpClient CreateHttpClient(string apiKey)
     {
         var client = new HttpClient();
         client.DefaultRequestHeaders.Add("X-API-Key", apiKey);
         return client;
-    }
-    
-    
-    /// <summary>
-    /// If the call to the API fails, this method is called to load the previously parsed configuration.
-    /// If the previously parsed configuration is not found, an exception is thrown.
-    /// </summary>
-    /// <param name="builder">The WebApplicationBuilder to add the configuration to.</param>
-    /// <param name="file">The file that contains the previously parsed configuration.</param>
-    /// <returns>The WebApplicationBuilder with the configuration added.</returns>
-    /// <exception cref="FileNotFoundException">Thrown when the previously parsed configuration file is not found.</exception>
-    private static WebApplicationBuilder AddPreviouslyParsedConfiguration(this WebApplicationBuilder builder, string file)
-    {
-        if (!File.Exists(file))
-            throw new FileNotFoundException($"An old parsed configuration not found, file: {file}");
-        builder.Configuration.AddJsonFile(file, false, true);
-        return builder;
     }
 }
