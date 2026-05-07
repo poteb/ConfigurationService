@@ -28,7 +28,7 @@ Get-ChildItem -Path "F:\build\temp\package\lib\net8.0" -File | where {$_.name -l
 Get-ChildItem -Path "F:\build\temp\package\lib\net9.0" -File | where {$_.name -like "pote.*.dll"} | Move-Item -Destination F:\build\package\lib\net9.0 -Force
 Get-ChildItem -Path "F:\build\temp\package\lib\net10.0" -File | where {$_.name -like "pote.*.dll"} | Move-Item -Destination F:\build\package\lib\net10.0 -Force
 
-F:\build\NuGet.exe pack Config.Middleware.nuspec -OutputDirectory F:\build\artifacts -BasePath F:\build\package -Version 0.1.0.13 -Properties Configuration=Release
+F:\build\NuGet.exe pack Config.Middleware.nuspec -OutputDirectory F:\build\artifacts -BasePath F:\build\package -Version 0.1.0.14 -Properties Configuration=Release
 
 
 WEB
@@ -61,7 +61,7 @@ Get-ChildItem -Path "F:\build\temp\webpackage\lib\net8.0" -File | where {$_.name
 Get-ChildItem -Path "F:\build\temp\webpackage\lib\net9.0" -File | where {$_.name -like "pote.*.dll"} | Move-Item -Destination F:\build\webpackage\lib\net9.0 -Force
 Get-ChildItem -Path "F:\build\temp\webpackage\lib\net10.0" -File | where {$_.name -like "pote.*.dll"} | Move-Item -Destination F:\build\webpackage\lib\net10.0 -Force
 
-F:\build\NuGet.exe pack Config.Middleware.Web.nuspec -OutputDirectory F:\build\artifacts -BasePath F:\build\webpackage -Version 0.1.0.15 -Properties Configuration=Release
+F:\build\NuGet.exe pack Config.Middleware.Web.nuspec -OutputDirectory F:\build\artifacts -BasePath F:\build\webpackage -Version 0.1.0.16 -Properties Configuration=Release
 
 
 SECRETS
