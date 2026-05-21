@@ -24,11 +24,11 @@ public static class ExtensionMethods
         catch (Exception ex)
         {
             errorOutput?.Invoke("Error getting configuration from API. Loading previously parsed configuration.", ex);
-            return builder.AddFallbackConfiguration(parsedJsonFile, configuration, errorOutput);
+            return builder.AddFallbackConfiguration(parsedJsonFile, configuration, errorOutput, ex);
         }
     }
 
-    private static IConfigurationBuilder AddFallbackConfiguration(this IConfigurationBuilder builder, string parsedJsonFile, BuilderConfiguration configuration, Action<string, Exception> errorOutput)
+    private static IConfigurationBuilder AddFallbackConfiguration(this IConfigurationBuilder builder, string parsedJsonFile, BuilderConfiguration configuration, Action<string, Exception> errorOutput, Exception originalApiException)
     {
         if (File.Exists(parsedJsonFile))
             return builder.AddJsonFile(parsedJsonFile, false, true);
@@ -44,7 +44,8 @@ public static class ExtensionMethods
             $"No configuration found. Tried:{System.Environment.NewLine}" +
             $"  1. Config service API at {configuration.RootApiUri}{System.Environment.NewLine}" +
             $"  2. Local file: {parsedJsonFile}{System.Environment.NewLine}" +
-            $"  3. Persistent cache: {persistentFile ?? "(disabled)"}");
+            $"  3. Persistent cache: {persistentFile ?? "(disabled)"}",
+            originalApiException);
     }
 
     private static void SaveToPersistentCache(BuilderConfiguration configuration, string json, Action<string, Exception> errorOutput)
