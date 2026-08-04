@@ -1,6 +1,7 @@
 <script lang="ts">
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
+	import AppShell from '$lib/components/AppShell.svelte';
 	import { loadRuntimeConfig } from '$lib/runtime-config';
 
 	let { children } = $props();
@@ -16,7 +17,7 @@
 {#await boot}
 	<div class="flex h-screen items-center justify-center text-muted-foreground">Loading…</div>
 {:then}
-	{@render children()}
+	<AppShell>{@render children()}</AppShell>
 {:catch error}
 	<div class="flex h-screen flex-col items-center justify-center gap-2 p-8 text-center">
 		<h1 class="text-2xl font-semibold text-destructive">Configuration Admin failed to start</h1>
