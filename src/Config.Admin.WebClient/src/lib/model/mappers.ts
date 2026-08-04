@@ -40,7 +40,9 @@ export function namedItemsToString(items: NamedItem[]): string {
 	);
 }
 
-function sectionFromApiConfiguration(api: ApiConfiguration): Section {
+// The API has no index field — section order is persisted by array position;
+// the client-side index mirrors it (parity with the Blazor client).
+function sectionFromApiConfiguration(api: ApiConfiguration, index: number): Section {
 	return {
 		headerId: api.headerId ?? '',
 		id: api.id ?? '',
@@ -53,7 +55,7 @@ function sectionFromApiConfiguration(api: ApiConfiguration): Section {
 		isJsonEncrypted: api.isJsonEncrypted ?? false,
 		applications: namedItemsFromString(api.applications),
 		environments: namedItemsFromString(api.environments),
-		index: api.index ?? 0,
+		index,
 		isNew: false
 	};
 }
@@ -68,12 +70,11 @@ function sectionToApiConfiguration(section: Section): ApiConfiguration {
 		deleted: section.deleted,
 		isJsonEncrypted: section.isJsonEncrypted,
 		applications: namedItemsToString(section.applications),
-		environments: namedItemsToString(section.environments),
-		index: section.index
+		environments: namedItemsToString(section.environments)
 	};
 }
 
-function sectionFromApiSecret(api: ApiSecret): Section {
+function sectionFromApiSecret(api: ApiSecret, index: number): Section {
 	return {
 		headerId: api.headerId ?? '',
 		id: api.id ?? '',
@@ -86,7 +87,7 @@ function sectionFromApiSecret(api: ApiSecret): Section {
 		isJsonEncrypted: false,
 		applications: namedItemsFromString(api.applications),
 		environments: namedItemsFromString(api.environments),
-		index: 0,
+		index,
 		isNew: false
 	};
 }
@@ -114,7 +115,7 @@ export function configurationHeaderToClient(api: ApiConfigurationHeader): Header
 		deleted: api.deleted ?? false,
 		isActive: api.isActive ?? true,
 		isJsonEncrypted: api.isJsonEncrypted ?? false,
-		sections: (api.configurations ?? []).map(sectionFromApiConfiguration)
+		sections: (api.configurations ?? []).map((c, i) => sectionFromApiConfiguration(c, i))
 	};
 }
 
@@ -140,7 +141,7 @@ export function secretHeaderToClient(api: ApiSecretHeader): Header {
 		deleted: api.deleted ?? false,
 		isActive: api.isActive ?? true,
 		isJsonEncrypted: false,
-		sections: (api.secrets ?? []).map(sectionFromApiSecret)
+		sections: (api.secrets ?? []).map((s, i) => sectionFromApiSecret(s, i))
 	};
 }
 
