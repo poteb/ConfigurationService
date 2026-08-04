@@ -403,7 +403,7 @@ The green box shows the configuration for the *Test02* environment and the same 
 There is not reference in this example, but it's referenced by another configuration, the *Base-DeliveryNotesApi* configuration. You can see this to the right of the name field.
 
 ## Storage
-The underlying storage is abstracted away from the JSON parser and admin API, which means it's relatively easy to change it. For now you'll find a working file storage data provider and an incomplete SQL Server data provider. Changing the file location is done in *Config.Api/appsettings.Development.json* and *Config.Admin.Api/appsettings.Development.json*.
+The underlying storage is abstracted away from the JSON parser and admin API, which means it's relatively easy to change it. **SQL Server is the primary data provider** (and the default; see ADR-0005) — set `SqlServer:ConnectionString` and run the scripts in `src/Config.DataProvider.SqlServer/CreateScripts/` in order. A file-based provider still exists (`DataProvider: "File"`) but is considered legacy and does not support admin login.
 
 ## Middleware
 *Config.Middleware* contains an extension method for calling and adding the generated configuration to .NET's configuration builder. `IConfigurationBuilder` if .NET Standard and `WebApplicationBuilder` for .NET 6 applications.
@@ -411,9 +411,28 @@ The underlying storage is abstracted away from the JSON parser and admin API, wh
 If the call to the API fails it will try to load a previously generated configuration file instead. If this fails a `FileNotFoundException` is thrown.
 
 ## Security
-None. So don't expose the APIs outside your network.
 
-There are two issues that will add api-key security. [#125](https://github.com/poteb/ConfigurationService/issues/125) and [#126](https://github.com/poteb/ConfigurationService/issues/126).
+- **Config.Api** (middleware-facing): API-key authentication via the `X-API-Key` header. Keys are managed on the admin page.
+- **Admin API + admin page**: user login (see below). The old static admin API key is gone.
+
+### Admin login
+
+The admin page requires a login. Authentication is database-backed (SQL Server provider required) with revocable sessions — no IdentityServer/ADFS/OIDC dependency (the architecture supports adding OIDC providers later, see ADR-0002).
+
+**First run / claiming an instance.** When the user store is empty, the instance seeds a bootstrap user `guest` / `guest`. Guest can do exactly one thing: create the first administrator. Log in as guest immediately after deployment, create your own admin user (you'll be logged in as it right away), and the guest user is deleted — permanently, until the user store is empty again.
+
+- **Users are invite-only**: an admin enters a username + role and gets a single-use link (valid 7 days) to hand over; the invitee sets their own password. No email infrastructure.
+- **Roles**: `Admin` (user management plus everything else) and `User` (everything except user management). The last active admin can never be deleted or demoted.
+- **Password reset**: an admin generates a one-time reset link. Redeeming it revokes all of the user's existing sessions. Logged-in users can change their own password.
+- **Password policy**: at least 16 characters with an uppercase letter, a lowercase letter, a digit, and a special character.
+- **Deleting users**: soft delete by default (restorable, username stays reserved); permanent delete is an explicit second step. Deleting a user ends their sessions immediately.
+- **Disaster recovery** (last admin locked out): delete all rows in the `Users` table and restart the Admin API — the guest user is reborn.
+- **Audit log**: user management, logins, and failed login attempts are recorded in the `AuditLog` table with the acting username and action.
+- Login endpoints are rate-limited per IP. Sessions last 8 hours (configurable via `Auth:SessionLifetimeHours`).
+
+### Adding an auth provider
+
+Authentication is pluggable (ADR-0002): the app authorizes purely on claims (`name`, `role`, and a `guest` claim only the local provider issues). To add a provider (e.g. OIDC for ADFS/IdentityServer/Entra), implement `IAuthProviderSetup` in the Admin API — it contributes service registrations, an authentication handler, and anonymous provider metadata served by `GET api/auth/provider`, which the SPA uses to adapt its login UI. An OIDC provider is validation-only: no user table, no guest, no local endpoints.
 
 ## Build and Deployment
 
@@ -476,8 +495,14 @@ dotnet build
 **Configuration (appsettings.json):**
 ```json
 {
-  "FileDatabase": {
-    "Directory": "C:\\ConfigurationDatabase"
+  "DataProvider": "SqlServer",
+  "SqlServer": {
+    "ConnectionString": "Data Source=.;Database=ConfigurationService;Integrated Security=true;Encrypt=False"
+  },
+  "Auth": {
+    "Provider": "Local",
+    "SessionLifetimeHours": 8,
+    "InviteLifetimeDays": 7
   },
   "WithOrigins": [
     "http://localhost:5071"
@@ -518,8 +543,7 @@ The static site is written to `src/Config.Admin.WebClient/build/`. Convenience s
 **Configuration (static/config.json, deployed next to index.html):**
 ```json
 {
-  "adminApiUrl": "http://localhost:34246",
-  "apiKey": "YourApiKeyHere"
+  "adminApiUrl": "http://localhost:34246"
 }
 ```
 The file is fetched at runtime, so the same build can be deployed to any environment by swapping `config.json`.
@@ -538,14 +562,22 @@ The build output can be hosted on any static file server. A `web.config` with th
 
 ### Deployment Checklist
 
-1. Create a shared directory for configuration storage (e.g., `C:\ConfigurationDatabase` or `/var/configurationdb`)
-2. Ensure both APIs have read/write access to this directory
+1. Create the SQL Server database and run the scripts in `src/Config.DataProvider.SqlServer/CreateScripts/` in order (on upgrades, run only the new ones — they are numbered)
+2. Point both APIs at the database via `SqlServer:ConnectionString`
 3. Generate a secure 32-byte encryption key and use the same key in both APIs
 4. Configure the Admin API's CORS settings to allow the Admin Client origin
-5. Update the Admin Client's appsettings.json with the correct API URLs
+5. Update the Admin Client's `config.json` with the correct Admin API URL
 6. Start the Configuration API first
 7. Start the Admin API second
 8. Deploy and access the Admin Client
+9. **Claim the instance**: log in as `guest`/`guest` and create your admin user immediately
+
+### Upgrading from the API-key version
+
+- The Admin API no longer accepts `X-API-Key`; humans log in, scripts call `POST api/auth/login` first
+- Remove `apiKey` from the Admin Client's `config.json`
+- Run the new `CreateScripts` (`15_Users.sql`–`19_AlterAuditLog_AddUsernameAndAction.sql`) on the existing database
+- The default `DataProvider` is now `SqlServer`; file-based deployments must migrate to use admin login
 
 ### Docker Deployment (Optional)
 
