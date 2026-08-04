@@ -14,8 +14,7 @@
 	import { extractPropertyPaths } from '$lib/refs/suggestions';
 	import type { ParsedRef } from '$lib/refs/refGrammar';
 	import { clearPageError, setPageError } from '$lib/stores/pageError.svelte';
-	import { clearTestState } from '$lib/stores/testState.svelte';
-	import { runHeaderTests } from '$lib/tests/testRunner';
+	import { clearTestState, requestSectionTestRun } from '$lib/stores/testState.svelte';
 	import ConfirmDialog from './dialogs/ConfirmDialog.svelte';
 	import DeleteDialog from './dialogs/DeleteDialog.svelte';
 	import DuplicateNameDialog from './dialogs/DuplicateNameDialog.svelte';
@@ -229,9 +228,10 @@
 		clearTestState(header.id);
 	}
 
-	async function testAll() {
+	function testAll() {
 		expandedSections = activeSections.map((s) => s.id);
-		await runHeaderTests($state.snapshot(header) as Header);
+		// Panels mount when their accordion item opens; signal on the next tick.
+		requestAnimationFrame(() => requestSectionTestRun(header.id));
 	}
 
 	function toggleExpandAll() {
@@ -382,7 +382,12 @@
 		<div id="editor-bottom"></div>
 	</div>
 
-	<DeleteDialog bind:open={deleteOpen} entityLabel={descriptor.labels.singular} allowPermanent onConfirm={confirmDelete} />
+	<DeleteDialog
+		bind:open={deleteOpen}
+		entityLabel={descriptor.labels.singular}
+		allowPermanent={descriptor.kind === 'configuration'}
+		onConfirm={confirmDelete}
+	/>
 	<DuplicateNameDialog bind:open={duplicateOpen} initialName={`${header.name} COPY`} onConfirm={duplicateHeader} />
 	<ReorderDialog
 		bind:open={reorderOpen}

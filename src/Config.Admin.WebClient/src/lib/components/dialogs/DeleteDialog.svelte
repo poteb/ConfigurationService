@@ -28,7 +28,7 @@
 		<Dialog.Header>
 			<Dialog.Title>Delete {entityLabel.toLowerCase()}?</Dialog.Title>
 			<Dialog.Description>
-				This deletes the {entityLabel.toLowerCase()} "{''}and all its sections.
+				This deletes the {entityLabel.toLowerCase()} and all its sections.
 			</Dialog.Description>
 		</Dialog.Header>
 		{#if allowPermanent}

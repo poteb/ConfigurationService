@@ -4,6 +4,7 @@
 	import { Progress } from '$lib/components/ui/progress';
 	import JsonEditor from '$lib/editor/JsonEditor.svelte';
 	import type { Section } from '$lib/model/types';
+	import { getSectionTestRunSignal } from '$lib/stores/testState.svelte';
 	import { runSectionTests, type SectionTestResult } from '$lib/tests/testRunner';
 	import ThumbsDownIcon from '@lucide/svelte/icons/thumbs-down';
 	import ThumbsUpIcon from '@lucide/svelte/icons/thumbs-up';
@@ -24,6 +25,16 @@
 		void section.applications.length;
 		void section.environments.length;
 		results = [];
+	});
+
+	// The editor page's "Test all" pings every panel of the header.
+	let lastSignal = getSectionTestRunSignal(section.headerId);
+	$effect(() => {
+		const signal = getSectionTestRunSignal(section.headerId);
+		if (signal !== lastSignal) {
+			lastSignal = signal;
+			if (!section.deleted) void run();
+		}
 	});
 
 	export async function run() {

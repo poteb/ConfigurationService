@@ -19,3 +19,17 @@ export function clearTestState(headerId?: string): void {
 	if (headerId !== undefined) delete states[headerId];
 	else for (const key of Object.keys(states)) delete states[key];
 }
+
+/**
+ * "Test all" signal for the editor page: incrementing a header's counter asks
+ * every mounted SectionTestPanel of that header to run its tests.
+ */
+const runSignals = $state<Record<string, number>>({});
+
+export function requestSectionTestRun(headerId: string): void {
+	runSignals[headerId] = (runSignals[headerId] ?? 0) + 1;
+}
+
+export function getSectionTestRunSignal(headerId: string): number {
+	return runSignals[headerId] ?? 0;
+}
