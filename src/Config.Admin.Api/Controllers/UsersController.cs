@@ -1,4 +1,4 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using pote.Config.Admin.Api.Auth;
@@ -9,9 +9,11 @@ using pote.Config.DbModel;
 
 namespace pote.Config.Admin.Api.Controllers;
 
+// Note: no controller-level policy - [Authorize] attributes combine with AND,
+// which would lock the guest-only create endpoint out. Every action carries
+// its own policy instead (verified by unit test).
 [ApiController]
 [Route("api/users")]
-[Authorize(Policy = AuthPolicies.AdminOnly)]
 public class UsersController : ControllerBase
 {
     private readonly ILogger<UsersController> _logger;
@@ -31,6 +33,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Policy = AuthPolicies.AdminOnly)]
     public async Task<ActionResult<UserListResponse>> GetAll(CancellationToken cancellationToken)
     {
         try
@@ -66,6 +69,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpPost("invites")]
+    [Authorize(Policy = AuthPolicies.AdminOnly)]
     public async Task<ActionResult<TokenResponse>> CreateInvite([FromBody] CreateInviteRequest request, CancellationToken cancellationToken)
     {
         Response.Headers.CacheControl = "no-store";
@@ -103,6 +107,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpDelete("invites/{username}")]
+    [Authorize(Policy = AuthPolicies.AdminOnly)]
     public async Task<ActionResult> RevokeInvite(string username, CancellationToken cancellationToken)
     {
         try
@@ -119,6 +124,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpPost("{username}/reset")]
+    [Authorize(Policy = AuthPolicies.AdminOnly)]
     public async Task<ActionResult<TokenResponse>> CreateResetLink(string username, CancellationToken cancellationToken)
     {
         Response.Headers.CacheControl = "no-store";
@@ -146,6 +152,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpPut("{username}/role")]
+    [Authorize(Policy = AuthPolicies.AdminOnly)]
     public async Task<ActionResult> ChangeRole(string username, [FromBody] ChangeRoleRequest request, CancellationToken cancellationToken)
     {
         try
@@ -171,6 +178,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpDelete("{username}")]
+    [Authorize(Policy = AuthPolicies.AdminOnly)]
     public async Task<ActionResult> Delete(string username, [FromQuery] bool permanent, CancellationToken cancellationToken)
     {
         try
@@ -207,6 +215,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpPost("{username}/restore")]
+    [Authorize(Policy = AuthPolicies.AdminOnly)]
     public async Task<ActionResult> Restore(string username, CancellationToken cancellationToken)
     {
         try

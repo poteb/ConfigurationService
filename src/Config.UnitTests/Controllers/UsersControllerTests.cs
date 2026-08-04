@@ -175,10 +175,18 @@ public class UsersControllerTests
     }
 
     [Test]
-    public void Controller_RequiresAdminPolicy()
+    public void EveryAdminAction_RequiresAdminPolicy()
     {
-        var attr = (AuthorizeAttribute)typeof(UsersController).GetCustomAttributes(typeof(AuthorizeAttribute), false).Single();
-        Assert.AreEqual(AuthPolicies.AdminOnly, attr.Policy);
+        // No controller-level policy (it would AND with the guest-only create
+        // endpoint and lock guest out) — so every other action must carry AdminOnly.
+        var actions = typeof(UsersController).GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.DeclaredOnly)
+            .Where(m => m.Name != nameof(UsersController.CreateFirstUser));
+        foreach (var method in actions)
+        {
+            var attr = method.GetCustomAttributes(typeof(AuthorizeAttribute), false).Cast<AuthorizeAttribute>().SingleOrDefault();
+            Assert.IsNotNull(attr, $"{method.Name} must carry an [Authorize] policy");
+            Assert.AreEqual(AuthPolicies.AdminOnly, attr!.Policy, $"{method.Name} must require AdminOnly");
+        }
     }
 
     [Test]
