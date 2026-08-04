@@ -19,7 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Config.Admin.Api.Model\Config.Admin.Api.Model.csproj" />
-    <ProjectReference Include="..\Config.Admin.WebClient\Config.Admin.WebClient\Config.Admin.WebClient.csproj" />
+    <ProjectReference Include="..\Config.Admin.WebClient.Blazor\Config.Admin.WebClient\Config.Admin.WebClient.csproj" />
     <ProjectReference Include="..\Config.Shared\Config.Shared.csproj" />
   </ItemGroup>
 
