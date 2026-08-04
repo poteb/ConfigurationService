@@ -1,4 +1,4 @@
-using System.Data;
+﻿using System.Data;
 using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
@@ -34,7 +34,7 @@ public class SqlServerAuditLogHandlerTests
     [Test]
     public async Task AuditLogConfiguration_InsertsRow()
     {
-        await _sut.AuditLogConfiguration("cfg1", "10.0.0.1", "config content");
+        await _sut.AuditLogConfiguration("cfg1", "10.0.0.1", "tester", "Insert", "config content");
 
         var conn = await _factory.CreateOpenConnection();
         var row = await conn.QueryFirstAsync("SELECT * FROM [AuditLog]");
@@ -42,12 +42,28 @@ public class SqlServerAuditLogHandlerTests
         Assert.AreEqual("cfg1", (string)row.EntityId);
         Assert.AreEqual("10.0.0.1", (string)row.CallerIp);
         Assert.AreEqual("config content", (string)row.Content);
+        Assert.AreEqual("tester", (string)row.Username);
+        Assert.AreEqual("Insert", (string)row.Action);
+    }
+
+    [Test]
+    public async Task AuditLogUser_InsertsRowWithUserEntityType()
+    {
+        await _sut.AuditLogUser("00000000-0000-0000-0000-000000000001", "10.0.0.9", "admin1", "UserCreated", "anna");
+
+        var conn = await _factory.CreateOpenConnection();
+        var row = await conn.QueryFirstAsync("SELECT * FROM [AuditLog]");
+        Assert.AreEqual("User", (string)row.EntityType);
+        Assert.AreEqual("00000000-0000-0000-0000-000000000001", (string)row.EntityId);
+        Assert.AreEqual("admin1", (string)row.Username);
+        Assert.AreEqual("UserCreated", (string)row.Action);
+        Assert.AreEqual("anna", (string)row.Content);
     }
 
     [Test]
     public async Task AuditLogEnvironment_InsertsRow()
     {
-        await _sut.AuditLogEnvironment("env1", "10.0.0.2", "env content");
+        await _sut.AuditLogEnvironment("env1", "10.0.0.2", "tester", "Insert", "env content");
 
         var conn = await _factory.CreateOpenConnection();
         var row = await conn.QueryFirstAsync("SELECT * FROM [AuditLog]");
@@ -58,7 +74,7 @@ public class SqlServerAuditLogHandlerTests
     [Test]
     public async Task AuditLogApplication_InsertsRow()
     {
-        await _sut.AuditLogApplication("app1", "10.0.0.3", "app content");
+        await _sut.AuditLogApplication("app1", "10.0.0.3", "tester", "Insert", "app content");
 
         var conn = await _factory.CreateOpenConnection();
         var row = await conn.QueryFirstAsync("SELECT * FROM [AuditLog]");
@@ -69,7 +85,7 @@ public class SqlServerAuditLogHandlerTests
     [Test]
     public async Task AuditLogSettings_InsertsRow()
     {
-        await _sut.AuditLogSettings("s1", "10.0.0.4", "settings content");
+        await _sut.AuditLogSettings("s1", "10.0.0.4", "tester", "Save", "settings content");
 
         var conn = await _factory.CreateOpenConnection();
         var row = await conn.QueryFirstAsync("SELECT * FROM [AuditLog]");
@@ -79,7 +95,7 @@ public class SqlServerAuditLogHandlerTests
     [Test]
     public async Task AuditLogApiKeys_InsertsRow()
     {
-        await _sut.AuditLogApiKeys("k1", "10.0.0.5", "apikeys content");
+        await _sut.AuditLogApiKeys("k1", "10.0.0.5", "tester", "Save", "apikeys content");
 
         var conn = await _factory.CreateOpenConnection();
         var row = await conn.QueryFirstAsync("SELECT * FROM [AuditLog]");
@@ -89,7 +105,7 @@ public class SqlServerAuditLogHandlerTests
     [Test]
     public async Task AuditLogSecrets_InsertsRow()
     {
-        await _sut.AuditLogSecrets("sec1", "10.0.0.6", "secret content");
+        await _sut.AuditLogSecrets("sec1", "10.0.0.6", "tester", "Insert", "secret content");
 
         var conn = await _factory.CreateOpenConnection();
         var row = await conn.QueryFirstAsync("SELECT * FROM [AuditLog]");
@@ -100,8 +116,8 @@ public class SqlServerAuditLogHandlerTests
     [Test]
     public async Task MultipleAuditLogs_InsertMultipleRows()
     {
-        await _sut.AuditLogConfiguration("c1", "ip1", "content1");
-        await _sut.AuditLogEnvironment("e1", "ip2", "content2");
+        await _sut.AuditLogConfiguration("c1", "ip1", "u1", "Insert", "content1");
+        await _sut.AuditLogEnvironment("e1", "ip2", "u2", "Insert", "content2");
 
         var conn = await _factory.CreateOpenConnection();
         var count = await conn.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM [AuditLog]");
