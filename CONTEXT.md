@@ -17,8 +17,10 @@ Ubiquitous language for ConfigurationService. Terms here are domain concepts, no
 
 ## Admin identity & access
 
-- **Real User** — A person who can log in to the admin page. Every real user is a full administrator. Avoid: account, admin, member.
-- **Guest User** — The bootstrap user (`guest`/`guest`) that exists whenever the user store is empty. Can do exactly one thing: create a real user. Deleted — not disabled — the first time a real user logs in. Avoid: default user, setup user.
+- **Real User** — A person who can log in to the admin page. Has a Role. Avoid: account, member.
+- **Role** — What a real user may do: `Admin` (user management plus everything else) or `User` (everything except user management).
+- **Guest User** — The bootstrap user (`guest`/`guest`) that exists whenever the user store is empty. Can do exactly one thing: create the first Admin. Deleted — not disabled (and not soft-deleted) — the first time a real user logs in. Avoid: default user, setup user.
+- **Restore** — Reactivating a soft-deleted real user with their old password and role. The counterpart of the repo-wide soft delete, applied to users.
 - **Invite** — Permission for a named person to become a real user by setting their own password, delivered as a link. Single-use, expires. Real users are created only by invite (or by the guest user). Avoid: registration, signup.
 - **Reset Link** — The same mechanism as an invite, but targeting an existing real user who needs a new password. Avoid: forgot-password flow.
 - **Redemption** — Consuming an invite or reset link: the holder sets a password and is logged in.

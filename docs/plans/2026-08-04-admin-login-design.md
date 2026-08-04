@@ -40,7 +40,12 @@ later (this is an open-source project; the auth mechanism must fit anyone and be
      (protects against typo'd usernames / lost invites).
    - **Empty user store ⇒ guest is (re)created at startup.** Bootstrap and disaster recovery
      ("last admin locked out": delete all user rows, restart) are the same mechanism.
-6. **Roles**: None. Every real user is a full admin. Guest is the only special case.
+6. **Roles**: Two — `Admin` and `User`. Admins do user management (invite, delete/restore,
+   reset links, role assignment) plus everything else; Users do everything else (configs,
+   secrets, environments, API keys) but nothing user-related except changing their own
+   password. Invites carry the role, chosen by the inviting admin. The user guest creates is
+   always an Admin. **The last active admin cannot be deleted or demoted.** `LastLoginUtc` is
+   tracked and shown in the user list so admins can spot stale accounts (e.g. leavers).
 7. **Storage** (ADR-0005): SQL Server provider only; the File provider gets
    `NotSupportedException` stubs. The default `DataProvider` becomes `SqlServer`. If the
    active auth provider needs user storage the data provider can't supply, the Admin API
@@ -55,6 +60,19 @@ later (this is an open-source project; the auth mechanism must fit anyone and be
 10. **Uniform errors**: login always returns the same 401 regardless of what was wrong;
     redemption failures return one generic 400 ("invalid or expired link") without
     distinguishing expired/used/unknown. ~500 ms delay on failed login; no lockout.
+11. **User deletion is soft** (repo convention): a `Deleted` flag; sessions revoked and
+    outstanding tokens removed immediately; login refused. Username uniqueness spans live and
+    soft-deleted users — inviting a soft-deleted username → 400 ("restore instead"). Restore
+    (admin-only) reactivates the account with its old password hash + role; pair with a reset
+    link if the password is forgotten. **Permanent delete** is the explicit second step,
+    available only on already-soft-deleted users; it frees the username, and the audit log
+    remains the historical record. Guest resurrection triggers only on a truly empty Users
+    table (soft-deleted rows count as existing); DB-level recovery (delete all rows, restart)
+    is unchanged. Guest itself is still hard-deleted on first real login.
+12. **Audit log gets first-class columns**: `Username` (acting user, `NVARCHAR(100) NULL`)
+    and `Action` (`NVARCHAR(50)`, e.g. `Insert`, `Delete`, `Login`, `LoginFailed`,
+    `InviteCreated`). `Content` becomes optional free-form detail — today it misleadingly
+    holds only the action verb.
 
 ## Architecture
 
@@ -89,13 +107,16 @@ identities to local user records.
 
 `15_Users.sql`:
 
-| Column       | Type                | Notes                        |
-|--------------|---------------------|------------------------------|
-| Id           | UNIQUEIDENTIFIER PK |                              |
-| Username     | NVARCHAR(100)       | unique (case-insensitive)    |
-| PasswordHash | NVARCHAR(500)       | ASP.NET Core PasswordHasher  |
-| IsGuest      | BIT                 |                              |
-| CreatedUtc   | DATETIME2           |                              |
+| Column       | Type                | Notes                          |
+|--------------|---------------------|--------------------------------|
+| Id           | UNIQUEIDENTIFIER PK |                                |
+| Username     | NVARCHAR(100)       | unique (case-insensitive), spans deleted users |
+| PasswordHash | NVARCHAR(500)       | ASP.NET Core PasswordHasher    |
+| Role         | NVARCHAR(20)        | `Admin` \| `User`              |
+| IsGuest      | BIT                 |                                |
+| Deleted      | BIT                 | soft delete                    |
+| CreatedUtc   | DATETIME2           |                                |
+| LastLoginUtc | DATETIME2 NULL      | updated on login               |
 
 `16_UserTokens.sql`:
 
@@ -145,23 +166,33 @@ implementation in `Config.DataProvider.SqlServer`; stub in `Config.DataProvider.
   users only.
 - `GET /api/auth/provider` — anonymous provider metadata (see seam above).
 
-`UsersController` (session required):
+`UsersController` (session required; user management is **admin-only**):
 
-- `GET /api/users` — users + pending invites (with expiry). Real users only.
-- `POST /api/users/invites` `{username}` → `{token, expiresUtc}`. Real users only. The SPA
+- `GET /api/users` — users (incl. soft-deleted, with `deleted`, `role`, `lastLoginUtc`) +
+  pending invites (with expiry). Admins only.
+- `POST /api/users/invites` `{username, role}` → `{token, expiresUtc}`. Admins only. The SPA
   composes the link as `<its own origin>/redeem?token=...` — the backend never needs to know
   the SPA's URL.
-- `DELETE /api/users/invites/{username}` — revoke a pending invite. Real users only.
-- `POST /api/users/{username}/reset` → `{token, expiresUtc}`. Real users only.
-- `DELETE /api/users/{username}` — real users only; cannot delete yourself. (Deleting the last
-  user directly in the DB is the designed recovery path.) Deletes the user's sessions and
-  outstanding tokens.
-- `POST /api/users` `{username, password}` — **guest-only** direct create (real users are
-  invite-only; guest gets the direct form).
+- `DELETE /api/users/invites/{username}` — revoke a pending invite. Admins only.
+- `POST /api/users/{username}/reset` → `{token, expiresUtc}`. Admins only.
+- `PUT /api/users/{username}/role` `{role}` — admins only; cannot demote the last active
+  admin.
+- `DELETE /api/users/{username}` — soft delete. Admins only; cannot delete yourself; cannot
+  delete the last active admin. Revokes the user's sessions and outstanding tokens.
+- `POST /api/users/{username}/restore` — admins only; reactivates a soft-deleted user with
+  old password hash and role.
+- `DELETE /api/users/{username}?permanent=true` — admins only; only valid on an already
+  soft-deleted user; frees the username.
+- `POST /api/users` `{username, password}` — **guest-only** direct create of the first Admin
+  (real users are invite-only; guest gets the direct form).
 
 Guest policy: a guest session may only call `POST /api/users` and `POST /api/auth/logout`
 (plus the anonymous endpoints). Everything else → 403. Guest deletion revokes guest sessions,
 so the policy needs no existence re-checks.
+
+Authorization layers: anonymous (login/redeem/provider) → authenticated real user (all
+config/secret/environment/API-key endpoints, own password change, logout) → admin (user
+management) — with guest outside all of them except its two endpoints.
 
 All existing Admin API controllers switch from `ApiKeyAuthenticationFilter` to `[Authorize]`
 with a deny-guest policy. Swagger security definition switches from `X-API-Key` to bearer.
@@ -187,31 +218,41 @@ Config.Api is untouched.
   user" screen.
 - `/redeem?token=...` page: set password (×2, policy validated client- and server-side),
   auto-login, navigate home.
-- Users admin page: list users, create invite (copyable link), revoke pending invite,
-  generate reset link (copyable), delete user.
+- Users admin page (admins only; hidden for role `User`): list users with role, last login,
+  and deleted state ("show deleted" toggle); create invite with role (copyable link); revoke
+  pending invite; generate reset link (copyable); change role; soft delete; restore;
+  permanent delete (on deleted users, with confirmation).
 - Change-password and logout in the header menu.
 - Regenerate API types (`npm run gen:api`).
 
 ### Audit logging
 
-Via the existing generic `AuditLog` table (`EntityType`, `EntityId`, `CallerIp`, `Content`):
+The `AuditLog` table gains two first-class columns (fresh installs via updated
+`13_AuditLog.sql`; existing databases via idempotent `18_AlterAuditLog_AddUsernameAndAction.sql`):
 
-- `EntityType="User"`, `EntityId` = the user's GUID (usernames exceed the 36-char column;
-  they go in `Content`).
-- Events: user created (by whom), user deleted, invite created/revoked, reset link created,
-  password changed, login success, **login failure** (attempted username + IP — the only
-  brute-force visibility given no lockout).
-- Acting user on existing entity audits (configs/environments/apps/settings/secrets): the
-  acting username is included in the JSON `Content` payload — no `ALTER TABLE`, no schema
-  migration for existing deployments.
+- **`Username`** `NVARCHAR(100) NULL` — the acting user (from the session). `NULL` for rows
+  predating login or written by non-user paths. (`User` is a reserved word in T-SQL.)
+- **`Action`** `NVARCHAR(50)` — `Insert`, `Delete`, `Save`, `Login`, `LoginFailed`,
+  `InviteCreated`, `InviteRevoked`, `ResetLinkCreated`, `PasswordChanged`, `RoleChanged`,
+  `UserRestored`, `UserPermanentlyDeleted`, ... Today the action verb hides in `Content`;
+  after this, `Content` becomes optional free-form detail (e.g. the target username of an
+  invite).
+- User events: `EntityType="User"`, `EntityId` = the target user's GUID (usernames exceed the
+  36-char column). The actor is the `Username` column.
+- Logged events: user created (by whom), user soft/permanently deleted, restored, role
+  changed, invite created/revoked, reset link created, password changed, login success, and
+  **login failure** (attempted username + IP — the only brute-force visibility given no
+  lockout).
 
 ### Testing
 
 - **Backend (NUnit + NSubstitute)**: auth service logic — guest lifecycle, session
   issue/validate/revoke/expiry, redemption paths (incl. username-taken and user-deleted
-  edges), token replace/revoke rules, password policy, fail-fast provider check — against
-  mocked `IUserDataAccess`. Dapper implementations stay unit-untested, consistent with the
-  rest of the repo (no SQL Server integration-test infrastructure in this feature).
+  edges), token replace/revoke rules, password policy, role policies (admin-only user
+  management, last-active-admin rail for delete and demote), soft delete/restore/permanent
+  delete semantics, fail-fast provider check — against mocked `IUserDataAccess`. Dapper
+  implementations stay unit-untested, consistent with the rest of the repo (no SQL Server
+  integration-test infrastructure in this feature).
 - **Frontend (Vitest)**: auth store (persistence, expiry), `client.ts` (bearer header,
   401 → clear session + redirect).
 - **E2E (Playwright, mocked routes — no real backend, unchanged pattern)**: login happy path,
@@ -223,8 +264,8 @@ Via the existing generic `AuditLog` table (`EntityType`, `EntityId`, `CallerIp`,
 - Default `DataProvider` is now `SqlServer`; a connection string is required. File-based
   deployments cannot use admin login (startup fails fast) — migrating to SQL Server is the
   upgrade path.
-- New `CreateScripts` `15_Users.sql`, `16_UserTokens.sql`, `17_Sessions.sql` must be run on
-  existing databases.
+- New `CreateScripts` `15_Users.sql`, `16_UserTokens.sql`, `17_Sessions.sql`, and
+  `18_AlterAuditLog_AddUsernameAndAction.sql` must be run on existing databases.
 - After upgrade the Users table is empty → guest/guest is live; the first operator to log in
   should immediately create their user (which kills guest on first real login).
 - README + CLAUDE.md updated: setup flow, SQL Server as primary provider, auth documentation,
