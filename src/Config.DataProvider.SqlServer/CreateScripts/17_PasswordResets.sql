@@ -1,6 +1,6 @@
 CREATE TABLE [dbo].[PasswordResets] (
     [Id]         UNIQUEIDENTIFIER NOT NULL,
-    [Token]      NVARCHAR(100) NOT NULL,
+    [Token]      NVARCHAR(100) COLLATE Latin1_General_100_BIN2 NOT NULL,
     [UserId]     UNIQUEIDENTIFIER NOT NULL,
     [ExpiresUtc] DATETIME2(7)  NOT NULL,
     CONSTRAINT [PK_PasswordResets] PRIMARY KEY CLUSTERED ([Token]),

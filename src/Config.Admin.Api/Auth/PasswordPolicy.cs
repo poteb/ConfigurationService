@@ -12,13 +12,15 @@ public static class PasswordPolicy
             return $"Password must be at least {MinLength} characters.";
         if (password.Length > MaxLength)
             return $"Password must be at most {MaxLength} characters.";
-        if (!password.Any(char.IsLower))
+        // Explicit ASCII classes to stay in lockstep with the SPA's regex checks
+        // (Unicode-aware char.IsLower etc. would accept passwords the client rejects).
+        if (!password.Any(char.IsAsciiLetterLower))
             return "Password must contain a lowercase letter.";
-        if (!password.Any(char.IsUpper))
+        if (!password.Any(char.IsAsciiLetterUpper))
             return "Password must contain an uppercase letter.";
-        if (!password.Any(char.IsDigit))
+        if (!password.Any(char.IsAsciiDigit))
             return "Password must contain a digit.";
-        if (password.All(char.IsLetterOrDigit))
+        if (password.All(char.IsAsciiLetterOrDigit))
             return "Password must contain a special character.";
         return null;
     }

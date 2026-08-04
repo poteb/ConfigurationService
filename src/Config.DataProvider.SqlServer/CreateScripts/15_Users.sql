@@ -2,7 +2,7 @@ CREATE TABLE [dbo].[Users] (
     [Id]           UNIQUEIDENTIFIER NOT NULL,
     [Username]     NVARCHAR(100) COLLATE Latin1_General_100_CI_AS NOT NULL,
     [PasswordHash] NVARCHAR(500) NOT NULL,
-    [Role]         NVARCHAR(20)  NOT NULL,
+    [Role]         NVARCHAR(20) COLLATE Latin1_General_100_BIN2 NOT NULL,
     [IsGuest]      BIT           NOT NULL DEFAULT 0,
     [Deleted]      BIT           NOT NULL DEFAULT 0,
     [CreatedUtc]   DATETIME2(7)  NOT NULL DEFAULT GETUTCDATE(),

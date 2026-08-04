@@ -34,14 +34,15 @@ public interface IUserDataAccess
     /// <summary>Returns false when blocked (demoting the last active admin).</summary>
     Task<bool> UpdateRole(Guid id, string role, CancellationToken cancellationToken);
     Task UpdateLastLogin(Guid id, DateTime utc, CancellationToken cancellationToken);
-    /// <summary>When expectedOldHash is set, only updates if the stored hash still matches (rehash race guard).</summary>
-    Task UpdatePasswordHash(Guid id, string newHash, string? expectedOldHash, CancellationToken cancellationToken);
+    /// <summary>When expectedOldHash is set, only updates if the stored hash still matches (concurrent-change guard). Returns whether a row was updated.</summary>
+    Task<bool> UpdatePasswordHash(Guid id, string newHash, string? expectedOldHash, CancellationToken cancellationToken);
 
     // Invites
     Task<List<UserInvite>> GetInvites(CancellationToken cancellationToken);
     /// <summary>Replaces any existing invite for the same username.</summary>
     Task UpsertInvite(UserInvite invite, CancellationToken cancellationToken);
-    Task DeleteInvite(string username, CancellationToken cancellationToken);
+    /// <summary>Returns the deleted invite's Id, or null when no invite existed (used for audit).</summary>
+    Task<Guid?> DeleteInvite(string username, CancellationToken cancellationToken);
     /// <summary>Atomically consumes (deletes and returns) an unexpired invite. Null when missing or expired.</summary>
     Task<UserInvite?> ConsumeInvite(string token, CancellationToken cancellationToken);
 

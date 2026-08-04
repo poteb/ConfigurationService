@@ -60,10 +60,15 @@ public class UserDataAccess : IUserDataAccess
         }
     }
 
+    /// <summary>
+    /// Serializes every mutation that could violate the last-active-admin rail.
+    /// Plain in-statement EXISTS checks are not enough under READ COMMITTED:
+    /// two concurrent demotions could each see the other admin and both succeed.
+    /// </summary>
+    private const string AcquireAdminRailLock = "EXEC sp_getapplock @Resource = N'ConfigService.AdminRail', @LockMode = 'Exclusive', @LockOwner = 'Transaction', @LockTimeout = 5000;";
+
     public async Task<bool> SoftDeleteUser(Guid id, CancellationToken cancellationToken)
     {
-        // The last-active-admin invariant is re-checked inside the statement so
-        // concurrent deletions/demotions cannot strand the system without an admin.
         const string sql = """
             UPDATE [Users] SET [Deleted] = 1
             WHERE [Id] = @id AND [Deleted] = 0
@@ -73,6 +78,7 @@ public class UserDataAccess : IUserDataAccess
             """;
         await using var conn = await _connectionFactory.CreateOpenConnection(cancellationToken);
         await using var tx = await conn.BeginTransactionAsync(cancellationToken);
+        await conn.ExecuteAsync(new CommandDefinition(AcquireAdminRailLock, transaction: tx, cancellationToken: cancellationToken));
         var rows = await conn.ExecuteAsync(new CommandDefinition(sql, new { id }, tx, cancellationToken: cancellationToken));
         if (rows == 1)
         {
@@ -114,7 +120,10 @@ public class UserDataAccess : IUserDataAccess
                     WHERE u2.[Role] = N'Admin' AND u2.[Deleted] = 0 AND u2.[Id] <> @id))
             """;
         await using var conn = await _connectionFactory.CreateOpenConnection(cancellationToken);
-        var rows = await conn.ExecuteAsync(new CommandDefinition(sql, new { id, role }, cancellationToken: cancellationToken));
+        await using var tx = await conn.BeginTransactionAsync(cancellationToken);
+        await conn.ExecuteAsync(new CommandDefinition(AcquireAdminRailLock, transaction: tx, cancellationToken: cancellationToken));
+        var rows = await conn.ExecuteAsync(new CommandDefinition(sql, new { id, role }, tx, cancellationToken: cancellationToken));
+        await tx.CommitAsync(cancellationToken);
         return rows == 1;
     }
 
@@ -125,14 +134,15 @@ public class UserDataAccess : IUserDataAccess
             "UPDATE [Users] SET [LastLoginUtc] = @utc WHERE [Id] = @id", new { id, utc }, cancellationToken: cancellationToken));
     }
 
-    public async Task UpdatePasswordHash(Guid id, string newHash, string? expectedOldHash, CancellationToken cancellationToken)
+    public async Task<bool> UpdatePasswordHash(Guid id, string newHash, string? expectedOldHash, CancellationToken cancellationToken)
     {
         const string sql = """
             UPDATE [Users] SET [PasswordHash] = @newHash
             WHERE [Id] = @id AND (@expectedOldHash IS NULL OR [PasswordHash] = @expectedOldHash)
             """;
         await using var conn = await _connectionFactory.CreateOpenConnection(cancellationToken);
-        await conn.ExecuteAsync(new CommandDefinition(sql, new { id, newHash, expectedOldHash }, cancellationToken: cancellationToken));
+        var rows = await conn.ExecuteAsync(new CommandDefinition(sql, new { id, newHash, expectedOldHash }, cancellationToken: cancellationToken));
+        return rows == 1;
     }
 
     public async Task<List<UserInvite>> GetInvites(CancellationToken cancellationToken)
@@ -156,11 +166,11 @@ public class UserDataAccess : IUserDataAccess
         await tx.CommitAsync(cancellationToken);
     }
 
-    public async Task DeleteInvite(string username, CancellationToken cancellationToken)
+    public async Task<Guid?> DeleteInvite(string username, CancellationToken cancellationToken)
     {
         await using var conn = await _connectionFactory.CreateOpenConnection(cancellationToken);
-        await conn.ExecuteAsync(new CommandDefinition(
-            "DELETE FROM [UserInvites] WHERE [Username] = @username", new { username }, cancellationToken: cancellationToken));
+        return await conn.QueryFirstOrDefaultAsync<Guid?>(new CommandDefinition(
+            "DELETE FROM [UserInvites] OUTPUT DELETED.[Id] WHERE [Username] = @username", new { username }, cancellationToken: cancellationToken));
     }
 
     public async Task<UserInvite?> ConsumeInvite(string token, CancellationToken cancellationToken)

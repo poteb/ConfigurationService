@@ -64,7 +64,7 @@ public class UsersController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to get users");
-            return Problem(ex.Message);
+            return Problem("Failed to load users.");
         }
     }
 
@@ -102,7 +102,7 @@ public class UsersController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to create invite");
-            return Problem(ex.Message);
+            return Problem("Failed to create the invite.");
         }
     }
 
@@ -112,14 +112,15 @@ public class UsersController : ControllerBase
     {
         try
         {
-            await _users.DeleteInvite(username, cancellationToken);
-            await this.AuditLog(Guid.Empty.ToString(), "InviteRevoked", _auditLogHandler.AuditLogUser, username);
+            var inviteId = await _users.DeleteInvite(username, cancellationToken);
+            if (inviteId != null)
+                await this.AuditLog(inviteId.Value.ToString(), "InviteRevoked", _auditLogHandler.AuditLogUser, username);
             return Ok();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to revoke invite");
-            return Problem(ex.Message);
+            return Problem("Failed to revoke the invite.");
         }
     }
 
@@ -147,7 +148,7 @@ public class UsersController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to create reset link");
-            return Problem(ex.Message);
+            return Problem("Failed to create the reset link.");
         }
     }
 
@@ -173,7 +174,7 @@ public class UsersController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to change role");
-            return Problem(ex.Message);
+            return Problem("Failed to change the role.");
         }
     }
 
@@ -210,7 +211,7 @@ public class UsersController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to delete user");
-            return Problem(ex.Message);
+            return Problem("Failed to delete the user.");
         }
     }
 
@@ -231,7 +232,7 @@ public class UsersController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to restore user");
-            return Problem(ex.Message);
+            return Problem("Failed to restore the user.");
         }
     }
 
@@ -261,7 +262,7 @@ public class UsersController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to create user");
-            return Problem(ex.Message);
+            return Problem("Failed to create the user.");
         }
     }
 }

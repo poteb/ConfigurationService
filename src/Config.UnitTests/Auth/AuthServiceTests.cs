@@ -196,12 +196,27 @@ public class AuthServiceTests
     {
         var user = MakeUser("anna", ValidPassword);
         _users.GetUserById(user.Id, Arg.Any<CancellationToken>()).Returns(user);
+        _users.UpdatePasswordHash(Arg.Any<Guid>(), Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<CancellationToken>()).Returns(true);
 
         var ok = await _sut.ChangePassword(user.Id, ValidPassword, "NewPassword1!xxxx", "keep-token", CancellationToken.None);
 
         Assert.IsTrue(ok);
-        await _users.Received(1).UpdatePasswordHash(user.Id, Arg.Any<string>(), Arg.Is((string?)null), Arg.Any<CancellationToken>());
+        // Guarded by the current hash so concurrent changes cannot both win.
+        await _users.Received(1).UpdatePasswordHash(user.Id, Arg.Any<string>(), Arg.Is(user.PasswordHash), Arg.Any<CancellationToken>());
         await _users.Received(1).DeleteOtherSessionsForUser(user.Id, "keep-token", Arg.Any<CancellationToken>());
+    }
+
+    [Test]
+    public async Task ChangePassword_ConcurrentChangeWonTheRace_ReturnsFalse()
+    {
+        var user = MakeUser("anna", ValidPassword);
+        _users.GetUserById(user.Id, Arg.Any<CancellationToken>()).Returns(user);
+        _users.UpdatePasswordHash(Arg.Any<Guid>(), Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<CancellationToken>()).Returns(false);
+
+        var ok = await _sut.ChangePassword(user.Id, ValidPassword, "NewPassword1!xxxx", "keep-token", CancellationToken.None);
+
+        Assert.IsFalse(ok);
+        await _users.DidNotReceive().DeleteOtherSessionsForUser(Arg.Any<Guid>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
 
     [Test]

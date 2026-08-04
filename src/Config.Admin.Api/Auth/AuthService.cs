@@ -12,6 +12,8 @@ public class LoginResult
     public string Username { get; set; } = string.Empty;
     public string Role { get; set; } = string.Empty;
     public bool IsGuest { get; set; }
+    /// <summary>Set when the login came from redeeming a token: "invite" or "reset". Drives audit events.</summary>
+    public string? Redemption { get; set; }
 }
 
 /// <summary>
@@ -58,8 +60,8 @@ public class AuthService
         if (verification == PasswordVerificationResult.SuccessRehashNeeded)
         {
             // Guarded by the old hash so a concurrent password change wins.
-            var newHash = _hasher.HashPassword(user, password);
-            await _users.UpdatePasswordHash(user.Id, newHash, user.PasswordHash, cancellationToken);
+            var rehash = _hasher.HashPassword(user, password);
+            _ = await _users.UpdatePasswordHash(user.Id, rehash, user.PasswordHash, cancellationToken);
         }
 
         await _users.UpdateLastLogin(user.Id, DateTime.UtcNow, cancellationToken);
@@ -106,7 +108,9 @@ public class AuthService
         user.PasswordHash = _hasher.HashPassword(user, password);
         await _users.InsertUser(user, cancellationToken);
         await _users.UpdateLastLogin(user.Id, DateTime.UtcNow, cancellationToken);
-        return await CreateSession(user, cancellationToken);
+        var result = await CreateSession(user, cancellationToken);
+        if (result != null) result.Redemption = "invite";
+        return result;
     }
 
     private async Task<LoginResult?> RedeemReset(PasswordReset reset, string password, CancellationToken cancellationToken)
@@ -120,7 +124,9 @@ public class AuthService
         // A reset is typically used after compromise: every prior session dies.
         await _users.DeleteSessionsForUser(user.Id, cancellationToken);
         await _users.UpdateLastLogin(user.Id, DateTime.UtcNow, cancellationToken);
-        return await CreateSession(user, cancellationToken);
+        var result = await CreateSession(user, cancellationToken);
+        if (result != null) result.Redemption = "reset";
+        return result;
     }
 
     public async Task<bool> ChangePassword(Guid userId, string currentPassword, string newPassword, string keepToken, CancellationToken cancellationToken)
@@ -136,7 +142,10 @@ public class AuthService
             return false;
 
         var newHash = _hasher.HashPassword(user, newPassword);
-        await _users.UpdatePasswordHash(user.Id, newHash, null, cancellationToken);
+        // Guarded by the current hash: of two concurrent changes only one wins,
+        // instead of both reporting success.
+        if (!await _users.UpdatePasswordHash(user.Id, newHash, user.PasswordHash, cancellationToken))
+            return false;
         await _users.DeleteOtherSessionsForUser(user.Id, keepToken, cancellationToken);
         return true;
     }

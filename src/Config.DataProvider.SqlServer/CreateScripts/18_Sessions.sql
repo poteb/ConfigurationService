@@ -1,5 +1,5 @@
 CREATE TABLE [dbo].[Sessions] (
-    [Token]      NVARCHAR(100) NOT NULL,
+    [Token]      NVARCHAR(100) COLLATE Latin1_General_100_BIN2 NOT NULL,
     [UserId]     UNIQUEIDENTIFIER NOT NULL,
     [CreatedUtc] DATETIME2(7)  NOT NULL DEFAULT GETUTCDATE(),
     [ExpiresUtc] DATETIME2(7)  NOT NULL,

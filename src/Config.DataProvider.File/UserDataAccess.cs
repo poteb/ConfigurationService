@@ -24,10 +24,10 @@ public class UserDataAccess : IUserDataAccess
     public Task HardDeleteGuest(CancellationToken cancellationToken) => throw NotSupported();
     public Task<bool> UpdateRole(Guid id, string role, CancellationToken cancellationToken) => throw NotSupported();
     public Task UpdateLastLogin(Guid id, DateTime utc, CancellationToken cancellationToken) => throw NotSupported();
-    public Task UpdatePasswordHash(Guid id, string newHash, string? expectedOldHash, CancellationToken cancellationToken) => throw NotSupported();
+    public Task<bool> UpdatePasswordHash(Guid id, string newHash, string? expectedOldHash, CancellationToken cancellationToken) => throw NotSupported();
     public Task<List<UserInvite>> GetInvites(CancellationToken cancellationToken) => throw NotSupported();
     public Task UpsertInvite(UserInvite invite, CancellationToken cancellationToken) => throw NotSupported();
-    public Task DeleteInvite(string username, CancellationToken cancellationToken) => throw NotSupported();
+    public Task<Guid?> DeleteInvite(string username, CancellationToken cancellationToken) => throw NotSupported();
     public Task<UserInvite?> ConsumeInvite(string token, CancellationToken cancellationToken) => throw NotSupported();
     public Task UpsertReset(PasswordReset reset, CancellationToken cancellationToken) => throw NotSupported();
     public Task<PasswordReset?> ConsumeReset(string token, CancellationToken cancellationToken) => throw NotSupported();

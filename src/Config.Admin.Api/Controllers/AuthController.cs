@@ -54,7 +54,7 @@ public class AuthController : ControllerBase
                 await DelayToUniformDuration(started, cancellationToken);
                 return Unauthorized();
             }
-            await this.AuditLog(result.UserId.ToString(), "Login", _auditLogHandler.AuditLogUser, result.Username);
+            await this.AuditLog(result.UserId.ToString(), "Login", _auditLogHandler.AuditLogUser, result.Username, actingUsername: result.Username);
             return Ok(ToResponse(result));
         }
         catch (Exception ex)
@@ -76,7 +76,11 @@ public class AuthController : ControllerBase
             var result = await _authService.Redeem(request.Token, request.Password, cancellationToken);
             if (result == null)
                 return BadRequest(new { errors = new[] { "The link is invalid or has expired." } });
-            await this.AuditLog(result.UserId.ToString(), "Login", _auditLogHandler.AuditLogUser, result.Username);
+            if (result.Redemption == "invite")
+                await this.AuditLog(result.UserId.ToString(), "UserCreated", _auditLogHandler.AuditLogUser, $"{result.Username} ({result.Role}, via invite)", actingUsername: result.Username);
+            else if (result.Redemption == "reset")
+                await this.AuditLog(result.UserId.ToString(), "PasswordChanged", _auditLogHandler.AuditLogUser, $"{result.Username} (via reset link)", actingUsername: result.Username);
+            await this.AuditLog(result.UserId.ToString(), "Login", _auditLogHandler.AuditLogUser, result.Username, actingUsername: result.Username);
             return Ok(ToResponse(result));
         }
         catch (Exception ex)
