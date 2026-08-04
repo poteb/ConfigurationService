@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using pote.Config.Admin.Api.Model.RequestResponse;
-using pote.Config.Auth;
+using Microsoft.AspNetCore.Authorization;
+using pote.Config.Admin.Api.Auth;
 using pote.Config.DataProvider.Interfaces;
 using pote.Config.Admin.Api.Helpers;
 
@@ -8,7 +9,7 @@ namespace pote.Config.Admin.Api.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-[ApiKey]
+[Authorize(Policy = AuthPolicies.RealUser)]
 public class ApiKeysController : ControllerBase
 {
     private readonly ILogger<ApiKeysController> _logger;

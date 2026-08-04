@@ -2,13 +2,14 @@
 using Microsoft.Extensions.Caching.Memory;
 using pote.Config.Admin.Api.Model.RequestResponse;
 using pote.Config.Admin.Api.Services;
-using pote.Config.Auth;
+using Microsoft.AspNetCore.Authorization;
+using pote.Config.Admin.Api.Auth;
 
 namespace pote.Config.Admin.Api.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-[ApiKey]
+[Authorize(Policy = AuthPolicies.RealUser)]
 public class DependencyGraphController : ControllerBase
 {
     private readonly ILogger<DependencyGraphController> _logger;
