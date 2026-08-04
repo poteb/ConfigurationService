@@ -1,0 +1,78 @@
+import { expect, test } from '@playwright/test';
+import { makeFixtures, mockAdminApi, type Fixtures } from './mocks';
+
+let fixtures: Fixtures;
+
+test.beforeEach(async ({ page }) => {
+	fixtures = makeFixtures();
+	await mockAdminApi(page, fixtures);
+});
+
+test('configurations list → open → edit → save round-trip', async ({ page }) => {
+	await page.goto('/');
+	await expect(page.getByRole('cell', { name: 'Database' })).toBeVisible();
+	await expect(page.getByRole('cell', { name: 'AppSettings' })).toBeVisible();
+
+	await page.getByRole('row', { name: /Database/ }).getByRole('link', { name: 'Edit' }).click();
+	await expect(page).toHaveURL(/EditConfiguration\/cfg-database/);
+
+	// Edit the name and save.
+	const nameInput = page.getByLabel('Name');
+	await nameInput.fill('Database2');
+	const saveButton = page.getByRole('button', { name: 'Save' }).first();
+	await expect(saveButton).toBeEnabled();
+	await saveButton.click();
+
+	await expect.poll(() => fixtures.savedConfigurations.length).toBe(1);
+	const saved = fixtures.savedConfigurations[0] as { name: string };
+	expect(saved.name).toBe('Database2');
+});
+
+test('save validation errors from the API are shown', async ({ page }) => {
+	fixtures.saveErrors = ['Name already in use'];
+	await page.goto('/EditConfiguration/cfg-database');
+	await page.getByLabel('Name').fill('Database renamed');
+	await page.getByRole('button', { name: 'Save' }).first().click();
+	await expect(page.getByText('Name already in use')).toBeVisible();
+});
+
+test('secret round-trip', async ({ page }) => {
+	await page.goto('/secrets');
+	await expect(page.getByRole('cell', { name: 'DbPassword' })).toBeVisible();
+	await page.getByRole('link', { name: 'Edit' }).click();
+	await expect(page).toHaveURL(/EditSecret\/secret-1/);
+	await page.getByLabel('Name').fill('DbPassword2');
+	await page.getByRole('button', { name: 'Save' }).first().click();
+	await expect.poll(() => fixtures.savedSecrets.length).toBe(1);
+});
+
+test('Ctrl+Click on a $ref navigates to the referenced configuration', async ({ page }) => {
+	await page.goto('/EditConfiguration/cfg-appsettings');
+	// Expand the section accordion.
+	await page.getByRole('button', { name: /Environments:/ }).click();
+	const refLink = page.locator('.cm-ref-link').first();
+	await expect(refLink).toBeVisible();
+	await refLink.click({ modifiers: ['Control'] });
+	await expect(page).toHaveURL(/EditConfiguration\/cfg-database/);
+});
+
+test('unsaved-changes guard blocks navigation until confirmed', async ({ page }) => {
+	await page.goto('/EditConfiguration/cfg-database');
+	await page.getByLabel('Name').fill('Dirty name');
+	await page.getByRole('link', { name: 'Secrets' }).click();
+	await expect(page.getByText('You have unsaved changes')).toBeVisible();
+	// Stay: cancel keeps us on the editor.
+	await page.getByRole('button', { name: 'Cancel' }).click();
+	await expect(page).toHaveURL(/EditConfiguration\/cfg-database/);
+	// Leave: confirm navigates.
+	await page.getByRole('link', { name: 'Secrets' }).click();
+	await page.getByRole('button', { name: 'Leave' }).click();
+	await expect(page).toHaveURL(/secrets/);
+});
+
+test('boot fails with a clear page when config.json is missing', async ({ page }) => {
+	await page.route('**/config.json', (route) => route.fulfill({ status: 404, body: 'not found' }));
+	await page.goto('/');
+	await expect(page.getByText('Configuration Admin failed to start')).toBeVisible();
+	await expect(page.getByText(/config\.json/).first()).toBeVisible();
+});
