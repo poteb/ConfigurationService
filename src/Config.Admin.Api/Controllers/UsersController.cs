@@ -244,7 +244,7 @@ public class UsersController : ControllerBase
         try
         {
             var result = await _authService.CreateFirstUser(request.Username, request.Password, cancellationToken);
-            await this.AuditLog(Guid.Empty.ToString(), "UserCreated", _auditLogHandler.AuditLogUser, $"{result.Username} (Admin, by guest)");
+            await this.AuditLog(result.UserId.ToString(), "UserCreated", _auditLogHandler.AuditLogUser, $"{result.Username} (Admin, by guest)");
             return Ok(new LoginResponse
             {
                 Token = result.Token,

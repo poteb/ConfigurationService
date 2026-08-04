@@ -8,6 +8,7 @@ public class LoginResult
 {
     public string Token { get; set; } = string.Empty;
     public DateTime ExpiresUtc { get; set; }
+    public Guid UserId { get; set; }
     public string Username { get; set; } = string.Empty;
     public string Role { get; set; } = string.Empty;
     public bool IsGuest { get; set; }
@@ -204,6 +205,7 @@ public class AuthService
         {
             Token = session.Token,
             ExpiresUtc = session.ExpiresUtc,
+            UserId = user.Id,
             Username = user.Username,
             Role = user.Role,
             IsGuest = user.IsGuest
