@@ -22,7 +22,28 @@ export default defineConfig({
 	// Svelte component libraries must not be prebundled: the optimizer inlines a
 	// second copy of the svelte runtime, whose scheduler never flushes effects
 	// registered against the app's copy (symptom: $state updates don't render).
-	optimizeDeps: { exclude: ['bits-ui', 'svelte-sonner', 'mode-watcher', '@lucide/svelte'] },
+	// CodeMirror packages likewise end up as multiple @codemirror/state copies,
+	// breaking its instanceof-based extension checks.
+	optimizeDeps: {
+		exclude: [
+			'bits-ui',
+			'svelte-sonner',
+			'mode-watcher',
+			'@lucide/svelte',
+			'codemirror',
+			'@codemirror/state',
+			'@codemirror/view',
+			'@codemirror/language',
+			'@codemirror/lint',
+			'@codemirror/autocomplete',
+			'@codemirror/commands',
+			'@codemirror/lang-json',
+			'@codemirror/theme-one-dark'
+		]
+	},
+	resolve: {
+		dedupe: ['@codemirror/state', '@codemirror/view', '@codemirror/language']
+	},
 	test: {
 		environment: 'jsdom',
 		include: ['src/**/*.test.ts']

@@ -5,6 +5,9 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title>Configuration Admin</title>
 		<script>
+			window.__errs = [];
+			window.addEventListener('error', (e) => window.__errs.push('ERR: ' + (e.error?.stack || e.message)));
+			window.addEventListener('unhandledrejection', (e) => window.__errs.push('REJ: ' + (e.reason?.stack || String(e.reason))));
 			// Apply the persisted theme before first paint to avoid a light/dark flash.
 			(function () {
 				try {
