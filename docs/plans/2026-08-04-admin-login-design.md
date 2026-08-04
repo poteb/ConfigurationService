@@ -102,8 +102,10 @@ New `IUserDataAccess` in `Config.DataProvider.Interfaces`; Dapper implementation
   blunt brute force; no lockout machinery.
   **Side effect: successful non-guest login deletes the guest user.**
 - `POST /api/auth/redeem` `{token, password}` → creates the user (invite) or sets the password
-  (reset), then auto-logs-in and returns the same shape as login. Expired/unknown/used token →
-  400 with a generic message.
+  (reset), then auto-logs-in and returns the same shape as login — and therefore also triggers
+  guest deletion. Expired/unknown/used token → 400 with a generic message. Edge rules: invite
+  redemption fails if the username was taken in the meantime; reset redemption fails if the
+  user no longer exists.
 - `POST /api/auth/change-password` `{currentPassword, newPassword}` — authenticated, non-guest.
 - `GET /api/auth/provider` — anonymous provider metadata (see seam above).
 
@@ -161,7 +163,8 @@ with a deny-guest policy. Config.Api is untouched.
 ## Security posture (accepted for v1)
 
 - No rate limiting beyond the fixed failure delay; no account lockout.
-- No refresh tokens; JWTs are irrevocable until expiry (8 h).
+- No refresh tokens; JWTs are irrevocable until expiry (8 h). This includes tokens of users
+  deleted mid-session — a deleted user keeps API access for up to 8 hours.
 - Raw (unhashed) one-time tokens stored in the DB — an attacker with DB write access could
   mint credentials anyway.
 - HTTPS is assumed to be handled by deployment/reverse proxy.
