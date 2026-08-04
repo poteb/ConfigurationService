@@ -7,6 +7,8 @@
 	import AppWindowIcon from '@lucide/svelte/icons/app-window';
 	import GlobeIcon from '@lucide/svelte/icons/globe';
 	import SettingsIcon from '@lucide/svelte/icons/settings';
+	import UsersIcon from '@lucide/svelte/icons/users';
+	import { isAdmin } from '$lib/auth/session.svelte';
 
 	let { onNavigate }: { onNavigate?: () => void } = $props();
 
@@ -16,7 +18,8 @@
 		{ href: '/applications', label: 'Applications', icon: AppWindowIcon },
 		{ href: '/environments', label: 'Environments', icon: GlobeIcon },
 		{ href: '/ApiKeys', label: 'Api keys', icon: KeyRoundIcon },
-		{ href: '/Settings', label: 'Settings', icon: SettingsIcon }
+		{ href: '/Settings', label: 'Settings', icon: SettingsIcon },
+		...(isAdmin() ? [{ href: '/users', label: 'Users', icon: UsersIcon }] : [])
 	];
 
 	const isActive = (href: string) =>
