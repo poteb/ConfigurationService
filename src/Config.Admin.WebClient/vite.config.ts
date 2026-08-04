@@ -19,6 +19,10 @@ export default defineConfig({
 		})
 	],
 	server: { port: 5071, strictPort: true },
+	// Svelte component libraries must not be prebundled: the optimizer inlines a
+	// second copy of the svelte runtime, whose scheduler never flushes effects
+	// registered against the app's copy (symptom: $state updates don't render).
+	optimizeDeps: { exclude: ['bits-ui', 'svelte-sonner', 'mode-watcher', '@lucide/svelte'] },
 	test: {
 		environment: 'jsdom',
 		include: ['src/**/*.test.ts']
