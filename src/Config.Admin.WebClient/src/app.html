@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Configuration Admin</title>
+		<script>
+			// Apply the persisted theme before first paint to avoid a light/dark flash.
+			(function () {
+				try {
+					var pref = localStorage.getItem('theme-preference') || 'System';
+					var dark =
+						pref === 'Dark' ||
+						(pref === 'System' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+					document.documentElement.classList.toggle('dark', dark);
+				} catch (e) {
+					/* no-op: default light */
+				}
+			})();
+		</script>
+		%sveltekit.head%
+	</head>
+	<body data-sveltekit-preload-data="hover">
+		<div style="display: contents">%sveltekit.body%</div>
+	</body>
+</html>
