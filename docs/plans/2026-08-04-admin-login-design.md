@@ -1,7 +1,9 @@
 # Admin login — design
 
 Date: 2026-08-04
-Status: Approved (brainstorm phase)
+Status: Approved (brainstorm + grilling complete)
+Related: ADR-0002 (pluggable auth provider), ADR-0003 (DB-backed sessions),
+ADR-0004 (guest bootstrap user), ADR-0005 (SQL Server primary provider), CONTEXT.md glossary.
 
 ## Goal
 
@@ -9,57 +11,75 @@ Add user login to the ConfigurationService admin page. Simple database-backed au
 no IdentityServer/ADFS/Google for now — but architected so the identity provider is swappable
 later (this is an open-source project; the auth mechanism must fit anyone and be extendable).
 
-## Decisions (from brainstorm interview)
+## Decisions
 
-1. **Scope**: Login replaces the static `X-API-Key` for the Admin API. The SPA no longer ships
-   an API key in `static/config.json`. Config.Api (middleware-facing) keeps API-key auth,
-   untouched.
-2. **Session mechanism**: JWT bearer token, 8-hour lifetime, no refresh tokens. The SPA sends
-   `Authorization: Bearer <token>` via the existing seam in `src/lib/api/client.ts`.
-3. **Password reset**: Admin-driven — any logged-in (non-guest) user can generate a one-time
-   reset link for another user. No SMTP/email anywhere. A logged-in user can always change
-   their own password.
+1. **Scope**: Login replaces the static `X-API-Key` for the Admin API — a clean break, no
+   grace period (the key shipped to every browser and was never a real boundary; scripts can
+   `POST /api/auth/login` instead). The SPA no longer ships an API key in `static/config.json`.
+   Config.Api (middleware-facing) keeps API-key auth, untouched.
+2. **Session mechanism**: DB-backed sessions (ADR-0003). Login stores an opaque random
+   256-bit token in a `Sessions` table; the SPA sends it as `Authorization: Bearer <token>`
+   via the existing seam in `src/lib/api/client.ts`; validation is a DB lookup per request.
+   Fixed 8-hour absolute lifetime, no refresh. Sessions are revocable: deleting a user (or
+   guest) deletes their sessions and ends access immediately. Logout deletes the session row.
+   No signing keys — restarts and load-balanced instances need zero coordination.
+3. **Password reset**: Admin-driven — any real user can generate a one-time reset link for
+   another user. No SMTP/email anywhere. A logged-in real user can always change their own
+   password.
 4. **Invites**: New users only by invite. The inviter fixes the username; the invitee opens a
-   single-use link (valid 7 days) and sets their password. Invite links and reset links are the
-   same mechanism: a token that authorizes setting the password for a username.
-5. **Guest user**:
+   single-use link (valid 7 days) and sets their password. Invite links and reset links are
+   the same mechanism: a token that authorizes setting the password for a username.
+5. **Guest user** (ADR-0004):
    - A new instance is born with user `guest` / password `guest`.
    - Guest can do exactly one thing: directly create a real user (username + password form —
      no invite-link ceremony, since the person at the keyboard is the new user).
-   - Guest is **deleted** (not disabled) the first time a real (non-guest) user logs in.
-     Redeeming an invite auto-logs-in and counts as a login.
+   - Guest is **deleted** (not disabled) the first time a real user logs in. Redeeming an
+     invite auto-logs-in and counts. Deletion cascades to guest's sessions, so a lingering
+     guest login dies with it.
    - Until a real user has logged in, guest keeps working and can create more users
      (protects against typo'd usernames / lost invites).
    - **Empty user store ⇒ guest is (re)created at startup.** Bootstrap and disaster recovery
      ("last admin locked out": delete all user rows, restart) are the same mechanism.
 6. **Roles**: None. Every real user is a full admin. Guest is the only special case.
-7. **Storage**: SQL Server provider is the focus (file provider is likely end-of-life). File
-   provider gets a stub that throws `NotSupportedException` with a clear message.
+7. **Storage** (ADR-0005): SQL Server provider only; the File provider gets
+   `NotSupportedException` stubs. The default `DataProvider` becomes `SqlServer`. If the
+   active auth provider needs user storage the data provider can't supply, the Admin API
+   **fails fast at startup** with a clear message.
+8. **Username rules**: trimmed, 1–100 chars, case-insensitive unique (SQL Server default
+   collation) and case-insensitive at login; displayed as first entered. `guest` reserved
+   case-insensitively.
+9. **Password policy**: minimum 16 characters, at least one lowercase, one uppercase, one
+   digit, one special character. Applies everywhere a password is chosen (redemption,
+   change-password, guest's direct create). The seeded `guest`/`guest` credential is exempt
+   (fixed bootstrap credential, not user-chosen).
+10. **Uniform errors**: login always returns the same 401 regardless of what was wrong;
+    redemption failures return one generic 400 ("invalid or expired link") without
+    distinguishing expired/used/unknown. ~500 ms delay on failed login; no lockout.
 
 ## Architecture
 
-### Swappable identity provider (the load-bearing seam)
+### Swappable identity provider (ADR-0002)
 
-**The app consumes standard JWT bearer identities; how tokens are issued is the pluggable part.**
+**The app consumes claims-based identities; how they're established is the pluggable part.**
 
 - Config setting `Auth:Provider` selects the provider. This feature implements `"Local"`.
   A future `"Oidc"` provider covers ADFS / IdentityServer / Entra / any OIDC authority.
 - Backend seam: an `IAuthProviderSetup` registration interface. Each provider contributes:
-  - service registrations,
-  - JWT-validation configuration,
-  - optionally its own endpoints.
+  service registrations, authentication-handler configuration, and optionally its own
+  endpoints.
 
-  `Local` contributes the `AuthController` (login/redeem/change-password), user management,
-  the user store (`IUserDataAccess`), guest bootstrap, and validation of its self-signed JWTs.
-  A future `Oidc` provider contributes only JwtBearer validation against the external
-  authority — no local endpoints, no user table, no guest user.
+  `Local` contributes: the `AuthController` (login/logout/redeem/change-password), user
+  management, the stores (`IUserDataAccess`), guest bootstrap, and an authentication handler
+  that validates opaque bearer tokens against the `Sessions` table.
+  A future `Oidc` provider contributes only standard JwtBearer validation against the
+  external authority — no local endpoints, no user table, no guest.
 - Everything outside the provider is provider-agnostic: controllers authorize on **claims**
-  (`name`, plus a `guest` claim only Local ever issues), never on how the token was minted.
-  Invite/reset/guest/user-management are Local-only features and drop out of the request path
-  when another provider is active.
+  (`name`, plus a `guest` claim only Local ever issues), never on how the identity was
+  established.
 - Frontend seam: anonymous `GET /api/auth/provider` returns provider metadata.
   `{type: "local"}` → SPA shows the login form. Future `{type: "oidc", authority, clientId}` →
-  redirect-based flow. The SPA auth store and `client.ts` deal only in "current token".
+  redirect-based flow. The SPA auth store and `client.ts` deal only in "current token" —
+  opaque bytes either way.
 - Docs: add a short "adding an auth provider" section (public extension point).
 
 Out of scope now: implementing OIDC, mixed mode (two providers at once), mapping external
@@ -72,70 +92,89 @@ identities to local user records.
 | Column       | Type                | Notes                        |
 |--------------|---------------------|------------------------------|
 | Id           | UNIQUEIDENTIFIER PK |                              |
-| Username     | NVARCHAR(100)       | unique                       |
+| Username     | NVARCHAR(100)       | unique (case-insensitive)    |
 | PasswordHash | NVARCHAR(500)       | ASP.NET Core PasswordHasher  |
 | IsGuest      | BIT                 |                              |
 | CreatedUtc   | DATETIME2           |                              |
 
 `16_UserTokens.sql`:
 
-| Column     | Type           | Notes                                  |
-|------------|----------------|----------------------------------------|
-| Token      | NVARCHAR(100) PK | random 256-bit, url-safe             |
-| Username   | NVARCHAR(100)  | target user                            |
-| Purpose    | NVARCHAR(20)   | `invite` \| `reset`                    |
-| ExpiresUtc | DATETIME2      | now + 7 days                           |
+| Column     | Type             | Notes                                  |
+|------------|------------------|----------------------------------------|
+| Token      | NVARCHAR(100) PK | random 256-bit, url-safe               |
+| Username   | NVARCHAR(100)    | target user                            |
+| Purpose    | NVARCHAR(20)     | `invite` \| `reset`                    |
+| ExpiresUtc | DATETIME2        | now + 7 days                           |
 
-Tokens are single-use: deleted on redemption. Username `guest` is reserved (cannot be invited
-or created).
+`17_Sessions.sql`:
 
-New `IUserDataAccess` in `Config.DataProvider.Interfaces`; Dapper implementation in
-`Config.DataProvider.SqlServer`; stub in `Config.DataProvider.File` (throws
+| Column     | Type             | Notes                                  |
+|------------|------------------|----------------------------------------|
+| Token      | NVARCHAR(100) PK | random 256-bit, url-safe               |
+| Username   | NVARCHAR(100)    |                                        |
+| IsGuest    | BIT              |                                        |
+| CreatedUtc | DATETIME2        |                                        |
+| ExpiresUtc | DATETIME2        | now + 8 h (absolute)                   |
+
+Token lifecycle rules:
+
+- One active token per (username, purpose): creating a new invite/reset replaces the old one.
+- Inviting a username that already exists as a user → 400.
+- Tokens are single-use: deleted on redemption. Expired token/session rows are cleaned up
+  opportunistically (on login and token creation).
+- Pending invites can be revoked (`DELETE /api/users/invites/{username}`).
+- A reset link whose user was deleted fails at redemption and is swept by cleanup.
+
+New `IUserDataAccess` in `Config.DataProvider.Interfaces` (users, tokens, sessions); Dapper
+implementation in `Config.DataProvider.SqlServer`; stub in `Config.DataProvider.File` (throws
 `NotSupportedException`: "user login requires the SqlServer provider").
 
 ### Endpoints (Admin API)
 
-`AuthController` (anonymous):
+`AuthController` (anonymous unless noted):
 
 - `POST /api/auth/login` `{username, password}` → `{token, expiresUtc, username, isGuest}` or
-  uniform 401 (same response for unknown user / wrong password). ~500 ms delay on failure to
-  blunt brute force; no lockout machinery.
-  **Side effect: successful non-guest login deletes the guest user.**
+  uniform 401 (~500 ms delay on failure).
+  **Side effect: successful real-user login deletes the guest user and guest sessions.**
 - `POST /api/auth/redeem` `{token, password}` → creates the user (invite) or sets the password
   (reset), then auto-logs-in and returns the same shape as login — and therefore also triggers
-  guest deletion. Expired/unknown/used token → 400 with a generic message. Edge rules: invite
-  redemption fails if the username was taken in the meantime; reset redemption fails if the
-  user no longer exists.
-- `POST /api/auth/change-password` `{currentPassword, newPassword}` — authenticated, non-guest.
+  guest deletion. Edge rules: invite redemption fails if the username was taken in the
+  meantime; reset redemption fails if the user no longer exists. Failures → generic 400.
+- `POST /api/auth/logout` (authenticated) — deletes the session row.
+- `POST /api/auth/change-password` `{currentPassword, newPassword}` — authenticated, real
+  users only.
 - `GET /api/auth/provider` — anonymous provider metadata (see seam above).
 
-`UsersController` (JWT required):
+`UsersController` (session required):
 
-- `GET /api/users` — users + pending invites (with expiry). Non-guest only.
-- `POST /api/users/invites` `{username}` → `{token, expiresUtc}`. Non-guest only. The SPA
+- `GET /api/users` — users + pending invites (with expiry). Real users only.
+- `POST /api/users/invites` `{username}` → `{token, expiresUtc}`. Real users only. The SPA
   composes the link as `<its own origin>/redeem?token=...` — the backend never needs to know
   the SPA's URL.
-- `POST /api/users/{username}/reset` → `{token, expiresUtc}`. Non-guest only.
-- `DELETE /api/users/{username}` — non-guest only; cannot delete yourself. (Deleting the last
-  user directly in the DB is the designed recovery path.)
+- `DELETE /api/users/invites/{username}` — revoke a pending invite. Real users only.
+- `POST /api/users/{username}/reset` → `{token, expiresUtc}`. Real users only.
+- `DELETE /api/users/{username}` — real users only; cannot delete yourself. (Deleting the last
+  user directly in the DB is the designed recovery path.) Deletes the user's sessions and
+  outstanding tokens.
 - `POST /api/users` `{username, password}` — **guest-only** direct create (real users are
   invite-only; guest gets the direct form).
 
-Guest policy: a guest JWT may only call `POST /api/users` (plus the anonymous endpoints).
-Everything else → 403.
+Guest policy: a guest session may only call `POST /api/users` and `POST /api/auth/logout`
+(plus the anonymous endpoints). Everything else → 403. Guest deletion revokes guest sessions,
+so the policy needs no existence re-checks.
 
 All existing Admin API controllers switch from `ApiKeyAuthenticationFilter` to `[Authorize]`
-with a deny-guest policy. Config.Api is untouched.
+with a deny-guest policy. Swagger security definition switches from `X-API-Key` to bearer.
+Config.Api is untouched.
 
 ### Bootstrap & configuration
 
 - Startup (Local provider only): if the `Users` table is empty, insert `guest` with hashed
   password `guest`. Runs on every startup.
-- New `AuthSettings`:
-  - `JwtSigningKey` — if empty, auto-generate at startup and log a warning (restart then
-    invalidates sessions).
-  - `TokenLifetimeHours` = 8
-  - `InviteLifetimeDays` = 7
+- Startup validation: `Auth:Provider=Local` + a data provider without user-storage support →
+  fail fast with a clear message.
+- New `AuthSettings`: `SessionLifetimeHours` = 8, `InviteLifetimeDays` = 7 (applies to reset
+  links too).
 - Password hashing: ASP.NET Core standalone `PasswordHasher` (PBKDF2, format-versioned)
   from `Microsoft.Extensions.Identity.Core` — no EF, no Identity schema.
 
@@ -146,25 +185,61 @@ with a deny-guest policy. Config.Api is untouched.
   `/login`. The static `apiKey` in `config.json` is removed.
 - Layout guard: no token → `/login`. Guest token → locked to a single "create your first real
   user" screen.
-- `/redeem?token=...` page: set password (×2), auto-login, navigate home.
-- Users admin page: list users, create invite (copyable link), generate reset link (copyable),
-  delete user, pending invites with expiry.
-- Change-password in the header menu.
+- `/redeem?token=...` page: set password (×2, policy validated client- and server-side),
+  auto-login, navigate home.
+- Users admin page: list users, create invite (copyable link), revoke pending invite,
+  generate reset link (copyable), delete user.
+- Change-password and logout in the header menu.
+- Regenerate API types (`npm run gen:api`).
 
-### Audit & testing
+### Audit logging
 
-- User actions (login, user created/deleted, invite/reset created, password changed) go
-  through the existing audit-log handler, stamped with the acting username from the JWT.
-- NUnit: auth service (guest lifecycle, redemption paths, expiry/reuse rejection, hashing,
-  login side effects) with NSubstitute'd `IUserDataAccess`.
-- Vitest: auth store, client seam (401 handling, bearer header).
-- Playwright: one e2e for the login flow.
+Via the existing generic `AuditLog` table (`EntityType`, `EntityId`, `CallerIp`, `Content`):
+
+- `EntityType="User"`, `EntityId` = the user's GUID (usernames exceed the 36-char column;
+  they go in `Content`).
+- Events: user created (by whom), user deleted, invite created/revoked, reset link created,
+  password changed, login success, **login failure** (attempted username + IP — the only
+  brute-force visibility given no lockout).
+- Acting user on existing entity audits (configs/environments/apps/settings/secrets): the
+  acting username is included in the JSON `Content` payload — no `ALTER TABLE`, no schema
+  migration for existing deployments.
+
+### Testing
+
+- **Backend (NUnit + NSubstitute)**: auth service logic — guest lifecycle, session
+  issue/validate/revoke/expiry, redemption paths (incl. username-taken and user-deleted
+  edges), token replace/revoke rules, password policy, fail-fast provider check — against
+  mocked `IUserDataAccess`. Dapper implementations stay unit-untested, consistent with the
+  rest of the repo (no SQL Server integration-test infrastructure in this feature).
+- **Frontend (Vitest)**: auth store (persistence, expiry), `client.ts` (bearer header,
+  401 → clear session + redirect).
+- **E2E (Playwright, mocked routes — no real backend, unchanged pattern)**: login happy path,
+  guest → create-first-user flow, invite redemption.
+
+## Rollout (breaking changes — release notes required)
+
+- Admin API requires login; `X-API-Key` no longer accepted there. Scripts must log in first.
+- Default `DataProvider` is now `SqlServer`; a connection string is required. File-based
+  deployments cannot use admin login (startup fails fast) — migrating to SQL Server is the
+  upgrade path.
+- New `CreateScripts` `15_Users.sql`, `16_UserTokens.sql`, `17_Sessions.sql` must be run on
+  existing databases.
+- After upgrade the Users table is empty → guest/guest is live; the first operator to log in
+  should immediately create their user (which kills guest on first real login).
+- README + CLAUDE.md updated: setup flow, SQL Server as primary provider, auth documentation,
+  "adding an auth provider" extension guide.
 
 ## Security posture (accepted for v1)
 
-- No rate limiting beyond the fixed failure delay; no account lockout.
-- No refresh tokens; JWTs are irrevocable until expiry (8 h). This includes tokens of users
-  deleted mid-session — a deleted user keeps API access for up to 8 hours.
-- Raw (unhashed) one-time tokens stored in the DB — an attacker with DB write access could
-  mint credentials anyway.
+- No rate limiting beyond the fixed failure delay; no account lockout. Failed logins are
+  audit-logged.
+- Sessions are revocable (DB-backed); logout, user deletion, and guest deletion take effect
+  immediately. Absolute 8 h lifetime, no refresh/sliding.
+- Session token in localStorage: accepted XSS trade-off for a static SPA (no cookie
+  infrastructure); the SPA has no third-party script includes.
+- Raw (unhashed) one-time tokens and session tokens stored in the DB — an attacker with DB
+  write access could mint credentials anyway.
+- The well-known guest/guest credential is live until the first real login (ADR-0004) —
+  acceptable because guest can only create users, and operators claim instances immediately.
 - HTTPS is assumed to be handled by deployment/reverse proxy.
