@@ -67,7 +67,7 @@ builder.Services.AddCors(p => p.AddPolicy("allowall", policy =>
 
 builder.Services.AddConfiguration<EncryptionSettings>(builder.Configuration);
 
-var dataProviderType = builder.Configuration["DataProvider"] ?? "File";
+var dataProviderType = builder.Configuration["DataProvider"] ?? "SqlServer";
 if (dataProviderType.Equals("SqlServer", StringComparison.OrdinalIgnoreCase))
 {
     var connStr = builder.Configuration["SqlServer:ConnectionString"];
@@ -78,6 +78,7 @@ if (dataProviderType.Equals("SqlServer", StringComparison.OrdinalIgnoreCase))
     builder.Services.AddScoped<IAdminDataProvider, pote.Config.DataProvider.SqlServer.AdminDataProvider>();
     builder.Services.AddScoped<IAuditLogHandler, pote.Config.DataProvider.SqlServer.AuditLogHandler>();
     builder.Services.AddScoped<IDataProvider, SqlServerDataProvider>();
+    builder.Services.AddScoped<IUserDataAccess, pote.Config.DataProvider.SqlServer.UserDataAccess>();
 }
 else
 {
@@ -89,6 +90,7 @@ else
     builder.Services.AddScoped<IAdminDataProvider, pote.Config.DataProvider.File.AdminDataProvider>();
     builder.Services.AddScoped<IAuditLogHandler, pote.Config.DataProvider.File.AuditLogHandler>();
     builder.Services.AddScoped<IDataProvider, FileDataProvider>();
+    builder.Services.AddScoped<IUserDataAccess, pote.Config.DataProvider.File.UserDataAccess>();
 }
 builder.Services.AddScoped<IDependencyGraphService, DependencyGraphService>();
 builder.Services.AddScoped<IParser, Parser>();

@@ -38,7 +38,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IParser, Parser>();
 
-var dataProviderType = builder.Configuration["DataProvider"] ?? "File";
+var dataProviderType = builder.Configuration["DataProvider"] ?? "SqlServer";
 if (dataProviderType.Equals("SqlServer", StringComparison.OrdinalIgnoreCase))
 {
     var connStr = builder.Configuration["SqlServer:ConnectionString"];
