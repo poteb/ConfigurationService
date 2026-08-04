@@ -1,4 +1,6 @@
+import { goto } from '$app/navigation';
 import { getRuntimeConfig } from '$lib/runtime-config';
+import { clearSession, getSession } from '$lib/auth/session.svelte';
 
 export type ApiError = {
 	kind: 'network' | 'abort' | 'http' | 'invalid-json';
@@ -26,8 +28,8 @@ export function seg(value: string | number | boolean): string {
 type FetchLike = (input: string | URL, init?: RequestInit) => Promise<Response>;
 
 /**
- * The one place requests are built and credentials attached (login-readiness
- * seam: swap the X-API-Key header for a bearer token here and nowhere else).
+ * The one place requests are built and the session token attached. On 401 with
+ * an active session, the session is cleared and the user sent to /login.
  * Never throws — every failure class maps to an ApiResult error.
  */
 export async function apiFetch<T>(
@@ -35,7 +37,8 @@ export async function apiFetch<T>(
 	init: RequestInit = {},
 	fetchFn: FetchLike = fetch
 ): Promise<ApiResult<T>> {
-	const { adminApiUrl, apiKey } = getRuntimeConfig();
+	const { adminApiUrl } = getRuntimeConfig();
+	const session = getSession();
 	const base = adminApiUrl.endsWith('/') ? adminApiUrl : adminApiUrl + '/';
 	let url: URL;
 	try {
@@ -49,7 +52,7 @@ export async function apiFetch<T>(
 		response = await fetchFn(url, {
 			...init,
 			headers: {
-				'X-API-Key': apiKey,
+				...(session ? { Authorization: `Bearer ${session.token}` } : {}),
 				...(init.body ? { 'Content-Type': 'application/json' } : {}),
 				...(init.headers ?? {})
 			}
@@ -69,6 +72,13 @@ export async function apiFetch<T>(
 	}
 
 	if (!response.ok) {
+		if (response.status === 401 && session) {
+			// The session was revoked or expired server-side; a 401 without a
+			// session (e.g. a failed login attempt) is the caller's to handle.
+			clearSession();
+			void goto('/login');
+			return fail({ kind: 'http', status: 401, message: 'Your session has expired. Please log in again.' });
+		}
 		let errors: string[] | undefined;
 		let message = `The Admin API returned HTTP ${response.status}`;
 		try {

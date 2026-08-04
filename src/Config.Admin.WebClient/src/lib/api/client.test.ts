@@ -1,15 +1,31 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { setRuntimeConfigForTests } from '$lib/runtime-config';
+import { clearSession, resetSessionForTests, setSession } from '$lib/auth/session.svelte';
 import { apiFetch } from './client';
 
+const { gotoMock } = vi.hoisted(() => ({ gotoMock: vi.fn() }));
+vi.mock('$app/navigation', () => ({ goto: gotoMock }));
+
+const future = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+
 beforeEach(() => {
-	setRuntimeConfigForTests({ adminApiUrl: 'http://api.test', apiKey: 'test-key' });
+	localStorage.clear();
+	resetSessionForTests();
+	gotoMock.mockReset();
+	setRuntimeConfigForTests({ adminApiUrl: 'http://api.test' });
 });
-afterEach(() => setRuntimeConfigForTests(null));
+afterEach(() => {
+	localStorage.clear();
+	resetSessionForTests();
+	setRuntimeConfigForTests(null);
+});
 
 const respond =
 	(body: BodyInit | null, init?: ResponseInit) =>
 	async (): Promise<Response> => new Response(body, init);
+
+const loggedIn = () =>
+	setSession({ token: 'tok123', expiresUtc: future, username: 'anna', role: 'Admin', isGuest: false });
 
 describe('apiFetch', () => {
 	it('returns ok with parsed JSON for 2xx responses', async () => {
@@ -17,20 +33,41 @@ describe('apiFetch', () => {
 		expect(result).toEqual({ ok: true, value: { a: 1 } });
 	});
 
-	it('sends the API key header and joins the URL against the base', async () => {
+	it('sends the bearer token and joins the URL against the base', async () => {
+		loggedIn();
 		let seenUrl = '';
-		let seenKey: string | null = null;
-		await apiFetch(
-			'Configurations/abc',
-			{},
-			async (input, init) => {
-				seenUrl = String(input);
-				seenKey = new Headers(init?.headers).get('X-API-Key');
-				return new Response('{}');
-			}
-		);
+		let seenAuth: string | null = null;
+		await apiFetch('Configurations/abc', {}, async (input, init) => {
+			seenUrl = String(input);
+			seenAuth = new Headers(init?.headers).get('Authorization');
+			return new Response('{}');
+		});
 		expect(seenUrl).toBe('http://api.test/Configurations/abc');
-		expect(seenKey).toBe('test-key');
+		expect(seenAuth).toBe('Bearer tok123');
+	});
+
+	it('sends no Authorization header without a session', async () => {
+		let seenAuth: string | null = 'unset';
+		await apiFetch('api/auth/login', {}, async (_input, init) => {
+			seenAuth = new Headers(init?.headers).get('Authorization');
+			return new Response('{}');
+		});
+		expect(seenAuth).toBeNull();
+	});
+
+	it('clears the session and redirects to /login on 401 with a session', async () => {
+		loggedIn();
+		const result = await apiFetch('x', {}, respond('', { status: 401 }));
+		expect(result.ok).toBe(false);
+		if (!result.ok) expect(result.error.status).toBe(401);
+		expect(localStorage.getItem('configservice.session')).toBeNull();
+		expect(gotoMock).toHaveBeenCalledWith('/login');
+	});
+
+	it('does not redirect on 401 without a session (failed login)', async () => {
+		const result = await apiFetch('api/auth/login', {}, respond('', { status: 401 }));
+		expect(result.ok).toBe(false);
+		expect(gotoMock).not.toHaveBeenCalled();
 	});
 
 	it('returns ok undefined for 204 and empty bodies', async () => {

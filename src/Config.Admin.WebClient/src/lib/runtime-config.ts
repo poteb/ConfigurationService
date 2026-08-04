@@ -1,6 +1,5 @@
 export type RuntimeConfig = {
 	adminApiUrl: string;
-	apiKey: string;
 };
 
 export class RuntimeConfigError extends Error {}
@@ -40,12 +39,7 @@ export async function loadRuntimeConfig(
 	} catch {
 		throw new RuntimeConfigError('config.json "adminApiUrl" is not a valid http(s) URL');
 	}
-	if (typeof cfg.apiKey !== 'string' || cfg.apiKey.length === 0) {
-		throw new RuntimeConfigError('config.json is missing "apiKey"');
-	}
-	config = { adminApiUrl: cfg.adminApiUrl, apiKey: cfg.apiKey };
-	// Login-readiness seam: a future auth gate slots in here, after config
-	// load and before the app renders.
+	config = { adminApiUrl: cfg.adminApiUrl };
 	return config;
 }
 

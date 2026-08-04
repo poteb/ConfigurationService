@@ -8,20 +8,18 @@ function fetchReturning(body: unknown, ok = true, status = 200): typeof fetch {
 
 describe('loadRuntimeConfig', () => {
 	it('parses a valid config', async () => {
-		const cfg = await loadRuntimeConfig(
-			fetchReturning({ adminApiUrl: 'http://localhost:34246', apiKey: 'k' })
-		);
+		const cfg = await loadRuntimeConfig(fetchReturning({ adminApiUrl: 'http://localhost:34246' }));
 		expect(cfg.adminApiUrl).toBe('http://localhost:34246');
-		expect(cfg.apiKey).toBe('k');
 		setRuntimeConfigForTests(null);
 	});
 
-	it('rejects a config with a missing field', async () => {
+	it('rejects a config with a missing adminApiUrl', async () => {
+		await expect(loadRuntimeConfig(fetchReturning({}))).rejects.toThrow('missing "adminApiUrl"');
+	});
+
+	it('rejects a non-URL adminApiUrl', async () => {
 		await expect(loadRuntimeConfig(fetchReturning({ adminApiUrl: 'x' }))).rejects.toThrow(
 			RuntimeConfigError
-		);
-		await expect(loadRuntimeConfig(fetchReturning({ apiKey: 'k' }))).rejects.toThrow(
-			'missing "adminApiUrl"'
 		);
 	});
 
