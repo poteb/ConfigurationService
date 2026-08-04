@@ -4,6 +4,8 @@ CREATE TABLE [dbo].[AuditLog] (
     [EntityId]   NVARCHAR(36)  NOT NULL,
     [CallerIp]   NVARCHAR(100) NOT NULL,
     [Content]    NVARCHAR(MAX) NOT NULL,
+    [Username]   NVARCHAR(100) NULL,
+    [Action]     NVARCHAR(50)  NULL,
     [CreatedUtc] DATETIME2(7)  NOT NULL DEFAULT GETUTCDATE(),
     CONSTRAINT [PK_AuditLog] PRIMARY KEY CLUSTERED ([Id])
 );
