@@ -6,9 +6,10 @@
         <owners>Paw</owners>
         <projectUrl>https://github.com/poteb/ConfigurationService</projectUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <description>Configuration Admin Client</description>
+        <description>Configuration Admin Client (static SPA build output)</description>
     </metadata>
     <files>
+        <!-- BasePath is the SvelteKit build output; the site lands at the package root. -->
         <file src="**" target="" />
     </files>
 </package>

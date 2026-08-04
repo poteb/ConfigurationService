@@ -427,7 +427,7 @@ The Configuration Service consists of three main components that need to be buil
 
 1. **Configuration API (Config.Api)** - The API that middleware clients contact to resolve configuration requests
 2. **Admin API (Config.Admin.Api)** - The backend API for managing configurations
-3. **Admin Client (Config.Admin.WebClient)** - The Blazor WebAssembly frontend for managing configurations
+3. **Admin Client (Config.Admin.WebClient)** - The Svelte (SvelteKit) frontend for managing configurations
 
 ### 1. Configuration API (Config.Api)
 
@@ -505,36 +505,36 @@ dotnet publish -c Release -o ./publish
 
 ### 3. Admin Client (Config.Admin.WebClient)
 
-This is the Blazor WebAssembly frontend for managing configurations through a web interface.
+This is the Svelte (SvelteKit) frontend for managing configurations through a web interface. It builds to plain static files — no server runtime is required.
 
 **Build:**
 ```bash
-cd src/Config.Admin.WebClient/Config.Admin.WebClient
-dotnet build
+cd src/Config.Admin.WebClient
+npm install
+npm run build
 ```
+The static site is written to `src/Config.Admin.WebClient/build/`. Convenience scripts live in `build/` at the repo root (`build-admin-client.cmd`, `run-admin-client.cmd`, `build-and-run-admin.cmd`, `pack-admin-client.cmd`).
 
-**Configuration (wwwroot/appsettings.json):**
+**Configuration (static/config.json, deployed next to index.html):**
 ```json
 {
-  "ConnectionStrings": {
-    "AdminApi": "http://localhost:34246/",
-    "Api": "http://localhost:5146"
-  },
-  "ApiKey": "YourApiKeyHere"
+  "adminApiUrl": "http://localhost:34246",
+  "apiKey": "YourApiKeyHere"
 }
 ```
+The file is fetched at runtime, so the same build can be deployed to any environment by swapping `config.json`.
 
-**Run:**
+**Run (dev server on http://localhost:5071):**
 ```bash
-dotnet run --urls "http://localhost:5071"
+npm run dev
 ```
 
-**Publish:**
+**API types:** TypeScript DTO types are generated from the Admin API's OpenAPI spec and committed. Regenerate after changing the Admin API (requires the Admin API running locally):
 ```bash
-dotnet publish -c Release -o ./publish
+npm run gen:api
 ```
 
-The published output can be hosted on any static file server (IIS, nginx, Apache, etc.) or as part of an ASP.NET Core application.
+The build output can be hosted on any static file server. A `web.config` with the SPA fallback rewrite for IIS ships with the build; other servers need an equivalent rewrite of unknown paths to `index.html`.
 
 ### Deployment Checklist
 
