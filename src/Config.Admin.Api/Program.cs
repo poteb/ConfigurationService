@@ -1,9 +1,11 @@
 using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
 using Df.ServiceControllerExtensions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.OpenApi.Models;
+using pote.Config.Admin.Api.Auth;
 using pote.Config.Admin.Api.Services;
-using pote.Config.Auth;
 using pote.Config.DataProvider.File;
 using pote.Config.DataProvider.Interfaces;
 using pote.Config.DataProvider.SqlServer;
@@ -27,13 +29,13 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "API Key needed to access the endpoints. X-API-Key: My_API_Key",
+        Description = "Session token from POST api/auth/login. Authorization: Bearer <token>",
         In = ParameterLocation.Header,
-        Name = "X-API-Key",
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "ApiKeyScheme"
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer"
     });
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
@@ -43,11 +45,8 @@ builder.Services.AddSwaggerGen(c =>
                 Reference = new OpenApiReference
                 {
                     Type = ReferenceType.SecurityScheme,
-                    Id = "ApiKey"
-                },
-                Scheme = "ApiKeyScheme",
-                Name = "X-API-Key",
-                In = ParameterLocation.Header
+                    Id = "Bearer"
+                }
             },
             new List<string>()
         }
@@ -95,8 +94,38 @@ else
 builder.Services.AddScoped<IDependencyGraphService, DependencyGraphService>();
 builder.Services.AddScoped<IParser, Parser>();
 
-builder.Services.AddScoped<IApiKeyValidation, ApiKeyValidation>();
-builder.Services.AddScoped<ApiKeyAuthenticationFilter>();
+// Auth provider selection (ADR-0002): the app consumes claims; the provider
+// decides how requests become claims. Only "Local" is implemented.
+var authSettings = builder.Configuration.GetSection("Auth").Get<AuthSettings>() ?? new AuthSettings();
+builder.Services.AddSingleton(authSettings);
+IAuthProviderSetup authProvider = authSettings.Provider.Equals("Local", StringComparison.OrdinalIgnoreCase)
+    ? new LocalAuthProviderSetup()
+    : throw new InvalidOperationException($"Unknown Auth:Provider '{authSettings.Provider}'. Only 'Local' is supported.");
+builder.Services.AddSingleton(authProvider);
+authProvider.ConfigureServices(builder.Services, builder.Configuration);
+authProvider.ConfigureAuthentication(builder.Services.AddAuthentication(AuthPolicies.SchemeName));
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(AuthPolicies.RealUser, p => p.RequireAuthenticatedUser()
+        .RequireAssertion(ctx => !ctx.User.HasClaim(c => c.Type == AuthPolicies.GuestClaim)));
+    options.AddPolicy(AuthPolicies.AdminOnly, p => p.RequireAuthenticatedUser()
+        .RequireRole(pote.Config.DbModel.UserRoles.Admin)
+        .RequireAssertion(ctx => !ctx.User.HasClaim(c => c.Type == AuthPolicies.GuestClaim)));
+    options.AddPolicy(AuthPolicies.GuestOnly, p => p.RequireAuthenticatedUser()
+        .RequireClaim(AuthPolicies.GuestClaim));
+    // Endpoints without an explicit attribute require a real (non-guest) user.
+    options.FallbackPolicy = options.GetPolicy(AuthPolicies.RealUser);
+});
+
+// Brute-force and resource-exhaustion mitigation on the anonymous auth endpoints.
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("auth", httpContext => RateLimitPartition.GetFixedWindowLimiter(
+        httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        _ => new FixedWindowRateLimiterOptions { PermitLimit = 10, Window = TimeSpan.FromMinutes(1) }));
+});
 
 builder.Services.Configure<JsonOptions>(options =>
 {
@@ -105,13 +134,30 @@ builder.Services.Configure<JsonOptions>(options =>
 
 var app = builder.Build();
 
+// Fail fast when the Local provider has no user storage (ADR-0005), then seed
+// the guest bootstrap user if the store is empty.
+using (var scope = app.Services.CreateScope())
+{
+    try
+    {
+        var authService = scope.ServiceProvider.GetRequiredService<pote.Config.Admin.Api.Auth.AuthService>();
+        await authService.EnsureGuestSeeded(CancellationToken.None);
+    }
+    catch (NotSupportedException ex)
+    {
+        Log.Fatal(ex, "Startup aborted: {Message}", ex.Message);
+        throw;
+    }
+}
+
 app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseCors("allowall");
 
-//app.UseHttpsRedirection();
-//app.UseAuthorization();
+app.UseAuthentication();
+app.UseAuthorization();
+app.UseRateLimiter();
 
 app.MapControllers();
 
