@@ -1,11 +1,12 @@
 import { expect, test } from '@playwright/test';
-import { makeFixtures, mockAdminApi, type Fixtures } from './mocks';
+import { makeFixtures, mockAdminApi, seedSession, type Fixtures } from './mocks';
 
 let fixtures: Fixtures;
 
 test.beforeEach(async ({ page }) => {
 	fixtures = makeFixtures();
 	await mockAdminApi(page, fixtures);
+	await seedSession(page);
 });
 
 test('configurations list → open → edit → save round-trip', async ({ page }) => {
