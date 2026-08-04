@@ -1,7 +1,8 @@
 # Svelte Admin Frontend — Design
 
 **Date:** 2026-08-04
-**Status:** Approved (brainstorm complete; pending grilling + external review)
+**Status:** Approved (brainstorm + grilling complete; pending external review)
+**Related:** [ADR 0001](../adr/0001-svelte-admin-frontend.md), glossary in [CONTEXT.md](../../CONTEXT.md)
 
 ## Goal
 
@@ -23,14 +24,17 @@ Replace the Blazor WASM admin client (`Config.Admin.WebClient`, MudBlazor) with 
 
 ## 1. Layout, build & hosting
 
-- Svelte project lives at **`src/Config.Admin.WebClient/`** (takes over the Blazor project's path). During branch work the Blazor project is renamed to `src/Config.Admin.WebClient.Blazor/` for reference; it is deleted before the PR opens, together with its `.sln`, `.nuspec`, and `Config.Admin.WebClient.Tests` (its single mapper test is ported to Vitest).
+- Svelte project lives at **`src/Config.Admin.WebClient/`** (takes over the Blazor project's path). During branch work the Blazor project is renamed to `src/Config.Admin.WebClient.Blazor/` for reference; it is deleted before the PR opens, together with its `.sln` and `Config.Admin.WebClient.Tests` (its single mapper test is ported to Vitest).
+- **NuGet packaging stays** (grilling outcome): the TeamCity/Octopus pipeline may consume `pote.Config.Admin.Client`, so a nuspec keeps that package id, now packing the Svelte `build/` output (static files). A `build/pack-admin-client.cmd` script wraps the pack step. Dropping the package is a possible follow-up once the pipeline is confirmed not to reference it.
+- **IIS hosting** (grilling outcome): production host is IIS. The build ships its own SPA fallback — a `web.config` with a rewrite-unknown-paths-to-`index.html` rule lives in `static/` so every build/package is self-contained. Deep links (`/EditConfiguration/{gid}`) depend on it.
 - Build output is plain static files; no Node in production. Deployable to any static server, same model as the published WASM output.
-- **Runtime config:** `static/config.json` → `{ "adminApiUrl": "...", "apiKey": "..." }`, fetched at boot before first render (same deploy-anywhere model as `wwwroot/appsettings.json`). Admin API and CORS unchanged.
+- **Runtime config:** `static/config.json` → `{ "adminApiUrl": "...", "apiKey": "..." }`, fetched at boot before first render (same deploy-anywhere model as `wwwroot/appsettings.json`). Admin API and CORS unchanged. Confirmed in grilling: Octopus JSON variable substitution only targets the two APIs' appsettings, not the client's config file, so the rename from `appsettings.json` is safe.
 - **Dev:** `npm run dev` on port 5071 (matches today). `npm run gen:api` regenerates TS types from `http://localhost:34246/swagger/v1/swagger.json`.
 - **Scripts in `build/`** (Spool style: `@echo off`, `npm install` when `node_modules` missing, `errorlevel` checks):
   - `build-admin-client.cmd`, `build-admin-api.cmd`
   - `run-admin-client.cmd` (Vite dev, 5071), `run-admin-api.cmd` (Admin API, 34246)
   - `build-and-run-admin.cmd` — builds both, starts Admin API in a new window, runs the client dev server in the current one
+  - `pack-admin-client.cmd` — builds the client and packs `pote.Config.Admin.Client` from the build output
 - **CI:** add a Node build+test job to `azure-pipelines.yml`; the existing middleware build is untouched.
 
 ## 2. Routing & pages
@@ -72,7 +76,8 @@ Configs enable all capabilities; secrets disable all four (plain text value inst
 - **`UsagesPanel`**: shared by applications, environments, and both editors; lazily loads the dependency graph on demand and renders links to referencing configurations. Never eager.
 - **`SectionTestPanel`**: runs the section JSON through the parse endpoint for every application×environment combination; progress bar while running; one sub-panel per result (auto-expanded on problems) with pass/fail indicator, problem list, and a read-only editor showing the resolved JSON, height sized to content.
 - **Test state store**: keyed by header id — NotStarted / InProgress / Complete / Failed(+problems). Drives per-row icons on `/` and "Test all" (all headers in parallel); cleared when the edited configuration id changes.
-- **Dirty tracking**: snapshot on load + `$derived` deep-equal (replaces the 1 s polling timer). Drives Save enablement, `beforeNavigate` confirm, and `beforeunload`.
+- **Dirty tracking**: snapshot on load + `$derived` deep-equal (replaces the 1 s polling timer); section JSON compares as raw text, so formatting-only changes count as dirty (parity — formatting changes the stored text). Drives Save enablement, the unsaved-changes guard (in-app navigation uses a proper dialog instead of native `confirm()`; tab close uses the browser's `beforeunload`), and Save-button state.
+- **Secret value field**: single-line text input (parity with today's `MudTextField`).
 - **Mappers**: API DTO ↔ UI model as plain TS functions, incl. deep copy for dirty-checking and duplication. Existing `ConfigurationMapperTests` ported to Vitest.
 
 ## 4. Data layer & JSON editor
@@ -84,7 +89,7 @@ Configs enable all capabilities; secrets disable all four (plain text value inst
 **JSON editor** (`src/lib/editor/`) — CodeMirror 6 in a Svelte wrapper, feature parity with BlazorJsonEditor:
 - JSON highlighting, line numbers, debounced lint with Ln/Col error panel, Valid/Invalid/Empty status, Format (pretty-print) button, auto-close brackets, Tab/Shift-Tab indent, configurable height/read-only.
 - **`$ref` links**: decoration plugin marks `$ref:Name#Path` string values. Ctrl/Cmd+Click navigates to the referenced configuration; Ctrl+Shift+Click opens a new browser tab; link affordance (cursor/underline) while Ctrl held.
-- **`$ref` autocomplete**: configuration names after `$ref:`, property paths after `#` (recursive path extraction from the referenced config's JSON — pure, unit-tested TS function; paths `/`-separated as today).
+- **`$ref` autocomplete**: configuration names after `$ref:`, property paths after `#` (recursive path extraction from the referenced config's JSON — pure, unit-tested TS function; paths `/`-separated as today). Data source (parity, confirmed in code): the editor page loads the full configurations list once on mount; name suggestions filter that list (prefix matches first), and path suggestions come from the **first section** of the referenced header, matched case-insensitively. `$ref:Name#` with an empty path (whole-config reference) must be handled by link parsing and autocomplete.
 - Read-only instances in test-result and history panels; theme follows the app's light/dark state.
 
 ## 5. Login readiness
