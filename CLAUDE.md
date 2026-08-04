@@ -27,8 +27,15 @@ dotnet run --project src/Config.Api/Config.Api.csproj
 # Run the Admin API (port 34246)
 dotnet run --project src/Config.Admin.Api/Config.Admin.Api.csproj
 
-# Run the Admin WebClient (port 5071)
-dotnet run --project src/Config.Admin.WebClient/Config.Admin.WebClient/Config.Admin.WebClient.csproj
+# Run the Admin WebClient dev server (port 5071)
+cd src/Config.Admin.WebClient && npm run dev
+
+# Admin WebClient: build, unit tests, e2e, type check, regen API types
+cd src/Config.Admin.WebClient && npm run build
+cd src/Config.Admin.WebClient && npm test
+cd src/Config.Admin.WebClient && npm run test:e2e
+cd src/Config.Admin.WebClient && npm run check
+cd src/Config.Admin.WebClient && npm run gen:api   # requires Admin API running
 ```
 
 ## Architecture
@@ -36,7 +43,7 @@ dotnet run --project src/Config.Admin.WebClient/Config.Admin.WebClient/Config.Ad
 ### Three deployable components
 - **Config.Api** — Public-facing API that middleware clients call to resolve configurations
 - **Config.Admin.Api** — Backend API for managing configurations (CRUD)
-- **Config.Admin.WebClient** — Blazor WASM frontend (MudBlazor UI), talks to Admin API
+- **Config.Admin.WebClient** — Svelte (SvelteKit static SPA, Tailwind + shadcn-svelte, CodeMirror 6) frontend, talks to Admin API. TS types generated from the Admin API OpenAPI spec (`npm run gen:api`, committed). Runtime config in `static/config.json`.
 
 ### Core libraries
 - **Config.Parser** — JSON parsing engine that resolves `$ref:ConfigName#PropertyPath` references recursively
