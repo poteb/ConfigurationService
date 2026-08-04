@@ -16,7 +16,7 @@ Replace the Blazor WASM admin client (`Config.Admin.WebClient`, MudBlazor) with 
 | UI | Tailwind v4 + shadcn-svelte (copy-in components on bits-ui); drag-drop via `svelte-dnd-action` |
 | JSON editor | CodeMirror 6 (replaces `pote.BlazorJsonEditor`) |
 | API types | Generated from Admin API OpenAPI (`openapi-typescript`); generated file committed |
-| Auth | Unchanged: static `X-API-Key` from a runtime config file (documented trust model: internal/network-isolated) |
+| Auth | Unchanged: static `X-API-Key` from a runtime config file (documented trust model: internal/network-isolated). User login is a planned follow-up feature; this rewrite is built login-ready (see §5) |
 | UX scope | Same structure, better polish; filters move to URL; reactive dirty tracking |
 | Structure | Unified editor core: configs and secrets share components via an entity descriptor |
 | Testing | Vitest (logic) + Playwright smoke (mocked API) |
@@ -87,18 +87,26 @@ Configs enable all capabilities; secrets disable all four (plain text value inst
 - **`$ref` autocomplete**: configuration names after `$ref:`, property paths after `#` (recursive path extraction from the referenced config's JSON — pure, unit-tested TS function; paths `/`-separated as today).
 - Read-only instances in test-result and history panels; theme follows the app's light/dark state.
 
-## 5. Error handling
+## 5. Login readiness
+
+User login will be added later as its own feature (it primarily requires Admin API work — identity story, token issuance, authorization). This rewrite stays login-free but reserves the seams so login lands without restructuring:
+
+- **Single credential point**: every request's credentials attach in `client.ts` only. Swapping the static `X-API-Key` for a bearer token (or adding one) is a one-file change.
+- **Boot auth gate**: the boot sequence is explicitly `load config.json → auth gate → render app`. The auth gate is a no-op today; a login screen slots into it later.
+- **Layout & guard seams**: the shared layout reserves a slot for a user menu; SvelteKit's root `+layout.ts` is the designated place for a future route guard.
+
+## 6. Error handling
 
 - All API calls return `ApiResult`; failures surface in the page error banner (fetch/network) or as field/section-level messages (save validation errors from the API's `errors` array).
 - The boot config fetch failing renders a clear full-page error (misdeployment signal), not a blank app.
 - JSON parse errors are editor-local (lint panel), never banners.
 
-## 6. Testing
+## 7. Testing
 
 - **Vitest**: $ref parsing + suggestion providers, mappers (round-trip + deep copy), dirty deep-equal, `ApiResult` error parsing, ported mapper test.
 - **Playwright smoke** against a mocked Admin API: configurations list → open → edit → save round-trip; secret round-trip; Ctrl+Click ref navigation; unsaved-changes guard.
 
-## 7. Parity checklist (must not miss)
+## 8. Parity checklist (must not miss)
 
 1. Ctrl/Cmd+Click and Ctrl+Shift+Click `$ref` navigation; editor Tab handling and auto-close.
 2. Deep links `/EditConfiguration/{gid}`, `/EditSecret/{gid}` unchanged.
@@ -114,6 +122,6 @@ Configs enable all capabilities; secrets disable all four (plain text value inst
 ## Out of scope
 
 - Any Admin API change (endpoints, auth, CORS all stay as-is).
-- Real authentication/login (deliberately deferred; trust model documented above).
+- Real authentication/login — planned as a separate follow-up feature; this rewrite only prepares the seams (§5).
 - Workflow redesigns (side-by-side test results, command palette, etc.).
 - SQL Server data provider, middleware packages, Config.Api — untouched.
