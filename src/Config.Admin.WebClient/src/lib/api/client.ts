@@ -37,7 +37,12 @@ export async function apiFetch<T>(
 ): Promise<ApiResult<T>> {
 	const { adminApiUrl, apiKey } = getRuntimeConfig();
 	const base = adminApiUrl.endsWith('/') ? adminApiUrl : adminApiUrl + '/';
-	const url = new URL(path, base);
+	let url: URL;
+	try {
+		url = new URL(path, base);
+	} catch {
+		return fail({ kind: 'network', message: `Invalid Admin API URL: ${base}` });
+	}
 
 	let response: Response;
 	try {

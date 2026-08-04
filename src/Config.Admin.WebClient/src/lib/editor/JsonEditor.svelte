@@ -6,6 +6,7 @@
 	import { linter, lintGutter } from '@codemirror/lint';
 	import { Compartment, EditorState } from '@codemirror/state';
 	import { EditorView, keymap, lineNumbers } from '@codemirror/view';
+	import { untrack } from 'svelte';
 	import { oneDark } from '@codemirror/theme-one-dark';
 	import { Button } from '$lib/components/ui/button';
 	import type { ParsedRef } from '$lib/refs/refGrammar';
@@ -46,7 +47,9 @@
 		return isDark() ? oneDark : syntaxHighlighting(defaultHighlightStyle);
 	}
 
-	$effect(() => {
+	// untrack: creation must not depend on `value` (or the editor would be
+	// torn down and rebuilt on every keystroke echoed back through the prop).
+	$effect(() => untrack(() => {
 		const extensions = [
 			lineNumbers(),
 			history(),
@@ -104,7 +107,7 @@
 			view?.destroy();
 			view = null;
 		};
-	});
+	}));
 
 	// External value changes (undo, duplicate, load) sync into the editor.
 	$effect(() => {

@@ -34,6 +34,12 @@ export async function loadRuntimeConfig(
 	if (typeof cfg.adminApiUrl !== 'string' || cfg.adminApiUrl.length === 0) {
 		throw new RuntimeConfigError('config.json is missing "adminApiUrl"');
 	}
+	try {
+		const parsed = new URL(cfg.adminApiUrl);
+		if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') throw new Error();
+	} catch {
+		throw new RuntimeConfigError('config.json "adminApiUrl" is not a valid http(s) URL');
+	}
 	if (typeof cfg.apiKey !== 'string' || cfg.apiKey.length === 0) {
 		throw new RuntimeConfigError('config.json is missing "apiKey"');
 	}

@@ -19,11 +19,12 @@
 	const abort = new AbortController();
 	onDestroy(() => abort.abort());
 
-	// Any edit to the section invalidates cached results.
+	// Any edit to the section invalidates cached results (ids, not lengths,
+	// so a one-for-one selection swap also invalidates).
 	$effect(() => {
 		void section.json;
-		void section.applications.length;
-		void section.environments.length;
+		void section.applications.map((a) => a.id).join();
+		void section.environments.map((e) => e.id).join();
 		results = [];
 	});
 

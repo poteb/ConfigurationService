@@ -67,8 +67,9 @@
 	const encryptionForced = $derived(encryptAllJson);
 
 	const unhandled = $derived.by(() => {
-		const usedApps = new Set(header.sections.flatMap((s) => s.applications.map((a) => a.id)));
-		const usedEnvs = new Set(header.sections.flatMap((s) => s.environments.map((e) => e.id)));
+		const active = header.sections.filter((s) => !s.deleted);
+		const usedApps = new Set(active.flatMap((s) => s.applications.map((a) => a.id)));
+		const usedEnvs = new Set(active.flatMap((s) => s.environments.map((e) => e.id)));
 		return {
 			applications: allApplications.filter((a) => !usedApps.has(a.id)).map((a) => a.name),
 			environments: allEnvironments.filter((e) => !usedEnvs.has(e.id)).map((e) => e.name)
@@ -203,7 +204,11 @@
 	async function confirmDelete(softDelete: boolean) {
 		clearPageError();
 		const result = await descriptor.api.delete(header.id, !softDelete);
-		if (!result.ok) setPageError(result.error.message);
+		if (!result.ok) {
+			// Stay on the page so the error is actually visible.
+			setPageError(result.error.message);
+			return;
+		}
 		bypassGuard = true;
 		await goto(descriptor.listRoute);
 	}
@@ -220,10 +225,14 @@
 		);
 	}
 
+	// Soft-deleted sections are excluded from the reorder dialog; they keep
+	// their place after the reordered active sections.
 	function applyReorder(orderedIds: string[]) {
-		header.sections = orderedIds
+		const reordered = orderedIds
 			.map((id) => header.sections.find((s) => s.id === id))
 			.filter((s): s is Section => s !== undefined);
+		const deleted = header.sections.filter((s) => s.deleted);
+		header.sections = [...reordered, ...deleted];
 		reindex();
 		clearTestState(header.id);
 	}
@@ -391,12 +400,14 @@
 	<DuplicateNameDialog bind:open={duplicateOpen} initialName={`${header.name} COPY`} onConfirm={duplicateHeader} />
 	<ReorderDialog
 		bind:open={reorderOpen}
-		items={header.sections.map((s) => ({
-			id: s.id,
-			label:
-				`${s.environments.map((e) => e.name).join(', ') || '—'} / ` +
-				`${s.applications.map((a) => a.name).join(', ') || '—'}${s.deleted ? ' (deleted)' : ''}`
-		}))}
+		items={header.sections
+			.filter((s) => !s.deleted)
+			.map((s) => ({
+				id: s.id,
+				label:
+					`${s.environments.map((e) => e.name).join(', ') || '—'} / ` +
+					`${s.applications.map((a) => a.name).join(', ') || '—'}`
+			}))}
 		onConfirm={applyReorder}
 	/>
 	<ConfirmDialog

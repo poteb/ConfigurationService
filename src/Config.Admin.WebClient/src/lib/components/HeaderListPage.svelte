@@ -29,8 +29,11 @@
 	onDestroy(() => abort.abort());
 
 	// Filters live in the URL: /?app=…&env=…&search=… (names, encoded).
-	const appFilter = $derived(page.url.searchParams.get('app') ?? '');
-	const envFilter = $derived(page.url.searchParams.get('env') ?? '');
+	// Unknown app/env values are ignored rather than filtering to nothing.
+	const rawAppFilter = $derived(page.url.searchParams.get('app') ?? '');
+	const rawEnvFilter = $derived(page.url.searchParams.get('env') ?? '');
+	const appFilter = $derived(applications.includes(rawAppFilter) ? rawAppFilter : '');
+	const envFilter = $derived(environments.includes(rawEnvFilter) ? rawEnvFilter : '');
 	const searchFilter = $derived(page.url.searchParams.get('search') ?? '');
 
 	function setFilter(key: 'app' | 'env' | 'search', value: string) {

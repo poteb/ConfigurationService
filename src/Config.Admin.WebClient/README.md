@@ -1,42 +1,43 @@
-# sv
+# Config.Admin.WebClient
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+Svelte (SvelteKit) admin frontend for ConfigurationService. Builds to plain static files (`adapter-static`, SPA mode) — no server runtime.
 
-## Creating a project
+## Develop
 
-If you're seeing this, you've probably already done this step. Congrats!
-
-```sh
-# create a new project
-npx sv create my-app
+```bash
+npm install
+npm run dev        # http://localhost:5071 (strict port)
 ```
 
-To recreate this project with the same configuration:
+The app reads `static/config.json` at boot: set `adminApiUrl` (default `http://localhost:34246`) and a valid `apiKey` for your local Admin API. The committed file holds a placeholder key.
 
-```sh
-# recreate this project
-npx sv@0.17.0 create --template minimal --types ts --no-install Config.Admin.WebClient
+## Test
+
+```bash
+npm test           # Vitest unit tests
+npm run test:e2e   # Playwright smoke tests (mocked Admin API)
+npm run check      # svelte-check
 ```
 
-## Developing
+## Build & deploy
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+```bash
+npm run build      # static site in build/
 ```
 
-## Building
+Deploy `build/` to any static server at the site root. `web.config` (IIS SPA fallback + cache rules) ships in the output; other servers need an equivalent rewrite of unknown paths to `index.html`. Deployment overwrites `config.json` per environment. Repo-root `build/` has convenience scripts (`build-admin-client.cmd`, `run-admin-client.cmd`, `build-and-run-admin.cmd`, `pack-admin-client.cmd`).
 
-To create a production version of your app:
+## API types
 
-```sh
-npm run build
+TypeScript DTO types are generated from the Admin API's OpenAPI spec and committed:
+
+```bash
+npm run gen:api    # requires the Admin API running on localhost:34246
 ```
 
-You can preview the production build with `npm run preview`.
+Regenerate whenever the Admin API's models change.
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+## Notes
+
+- Vite config keeps Svelte component libraries and CodeMirror packages out of `optimizeDeps` — removing those exclusions breaks reactivity/editor in dev (duplicate runtime instances).
+- bits-ui tooltips require the `Tooltip.Provider` that lives in `AppShell.svelte`.
