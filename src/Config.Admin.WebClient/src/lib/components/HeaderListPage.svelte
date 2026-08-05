@@ -214,10 +214,10 @@
 						<Button size="sm" href={descriptor.editRoute(header.id)}>Edit</Button>
 					</Table.Cell>
 					<Table.Cell>{header.name}</Table.Cell>
-					<Table.Cell class="text-xs text-muted-foreground">
+					<Table.Cell class="whitespace-normal break-words text-xs text-muted-foreground">
 						{distinctNames(header, 'applications').join(', ')}
 					</Table.Cell>
-					<Table.Cell class="text-xs text-muted-foreground">
+					<Table.Cell class="whitespace-normal break-words text-xs text-muted-foreground">
 						{distinctNames(header, 'environments').join(', ')}
 					</Table.Cell>
 					<Table.Cell>

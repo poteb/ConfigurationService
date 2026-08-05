@@ -25,9 +25,9 @@
 <Tooltip.Provider delayDuration={300}>
 	<div class="flex min-h-screen">
 		<!-- Desktop sidebar -->
-		<aside class="hidden w-56 shrink-0 flex-col border-r bg-card md:flex">
+		<aside class="sticky top-0 hidden h-screen w-56 shrink-0 flex-col border-r bg-card md:flex">
 			<div class="p-4 text-lg font-semibold">Configuration Admin</div>
-			<div class="flex-1"><NavMenu /></div>
+			<div class="flex-1 overflow-y-auto"><NavMenu /></div>
 			<div class="border-t p-2">
 				<UserMenu />
 				<ThemeMenu />
