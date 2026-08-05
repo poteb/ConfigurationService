@@ -4,7 +4,9 @@
 	import { Input } from '$lib/components/ui/input';
 	import * as Table from '$lib/components/ui/table';
 	import * as Tooltip from '$lib/components/ui/tooltip';
+	import UnsavedChangesGuard from '$lib/components/UnsavedChangesGuard.svelte';
 	import UsagesPanel from '$lib/components/UsagesPanel.svelte';
+	import { createDirtyTracker } from '$lib/dirty.svelte';
 	import { clearPageError, setPageError } from '$lib/stores/pageError.svelte';
 	import PlusIcon from '@lucide/svelte/icons/plus';
 	import RefreshCwIcon from '@lucide/svelte/icons/refresh-cw';
@@ -29,11 +31,18 @@
 
 	let rows = $state<Row[]>([]);
 
+	// The baseline is re-snapshotted on every load, which includes the reload
+	// after a successful save — so saving also clears the dirty state.
+	const tracker = createDirtyTracker(() => $state.snapshot(rows));
+	const isDirty = $derived(tracker.isDirty);
+
 	async function load() {
 		clearPageError();
 		const result = await fetchAll();
-		if (result.ok) rows = result.value.toSorted((a, b) => a.name.localeCompare(b.name));
-		else setPageError(result.error.message);
+		if (result.ok) {
+			rows = result.value.toSorted((a, b) => a.name.localeCompare(b.name));
+			tracker.reset($state.snapshot(rows));
+		} else setPageError(result.error.message);
 	}
 	const loading = load();
 
@@ -51,6 +60,8 @@
 		toast.success(`${title} saved`);
 	}
 </script>
+
+<UnsavedChangesGuard isDirty={() => isDirty} />
 
 <div class="mb-4 flex items-center gap-2">
 	<h1 class="mr-4 text-xl font-semibold">{title}</h1>

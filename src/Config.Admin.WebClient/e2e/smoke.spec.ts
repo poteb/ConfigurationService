@@ -71,6 +71,41 @@ test('unsaved-changes guard blocks navigation until confirmed', async ({ page })
 	await expect(page).toHaveURL(/secrets/);
 });
 
+// Applications and Environments share NameTablePage; Api keys has its own page.
+for (const { title, url } of [
+	{ title: 'Applications', url: '/applications' },
+	{ title: 'Environments', url: '/environments' },
+	{ title: 'Api keys', url: '/ApiKeys' }
+]) {
+	test(`unsaved-changes guard blocks navigation away from ${title}`, async ({ page }) => {
+		await page.goto(url);
+		const firstName = page.getByPlaceholder('enter name').first();
+		await expect(firstName).toBeVisible();
+		await firstName.fill('Dirty value');
+
+		await page.getByRole('link', { name: 'Secrets' }).click();
+		await expect(page.getByText('You have unsaved changes')).toBeVisible();
+
+		// Stay: cancel keeps us on the page with the edit intact.
+		await page.getByRole('button', { name: 'Cancel' }).click();
+		await expect(page).toHaveURL(new RegExp(url, 'i'));
+		await expect(firstName).toHaveValue('Dirty value');
+
+		// Leave: confirm discards and navigates.
+		await page.getByRole('link', { name: 'Secrets' }).click();
+		await page.getByRole('button', { name: 'Leave' }).click();
+		await expect(page).toHaveURL(/secrets/);
+	});
+
+	test(`navigation away from ${title} is not blocked when unchanged`, async ({ page }) => {
+		await page.goto(url);
+		await expect(page.getByPlaceholder('enter name').first()).toBeVisible();
+		await page.getByRole('link', { name: 'Secrets' }).click();
+		await expect(page).toHaveURL(/secrets/);
+		await expect(page.getByText('You have unsaved changes')).toBeHidden();
+	});
+}
+
 test('boot fails with a clear page when config.json is missing', async ({ page }) => {
 	await page.route('**/config.json', (route) => route.fulfill({ status: 404, body: 'not found' }));
 	await page.goto('/');
