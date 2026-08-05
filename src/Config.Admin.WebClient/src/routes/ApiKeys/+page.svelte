@@ -81,6 +81,22 @@
 		</Tooltip.Trigger>
 		<Tooltip.Content>Save changes</Tooltip.Content>
 	</Tooltip.Root>
+	<Tooltip.Root>
+		<Tooltip.Trigger>
+			{#snippet child({ props })}
+				<Button
+					{...props}
+					variant="ghost"
+					size="icon"
+					onclick={() => keys.push({ name: '', key: generateApiKey() })}
+					aria-label="Add key"
+				>
+					<PlusIcon class="size-4 text-success" />
+				</Button>
+			{/snippet}
+		</Tooltip.Trigger>
+		<Tooltip.Content>Add a key</Tooltip.Content>
+	</Tooltip.Root>
 </div>
 
 {#await loading then}
@@ -91,11 +107,7 @@
 				<Table.Head>Key</Table.Head>
 				<Table.Head class="w-8"></Table.Head>
 				<Table.Head class="w-8"></Table.Head>
-				<Table.Head class="w-8">
-					<Button variant="ghost" size="icon" onclick={() => keys.push({ name: '', key: generateApiKey() })} aria-label="Add key">
-						<PlusIcon class="size-4 text-success" />
-					</Button>
-				</Table.Head>
+				<Table.Head class="w-8"></Table.Head>
 			</Table.Row>
 		</Table.Header>
 		<Table.Body>
