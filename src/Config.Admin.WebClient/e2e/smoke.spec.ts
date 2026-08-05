@@ -72,10 +72,10 @@ test('unsaved-changes guard blocks navigation until confirmed', async ({ page })
 });
 
 // Applications and Environments share NameTablePage; Api keys has its own page.
-for (const { title, url } of [
-	{ title: 'Applications', url: '/applications' },
-	{ title: 'Environments', url: '/environments' },
-	{ title: 'Api keys', url: '/ApiKeys' }
+for (const { title, url, addLabel } of [
+	{ title: 'Applications', url: '/applications', addLabel: 'Add' },
+	{ title: 'Environments', url: '/environments', addLabel: 'Add' },
+	{ title: 'Api keys', url: '/ApiKeys', addLabel: 'Add key' }
 ]) {
 	test(`unsaved-changes guard blocks navigation away from ${title}`, async ({ page }) => {
 		await page.goto(url);
@@ -103,6 +103,23 @@ for (const { title, url } of [
 		await page.getByRole('link', { name: 'Secrets' }).click();
 		await expect(page).toHaveURL(/secrets/);
 		await expect(page.getByText('You have unsaved changes')).toBeHidden();
+	});
+
+	test(`${title} add button sits in the toolbar and appends a row`, async ({ page }) => {
+		await page.goto(url);
+		const names = page.getByPlaceholder('enter name');
+		await expect(names.first()).toBeVisible();
+		const before = await names.count();
+
+		// The add button belongs to the toolbar next to Refresh/Save, not the
+		// table header.
+		const addButton = page.getByRole('button', { name: addLabel, exact: true });
+		await expect(addButton).toBeVisible();
+		await expect(page.locator('thead button')).toHaveCount(0);
+
+		await addButton.click();
+		await expect(names).toHaveCount(before + 1);
+		await expect(names.last()).toHaveValue('');
 	});
 }
 

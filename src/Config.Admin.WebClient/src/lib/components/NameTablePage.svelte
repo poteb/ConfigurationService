@@ -85,6 +85,22 @@
 		</Tooltip.Trigger>
 		<Tooltip.Content>Save changes</Tooltip.Content>
 	</Tooltip.Root>
+	<Tooltip.Root>
+		<Tooltip.Trigger>
+			{#snippet child({ props })}
+				<Button
+					{...props}
+					variant="ghost"
+					size="icon"
+					onclick={() => rows.push({ id: crypto.randomUUID(), name: '', isDeleted: false })}
+					aria-label="Add"
+				>
+					<PlusIcon class="size-4 text-success" />
+				</Button>
+			{/snippet}
+		</Tooltip.Trigger>
+		<Tooltip.Content>Add a row</Tooltip.Content>
+	</Tooltip.Root>
 </div>
 
 {#await loading then}
@@ -93,16 +109,7 @@
 			<Table.Row>
 				<Table.Head class="w-72">Name</Table.Head>
 				<Table.Head>Usages</Table.Head>
-				<Table.Head class="w-8">
-					<Button
-						variant="ghost"
-						size="icon"
-						onclick={() => rows.push({ id: crypto.randomUUID(), name: '', isDeleted: false })}
-						aria-label="Add"
-					>
-						<PlusIcon class="size-4 text-success" />
-					</Button>
-				</Table.Head>
+				<Table.Head class="w-8"></Table.Head>
 			</Table.Row>
 		</Table.Header>
 		<Table.Body>
