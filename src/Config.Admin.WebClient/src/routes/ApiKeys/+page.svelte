@@ -5,6 +5,8 @@
 	import { Input } from '$lib/components/ui/input';
 	import * as Table from '$lib/components/ui/table';
 	import * as Tooltip from '$lib/components/ui/tooltip';
+	import UnsavedChangesGuard from '$lib/components/UnsavedChangesGuard.svelte';
+	import { createDirtyTracker } from '$lib/dirty.svelte';
 	import { clearPageError, setPageError } from '$lib/stores/pageError.svelte';
 	import CopyIcon from '@lucide/svelte/icons/copy';
 	import KeyRoundIcon from '@lucide/svelte/icons/key-round';
@@ -17,11 +19,18 @@
 	type KeyRow = { name: string; key: string };
 	let keys = $state<KeyRow[]>([]);
 
+	// The baseline is re-snapshotted on every load, which includes the reload
+	// after a successful save — so saving also clears the dirty state.
+	const tracker = createDirtyTracker(() => $state.snapshot(keys));
+	const isDirty = $derived(tracker.isDirty);
+
 	async function load() {
 		clearPageError();
 		const result = await getApiKeys();
-		if (result.ok) keys = (result.value.apiKeys?.keys ?? []).map((k) => ({ name: k.name ?? '', key: k.key ?? '' }));
-		else setPageError(result.error.message);
+		if (result.ok) {
+			keys = (result.value.apiKeys?.keys ?? []).map((k) => ({ name: k.name ?? '', key: k.key ?? '' }));
+			tracker.reset($state.snapshot(keys));
+		} else setPageError(result.error.message);
 	}
 	const loading = load();
 
@@ -47,6 +56,8 @@
 </script>
 
 <svelte:head><title>Api keys</title></svelte:head>
+
+<UnsavedChangesGuard isDirty={() => isDirty} />
 
 <div class="mb-4 flex items-center gap-2">
 	<h1 class="mr-4 text-xl font-semibold">API Keys</h1>
