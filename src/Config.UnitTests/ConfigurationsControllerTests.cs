@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -27,7 +27,7 @@ public class ConfigurationsControllerTests
         _dataProvider = Substitute.For<IAdminDataProvider>();
         var memoryCache = new MemoryCache(new MemoryCacheOptions());
         var auditLogHandler = Substitute.For<IAuditLogHandler>();
-        auditLogHandler.AuditLogConfiguration(default!, default!, default!).ReturnsForAnyArgs(Task.CompletedTask);
+        auditLogHandler.AuditLogConfiguration(default!, default!, default, default!, default!).ReturnsForAnyArgs(Task.CompletedTask);
         _controller = new ConfigurationsController(logger, _dataProvider, memoryCache, auditLogHandler);
         _controller.ControllerContext = new ControllerContext
         {

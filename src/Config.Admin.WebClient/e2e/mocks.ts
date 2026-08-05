@@ -80,11 +80,32 @@ export function makeFixtures() {
 		savedConfigurations: [] as unknown[],
 		savedSecrets: [] as unknown[],
 		/** When set, POST Configurations fails with these error messages. */
-		saveErrors: null as string[] | null
+		saveErrors: null as string[] | null,
+		/** Users created via guest first-user or invite redemption. */
+		createdUsers: [] as unknown[]
 	};
 }
 
 export type Fixtures = ReturnType<typeof makeFixtures>;
+
+const sessionResponse = (username: string, role: string, isGuest: boolean) => ({
+	token: 'e2e-token',
+	expiresUtc: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString(),
+	username,
+	role,
+	isGuest
+});
+
+/** Puts a valid session in localStorage before the app boots. */
+export async function seedSession(
+	page: Page,
+	{ username = 'anna', role = 'Admin', isGuest = false } = {}
+) {
+	await page.addInitScript(
+		(session) => localStorage.setItem('configservice.session', JSON.stringify(session)),
+		sessionResponse(username, role, isGuest)
+	);
+}
 
 /** Intercepts every Admin API call the client makes. */
 export async function mockAdminApi(page: Page, fixtures: Fixtures) {
@@ -110,6 +131,29 @@ export async function mockAdminApi(page: Page, fixtures: Fixtures) {
 				}
 			});
 		}
+
+		// Auth endpoints
+		if (path === '/api/auth/provider') return json({ type: 'local' });
+		if (path === '/api/auth/login' && method === 'POST') {
+			const body = route.request().postDataJSON() as { username: string; password: string };
+			if (body.username === 'guest' && body.password === 'guest')
+				return json(sessionResponse('guest', 'Admin', true));
+			if (body.password === 'wrong') return json(null, 401);
+			return json(sessionResponse(body.username, 'Admin', false));
+		}
+		if (path === '/api/auth/redeem' && method === 'POST') {
+			const body = route.request().postDataJSON() as { token: string };
+			if (body.token !== 'valid-invite')
+				return json({ errors: ['The link is invalid or has expired.'] }, 400);
+			return json(sessionResponse('invitee', 'User', false));
+		}
+		if (path === '/api/auth/logout' && method === 'POST') return json({});
+		if (path === '/api/users' && method === 'POST') {
+			const body = route.request().postDataJSON() as { username: string };
+			fixtures.createdUsers.push(body);
+			return json(sessionResponse(body.username, 'Admin', false));
+		}
+		if (path === '/api/users' && method === 'GET') return json({ users: [], invites: [] });
 
 		if (path === '/Configurations' && method === 'GET')
 			return json({ configurations: fixtures.configurations });

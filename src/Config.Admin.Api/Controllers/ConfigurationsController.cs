@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json.Linq;
 using pote.Config.Admin.Api.Helpers;
@@ -6,14 +6,15 @@ using pote.Config.Admin.Api.Mappers;
 using pote.Config.Admin.Api.Model;
 using pote.Config.Admin.Api.Model.RequestResponse;
 using pote.Config.Admin.Api.Services;
-using pote.Config.Auth;
+using Microsoft.AspNetCore.Authorization;
+using pote.Config.Admin.Api.Auth;
 using pote.Config.DataProvider.Interfaces;
 
 namespace pote.Config.Admin.Api.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-[ApiKey]
+[Authorize(Policy = AuthPolicies.RealUser)]
 public class ConfigurationsController : ControllerBase
 {
     private readonly ILogger<ConfigurationsController> _logger;

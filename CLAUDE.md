@@ -53,11 +53,16 @@ cd src/Config.Admin.WebClient && npm run gen:api   # requires Admin API running
 - **Config.Auth** — API key authentication (`X-API-Key` header)
 
 ### Data provider abstraction
-- **Config.DataProvider.Interfaces** — `IDataProvider`, `IAdminDataProvider`, `IApplicationDataAccess`, `IEnvironmentDataAccess`, `ISecretDataAccess`
-- **Config.DataProvider.File** — File-based storage implementation (production-ready)
-- **Config.DataProvider.SqlServer** — SQL Server provider (incomplete)
+- **Config.DataProvider.Interfaces** — `IDataProvider`, `IAdminDataProvider`, `IApplicationDataAccess`, `IEnvironmentDataAccess`, `ISecretDataAccess`, `IUserDataAccess`
+- **Config.DataProvider.SqlServer** — SQL Server provider (primary and default; Dapper + numbered `CreateScripts/`, deployed manually in order)
+- **Config.DataProvider.File** — File-based storage (legacy; no user storage — admin login requires SqlServer)
 
-Both APIs must point to the same `FileDatabase.Directory` and use the same `EncryptionSettings.JsonEncryptionKey`.
+Both APIs must point to the same database (`SqlServer:ConnectionString`) and use the same `EncryptionSettings.JsonEncryptionKey`.
+
+### Admin authentication
+- Admin API + WebClient use DB-backed session login (see `docs/plans/2026-08-04-admin-login-design.md` and ADRs 0002–0005); Config.Api keeps `X-API-Key` for middleware clients.
+- Auth code lives in `src/Config.Admin.Api/Auth/` behind the pluggable `IAuthProviderSetup` seam. Claims contract: `name`, `role` (`Admin`|`User`), `guest`.
+- Bootstrap: empty `Users` table seeds `guest`/`guest`, which can only create the first admin and is hard-deleted on the first real login.
 
 ### Middleware (client-side NuGet packages)
 Located in `src/Config.Middleware/`:
@@ -70,6 +75,7 @@ Located in `src/Config.Middleware/`:
 - **$ref syntax**: `$ref:ConfigName#PropertyPath` resolves references; empty path after `#` takes the entire config
 - **"Base" convention**: A property named `base`/`Base` causes its resolved value to replace the parent object entirely
 - **Application/Environment scoping**: Configurations can be scoped to specific apps and environments for per-context overrides
+- **Glossary**: `CONTEXT.md` at the repo root is the ubiquitous language; ADRs live in `docs/adr/`
 
 ## Testing
 

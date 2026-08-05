@@ -132,6 +132,8 @@ public class InMemorySqlConnectionFactory : SqlConnectionFactory, IDisposable
                 [EntityId] TEXT NOT NULL,
                 [CallerIp] TEXT NOT NULL,
                 [Content] TEXT NOT NULL,
+                [Username] TEXT NULL,
+                [Action] TEXT NULL,
                 [CreatedUtc] TEXT NOT NULL DEFAULT (datetime('now'))
             );
 

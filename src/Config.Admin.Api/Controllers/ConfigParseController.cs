@@ -1,12 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using pote.Config.Auth;
+using Microsoft.AspNetCore.Authorization;
+using pote.Config.Admin.Api.Auth;
 using pote.Config.Shared;
 
 namespace pote.Config.Admin.Api.Controllers;
 
 [ApiController]
 [Route("Configuration")]
-[ApiKey]
+[Authorize(Policy = AuthPolicies.RealUser)]
 public class ConfigParseController : ControllerBase
 {
     private readonly ILogger<ConfigParseController> _logger;

@@ -1,14 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using pote.Config.Admin.Api.Helpers;
 using pote.Config.Admin.Api.Model.RequestResponse;
-using pote.Config.Auth;
+using Microsoft.AspNetCore.Authorization;
+using pote.Config.Admin.Api.Auth;
 using pote.Config.DataProvider.Interfaces;
 
 namespace pote.Config.Admin.Api.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-[ApiKey]
+[Authorize(Policy = AuthPolicies.RealUser)]
 public class SettingsController : ControllerBase
 {
     private readonly ILogger<SettingsController> _logger;

@@ -8,6 +8,7 @@
 	import MenuIcon from '@lucide/svelte/icons/menu';
 	import NavMenu from './NavMenu.svelte';
 	import ThemeMenu from './ThemeMenu.svelte';
+	import UserMenu from './UserMenu.svelte';
 	import ErrorBanner from './ErrorBanner.svelte';
 	import { clearPageError } from '$lib/stores/pageError.svelte';
 	import { initTheme } from '$lib/theme';
@@ -28,7 +29,7 @@
 			<div class="p-4 text-lg font-semibold">Configuration Admin</div>
 			<div class="flex-1"><NavMenu /></div>
 			<div class="border-t p-2">
-				<!-- Login-readiness seam: a user menu slots in here later. -->
+				<UserMenu />
 				<ThemeMenu />
 			</div>
 		</aside>
@@ -47,7 +48,7 @@
 					<Sheet.Content side="left" class="w-64 p-0">
 						<div class="p-4 text-lg font-semibold">Configuration Admin</div>
 						<NavMenu onNavigate={() => (mobileNavOpen = false)} />
-						<div class="border-t p-2"><ThemeMenu /></div>
+						<div class="border-t p-2"><UserMenu /><ThemeMenu /></div>
 					</Sheet.Content>
 				</Sheet.Root>
 				<span class="font-semibold">Configuration Admin</span>

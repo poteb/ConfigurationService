@@ -12,22 +12,24 @@ public class AuditLogHandler : IAuditLogHandler
         _connectionFactory = connectionFactory;
     }
 
-    public Task AuditLogConfiguration(string id, string callerIp, string content) => InsertAuditLog("Configuration", id, callerIp, content);
+    public Task AuditLogConfiguration(string id, string callerIp, string? username, string action, string content) => InsertAuditLog("Configuration", id, callerIp, username, action, content);
 
-    public Task AuditLogEnvironment(string id, string callerIp, string content) => InsertAuditLog("Environment", id, callerIp, content);
+    public Task AuditLogEnvironment(string id, string callerIp, string? username, string action, string content) => InsertAuditLog("Environment", id, callerIp, username, action, content);
 
-    public Task AuditLogApplication(string id, string callerIp, string content) => InsertAuditLog("Application", id, callerIp, content);
+    public Task AuditLogApplication(string id, string callerIp, string? username, string action, string content) => InsertAuditLog("Application", id, callerIp, username, action, content);
 
-    public Task AuditLogSettings(string id, string callerIp, string content) => InsertAuditLog("Settings", id, callerIp, content);
+    public Task AuditLogSettings(string id, string callerIp, string? username, string action, string content) => InsertAuditLog("Settings", id, callerIp, username, action, content);
 
-    public Task AuditLogApiKeys(string id, string callerIp, string content) => InsertAuditLog("ApiKeys", id, callerIp, content);
+    public Task AuditLogApiKeys(string id, string callerIp, string? username, string action, string content) => InsertAuditLog("ApiKeys", id, callerIp, username, action, content);
 
-    public Task AuditLogSecrets(string id, string callerIp, string content) => InsertAuditLog("Secrets", id, callerIp, content);
+    public Task AuditLogSecrets(string id, string callerIp, string? username, string action, string content) => InsertAuditLog("Secrets", id, callerIp, username, action, content);
 
-    private async Task InsertAuditLog(string entityType, string entityId, string callerIp, string content)
+    public Task AuditLogUser(string entityId, string callerIp, string? username, string action, string content) => InsertAuditLog("User", entityId, callerIp, username, action, content);
+
+    private async Task InsertAuditLog(string entityType, string entityId, string callerIp, string? username, string action, string content)
     {
         await using var conn = await _connectionFactory.CreateOpenConnection();
-        await conn.ExecuteAsync("INSERT INTO [AuditLog] ([EntityType], [EntityId], [CallerIp], [Content], [CreatedUtc]) VALUES (@entityType, @entityId, @callerIp, @content, GETUTCDATE())",
-            new { entityType, entityId, callerIp, content });
+        await conn.ExecuteAsync("INSERT INTO [AuditLog] ([EntityType], [EntityId], [CallerIp], [Username], [Action], [Content], [CreatedUtc]) VALUES (@entityType, @entityId, @callerIp, @username, @action, @content, GETUTCDATE())",
+            new { entityType, entityId, callerIp, username, action, content });
     }
 }

@@ -13,4 +13,16 @@ Ubiquitous language for ConfigurationService. Terms here are domain concepts, no
 - **Unhandled application / environment** — An application or environment not covered by any active section of a header. Shown on the editor as a coverage gap.
 - **Test** — Resolving one section's JSON through the parser for one Application × Environment combination. A section's test runs all combinations; a header's test runs all its sections.
 - **Usage** — An occurrence of a configuration referencing an entity (configuration, application, or environment), derived from the dependency graph. Always loaded on demand.
-- **API key** — The `X-API-Key` credential required by both APIs. Admin-client keys use the `csk_` prefix.
+- **API key** — The `X-API-Key` credential used by middleware clients calling the public Config API. Admin-client keys use the `csk_` prefix. Not a login mechanism for humans; the Admin API uses Sessions instead.
+
+## Admin identity & access
+
+- **Real User** — A person who can log in to the admin page. Has a Role. Avoid: account, member.
+- **Role** — What a real user may do: `Admin` (user management plus everything else) or `User` (everything except user management).
+- **Guest User** — The bootstrap user (`guest`/`guest`) that exists whenever the user store is empty. Can do exactly one thing: create the first Admin. Deleted — not disabled (and not soft-deleted) — the first time a real user logs in. Avoid: default user, setup user.
+- **Restore** — Reactivating a soft-deleted real user with their old password and role. The counterpart of the repo-wide soft delete, applied to users.
+- **Invite** — Permission for a named person to become a real user by setting their own password, delivered as a link. Single-use, expires. Real users are created only by invite (or by the guest user). Avoid: registration, signup.
+- **Reset Link** — The same mechanism as an invite, but targeting an existing real user who needs a new password. Avoid: forgot-password flow.
+- **Redemption** — Consuming an invite or reset link: the holder sets a password and is logged in.
+- **Session** — A revocable grant of admin-page access created by logging in. Expires after a fixed lifetime; deleting it ends access immediately. Avoid: JWT, bearer token (implementation terms).
+- **Auth Provider** — The pluggable source of identity for the admin page. `Local` (database users) is the first; OIDC-based providers (ADFS, IdentityServer, Entra) can be added later.
