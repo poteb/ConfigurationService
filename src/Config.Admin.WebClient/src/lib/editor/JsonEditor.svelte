@@ -22,7 +22,8 @@
 		maxHeight,
 		onRefClick,
 		getNameSuggestions,
-		getPathSuggestions
+		getPathSuggestions,
+		getSecretNameSuggestions
 	}: {
 		value: string;
 		onChange?: (v: string) => void;
@@ -32,6 +33,7 @@
 		onRefClick?: (ref: ParsedRef, newTab: boolean) => void;
 		getNameSuggestions?: (filter: string) => string[];
 		getPathSuggestions?: (configName: string, filter: string) => string[];
+		getSecretNameSuggestions?: (filter: string) => string[];
 	} = $props();
 
 	let container: HTMLDivElement;
@@ -85,7 +87,9 @@
 		if (getNameSuggestions && getPathSuggestions) {
 			extensions.push(
 				autocompletion({
-					override: [refCompletionSource({ getNameSuggestions, getPathSuggestions })]
+					override: [
+						refCompletionSource({ getNameSuggestions, getPathSuggestions, getSecretNameSuggestions })
+					]
 				})
 			);
 		}

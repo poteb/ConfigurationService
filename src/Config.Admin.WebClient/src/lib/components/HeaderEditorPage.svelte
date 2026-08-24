@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { beforeNavigate, goto } from '$app/navigation';
-	import { getApplications, getEnvironments, getSettings } from '$lib/api/adminApi';
+	import { getApplications, getEnvironments, getSecrets, getSettings } from '$lib/api/adminApi';
 	import * as Accordion from '$lib/components/ui/accordion';
 	import { Button } from '$lib/components/ui/button';
 	import { Checkbox } from '$lib/components/ui/checkbox';
@@ -36,6 +36,7 @@
 	let allApplications = $state<NamedItem[]>([]);
 	let allEnvironments = $state<NamedItem[]>([]);
 	let otherHeaders = $state<Header[]>([]);
+	let secretNames = $state<string[]>([]);
 	let encryptAllJson = $state(false);
 	let saveError = $state('');
 	let expandedSections = $state<string[]>([]);
@@ -79,12 +80,20 @@
 	async function load() {
 		clearPageError();
 		saveError = '';
+		const secretsPromise = descriptor.capabilities.jsonEditor ? getSecrets() : null;
 		const [settingsResult, appsResult, envsResult, listResult] = await Promise.all([
 			getSettings(),
 			getApplications(),
 			getEnvironments(),
 			descriptor.api.list()
 		]);
+		if (secretsPromise) {
+			const secretsResult = await secretsPromise;
+			if (secretsResult.ok)
+				secretNames = (secretsResult.value.secrets ?? [])
+					.map((s) => s.name ?? '')
+					.filter((n) => n !== '');
+		}
 		if (settingsResult.ok) encryptAllJson = settingsResult.value.settings?.encryptAllJson ?? false;
 		else setPageError(settingsResult.error.message);
 		if (appsResult.ok)
@@ -259,6 +268,9 @@
 		const source = target?.sections.filter((s) => !s.deleted).toSorted((a, b) => a.index - b.index)[0];
 		return source ? extractPropertyPaths(source.json) : [];
 	}
+	function getSecretNameSuggestions(): string[] {
+		return secretNames;
+	}
 	function onRefClick(ref: ParsedRef, newTab: boolean) {
 		const target = otherHeaders.find((h) => h.name.toLowerCase() === ref.name.toLowerCase());
 		if (!target) return;
@@ -382,6 +394,9 @@
 					onRefClick={descriptor.capabilities.jsonEditor ? onRefClick : undefined}
 					getNameSuggestions={descriptor.capabilities.jsonEditor ? getNameSuggestions : undefined}
 					getPathSuggestions={descriptor.capabilities.jsonEditor ? getPathSuggestions : undefined}
+					getSecretNameSuggestions={descriptor.capabilities.jsonEditor
+						? getSecretNameSuggestions
+						: undefined}
 					{extraPanels}
 				/>
 			{/each}

@@ -57,6 +57,21 @@ test('Ctrl+Click on a $ref navigates to the referenced configuration', async ({ 
 	await expect(page).toHaveURL(/EditConfiguration\/cfg-database/);
 });
 
+test('$refs: autocompletes secret names and appends #', async ({ page }) => {
+	await page.goto('/EditConfiguration/cfg-appsettings');
+	await page.getByRole('button', { name: /Environments:/ }).click();
+	const editor = page.locator('.cm-content');
+	await editor.click();
+	await page.keyboard.press('Control+a');
+	await page.keyboard.type('{"pw": "$refs:Db');
+	const option = page.locator('.cm-tooltip-autocomplete').getByText('DbPassword');
+	await expect(option).toBeVisible();
+	// CodeMirror ignores accepts within its 75ms interactionDelay of the list opening.
+	await page.waitForTimeout(150);
+	await page.keyboard.press('Enter');
+	await expect(editor).toContainText('$refs:DbPassword#');
+});
+
 test('unsaved-changes guard blocks navigation until confirmed', async ({ page }) => {
 	await page.goto('/EditConfiguration/cfg-database');
 	await page.getByLabel('Name').fill('Dirty name');
