@@ -71,3 +71,39 @@ describe('refCompletionSource', () => {
 		expect(completionAt('{"a": "plain"}', providers)).toBeNull();
 	});
 });
+
+describe('refCompletionSource secrets ($refs:)', () => {
+	const providers = {
+		getNameSuggestions: () => ['Database', 'AppSettings'],
+		getPathSuggestions: (name: string) => (name === 'Database' ? ['Host', 'Port'] : []),
+		getSecretNameSuggestions: () => ['ApiToken', 'DbPassword']
+	};
+
+	it('suggests secret names after $refs:', () => {
+		const result = completionAt('{"a": "$refs:Db"}', providers);
+		expect(result).not.toBeNull();
+		expect(result!.options.map((o) => o.label)).toEqual(['DbPassword']);
+	});
+
+	it('appends a trailing # when a secret name is picked', () => {
+		const result = completionAt('{"a": "$refs:Api"}', providers);
+		expect(result).not.toBeNull();
+		expect(result!.options[0].apply).toBe('ApiToken#');
+	});
+
+	it('suggests nothing after # in a secret ref', () => {
+		expect(completionAt('{"a": "$refs:ApiToken#"}', providers)).toBeNull();
+	});
+
+	it('does not treat $refs: as a $ref: config name', () => {
+		const result = completionAt('{"a": "$refs:"}', providers);
+		expect(result).not.toBeNull();
+		expect(result!.options.map((o) => o.label)).toEqual(['ApiToken', 'DbPassword']);
+	});
+
+	it('still suggests config names after plain $ref:', () => {
+		const result = completionAt('{"a": "$ref:Da"}', providers);
+		expect(result).not.toBeNull();
+		expect(result!.options.map((o) => o.label)).toEqual(['Database']);
+	});
+});

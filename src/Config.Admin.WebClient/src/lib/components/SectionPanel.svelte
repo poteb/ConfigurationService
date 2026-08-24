@@ -24,6 +24,7 @@
 		onRefClick,
 		getNameSuggestions,
 		getPathSuggestions,
+		getSecretNameSuggestions,
 		extraPanels
 	}: {
 		section: Section;
@@ -36,6 +37,7 @@
 		onRefClick?: (ref: ParsedRef, newTab: boolean) => void;
 		getNameSuggestions?: (filter: string) => string[];
 		getPathSuggestions?: (configName: string, filter: string) => string[];
+		getSecretNameSuggestions?: (filter: string) => string[];
 		extraPanels?: Snippet<[Section]>;
 	} = $props();
 
@@ -169,6 +171,7 @@
 						{onRefClick}
 						{getNameSuggestions}
 						{getPathSuggestions}
+						{getSecretNameSuggestions}
 					/>
 				{:else}
 					<Input bind:value={section.value} placeholder="Secret value" />
