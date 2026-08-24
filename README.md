@@ -349,29 +349,50 @@ which results in
 The *base* key is gone from the original *appsettings.json* and replaced with the result of the reference.
 This works because the name of the json property is *base* or *Base*.
 
-## Key vault
-If you have sensitive information that you don't want to store in the configuration files you can use a key vault. The secrets are stored as key/value pairs.
+## Key vault (secrets)
+If you have sensitive information that you don't want to store in the configuration files you can use the built-in key vault. Secrets are stored as key/value pairs, scoped to applications and environments just like configurations, and encrypted at rest with the same `EncryptionSettings.JsonEncryptionKey`.
 
-A source generator is used to generate the needed code to fetch the secrets from the key vault. The source generator is triggered by the `SecretAttribute`.
+The important thing to understand is that **secrets are never part of a resolved configuration**. A configuration can *reference* a secret, but the secret's value is only fetched by the client application, at runtime, on first use.
 
-Example of a key vault reference in a configuration file:
-    
+### The `$refs:` syntax
+A configuration value references a secret with `$refs:SecretName#` (note the plural **refs** — `$ref:` is for configurations, `$refs:` is for secrets):
+
+    {
+      "RabbitMQ": {
+        "Username": "Goofy",
+        "Password": "$refs:RabbitMqPassword#"
+      }
+    }
+
+Unlike `$ref:`, the server-side parser does **not** resolve `$refs:` — there is no property path after the `#` because a secret is a single value. When the middleware fetches the configuration, the value arrives as the literal string `$refs:RabbitMqPassword#`. Think of it as a promise: "the real value can be fetched under this name when you need it."
+
+### How a secret gets resolved
+1. The client application binds the resolved configuration as usual; secret-referencing properties hold the literal `$refs:...#` string.
+2. On first read of such a property, `ISecretResolver.ResolveSecret(value)` is called. It strips the `$refs:` wrapper (a bare secret name also works) and POSTs `{SecretName, Application, Environment}` to Config.Api's `/Secrets` endpoint, authenticated with the `X-API-Key` header.
+3. The API looks up the secret for that application/environment, decrypts it, and returns the plain value.
+4. The value is cached in the property — each secret is resolved once and only once per process. This might change in the future to not keep secrets in memory, but that would couple clients more tightly to the configuration service.
+
+So resolution = one HTTP call, made lazily by the client. Nothing else is required.
+
+### The `[Secret]` attribute — optional convenience
+The `SecretAttribute` is **not** needed to resolve secrets. It is only a marker that triggers a source generator (`Config.Middleware.Secrets`) which writes the lazy resolve-once property for you.
+
+Mark a field on a `partial` class:
+
     public partial class MyConfiguration
     {
         [Secret]
         private string _secret1 = "";
     }
 
-The class must be partial.
-
-The generated code will look like this:
+The generator adds the property and the resolver hook:
 
     public partial class MyConfiguration : ISecretSettings
     {
         private bool _isSecret1Resolved;
         public string Secret1
         {
-            get 
+            get
             {
                 if (!this._isSecret1Resolved)
                 {
@@ -386,9 +407,27 @@ The generated code will look like this:
         public ISecretResolver SecretResolver { get; set; }
     }
 
-The `ISecretResolver` is an interface that is used to resolve the secrets. The `SecretResolver` is a class that implements the `ISecretResolver` interface. The `SecretResolver` is injected into the `MySecrets` class and used to resolve the secrets.
+You can write exactly the same property by hand and skip the attribute and the generator entirely — see `MySecrets2` in `src/Config.Middleware/Config.Middleware.TestApi/MySecrets.cs` for a manual example next to a generated one. You can also just take an `ISecretResolver` and call `ResolveSecret("$refs:MySecret#")` (or `ResolveSecretAsync`) directly.
 
-The secrets are resolved once and only once. This might change in the future to not keep secrets in memory. But a change like that will put a tighter coupling to the configuration service. 
+### Wiring it up
+Register the resolver and the settings class at startup:
+
+    var configSettings = builder.Services.AddBuilderConfiguration("MyApp", "Development", apiUri, "");
+    await builder.AddConfigurationFromApi(configSettings, appsettingsJson, apiKey, (_, _) => { });
+    var secretsResolver = builder.Services.AddSecretsResolver(configSettings, apiKey);
+    builder.Services.AddSecretConfiguration<MyConfiguration>(builder.Configuration, secretsResolver);
+
+`AddSecretsResolver` creates the `SecretResolver` (with the API key on its HTTP client) and `AddSecretConfiguration` binds the configuration section to your class and injects the resolver into its `SecretResolver` property.
+
+### Summary
+| | `$ref:` (configuration) | `$refs:` (secret) |
+|---|---|---|
+| Resolved by | Config.Api at fetch time | Client at first use |
+| Path after `#` | Property path (empty = whole config) | Always empty — secrets are single values |
+| Appears in resolved JSON | As the referenced value | As the literal `$refs:Name#` string |
+| Requires `[Secret]` | — | No — it only triggers code generation |
+
+The admin UI's configuration editor autocompletes both: configuration names (and property paths) after `$ref:`, secret names after `$refs:`.
 
 ## Admin UI
 ![Basic usage](/documentation/AdminUi1.png)

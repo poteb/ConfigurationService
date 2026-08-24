@@ -8,6 +8,7 @@ Ubiquitous language for ConfigurationService. Terms here are domain concepts, no
 - **Application** — A consuming program. One of the two scoping dimensions for sections.
 - **Environment** — A deployment context (e.g. test, production). The other scoping dimension.
 - **$ref** — Reference syntax `$ref:ConfigName#Property/Path` inside configuration JSON. Resolves to the referenced configuration's value at that path; an empty path after `#` takes the entire configuration.
+- **$refs** — Secret reference syntax `$refs:SecretName#` inside configuration JSON. Never resolved server-side; the literal string passes through to the client, where the middleware's `ISecretResolver` fetches the value from Config.Api's `/Secrets` endpoint on first use (lazy, cached per process).
 - **Base convention** — A property named `base`/`Base` inside an object: its resolved value replaces the parent object entirely.
 - **Soft delete** — Default deletion: the entity is flagged deleted but recoverable. Contrast **permanent delete**, an explicit opt-in.
 - **Unhandled application / environment** — An application or environment not covered by any active section of a header. Shown on the editor as a coverage gap.
