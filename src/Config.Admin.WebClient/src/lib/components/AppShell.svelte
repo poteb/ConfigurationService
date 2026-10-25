@@ -17,7 +17,12 @@
 	let mobileNavOpen = $state(false);
 
 	initTheme();
-	beforeNavigate(() => clearPageError());
+
+	beforeNavigate(({ shallow, type }) => {
+		if (shallow && type === 'goto') return;
+
+		return clearPageError();
+	});
 </script>
 
 <Toaster richColors />
@@ -47,7 +52,7 @@
 					</Sheet.Trigger>
 					<Sheet.Content side="left" class="w-64 p-0">
 						<div class="p-4 text-lg font-semibold">Configuration Admin</div>
-						<NavMenu onNavigate={() => (mobileNavOpen = false)} />
+						<NavMenu onNavigate={() => mobileNavOpen = false} />
 						<div class="border-t p-2"><UserMenu /><ThemeMenu /></div>
 					</Sheet.Content>
 				</Sheet.Root>
