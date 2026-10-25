@@ -98,18 +98,18 @@
 		else setPageError(settingsResult.error.message);
 		if (appsResult.ok)
 			allApplications = (appsResult.value.applications ?? []).map((a) => ({
-			id: a.id ?? '',
-			name: a.name ?? '',
-			isDeleted: false,
-			isSelected: false
-		}));
+				id: a.id ?? '',
+				name: a.name ?? '',
+				isDeleted: false,
+				isSelected: false
+			}));
 		if (envsResult.ok)
 			allEnvironments = (envsResult.value.environments ?? []).map((e) => ({
-			id: e.id ?? '',
-			name: e.name ?? '',
-			isDeleted: false,
-			isSelected: false
-		}));
+				id: e.id ?? '',
+				name: e.name ?? '',
+				isDeleted: false,
+				isSelected: false
+			}));
 
 		if (gid) {
 			const result = await descriptor.api.get(gid);
@@ -142,7 +142,7 @@
 	}
 
 	function reindex() {
-		header.sections.forEach((s, i) => s.index = i);
+		header.sections.forEach((s, i) => (s.index = i));
 	}
 
 	async function save(): Promise<boolean> {
@@ -282,7 +282,6 @@
 	// Unsaved-changes guard: in-app navigation gets a dialog, tab close the
 	// browser prompt.
 	beforeNavigate((navigation) => {
-		if (navigation.shallow && navigation.type === 'goto') return;
 		if (!isDirty || bypassGuard) return;
 		if (navigation.type === 'leave') {
 			navigation.cancel();
@@ -296,7 +295,7 @@
 	function confirmLeave() {
 		if (!leaveTarget) return;
 		bypassGuard = true;
-		goto(leaveTarget).finally(() => bypassGuard = false);
+		goto(leaveTarget).finally(() => (bypassGuard = false));
 	}
 </script>
 
@@ -304,7 +303,7 @@
 	onbeforeunload={(e) => {
 		if (isDirty) e.preventDefault();
 	}}
-></svelte:window>
+/>
 
 {#await loading}
 	<p class="text-muted-foreground">Loading…</p>
@@ -313,17 +312,8 @@
 		<div class="flex flex-wrap items-center gap-1">
 			<Button size="sm" disabled={!canSave} onclick={save}>Save</Button>
 			{#if !isNew}
-				<Button
-					size="sm"
-					variant="outline"
-					onclick={() => duplicateOpen = true}
-				>Duplicate</Button>
-
-				<Button
-					size="sm"
-					variant="destructive"
-					onclick={() => deleteOpen = true}
-				>Delete</Button>
+				<Button size="sm" variant="outline" onclick={() => (duplicateOpen = true)}>Duplicate</Button>
+				<Button size="sm" variant="destructive" onclick={() => (deleteOpen = true)}>Delete</Button>
 			{/if}
 			<Button size="sm" variant="outline" onclick={addSection}>Add section</Button>
 			{#if descriptor.capabilities.tests}
@@ -333,14 +323,11 @@
 				size="sm"
 				variant="outline"
 				disabled={header.sections.length <= 1}
-				onclick={() => reorderOpen = true}
-			>Reorder</Button>
-
-			<Button
-				size="sm"
-				variant="ghost"
-				onclick={toggleExpandAll}
-			>{expandedSections.length < activeSections.length ? 'Expand all' : 'Collapse all'}</Button>
+				onclick={() => (reorderOpen = true)}>Reorder</Button
+			>
+			<Button size="sm" variant="ghost" onclick={toggleExpandAll}>
+				{expandedSections.length < activeSections.length ? 'Expand all' : 'Collapse all'}
+			</Button>
 		</div>
 	{/snippet}
 
@@ -396,18 +383,21 @@
 		<Accordion.Root type="multiple" bind:value={expandedSections}>
 			{#each header.sections as section (section.id)}
 				<SectionPanel
-					section={section}
-					descriptor={descriptor}
-					allApplications={allApplications}
-					allEnvironments={allEnvironments}
-					encryptionForced={descriptor.capabilities.encryption && (header.isJsonEncrypted || encryptAllJson)}
+					{section}
+					{descriptor}
+					{allApplications}
+					{allEnvironments}
+					encryptionForced={descriptor.capabilities.encryption &&
+						(header.isJsonEncrypted || encryptAllJson)}
 					onDuplicate={() => duplicateSection(section)}
 					onUndo={() => undoSection(section)}
 					onRefClick={descriptor.capabilities.jsonEditor ? onRefClick : undefined}
 					getNameSuggestions={descriptor.capabilities.jsonEditor ? getNameSuggestions : undefined}
 					getPathSuggestions={descriptor.capabilities.jsonEditor ? getPathSuggestions : undefined}
-					getSecretNameSuggestions={descriptor.capabilities.jsonEditor ? getSecretNameSuggestions : undefined}
-					extraPanels={extraPanels}
+					getSecretNameSuggestions={descriptor.capabilities.jsonEditor
+						? getSecretNameSuggestions
+						: undefined}
+					{extraPanels}
 				/>
 			{/each}
 		</Accordion.Root>

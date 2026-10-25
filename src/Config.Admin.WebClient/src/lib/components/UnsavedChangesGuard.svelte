@@ -13,7 +13,6 @@
 	// Unsaved-changes guard: in-app navigation gets a dialog, tab close the
 	// browser prompt.
 	beforeNavigate((navigation) => {
-		if (navigation.shallow && navigation.type === 'goto') return;
 		if (!isDirty() || bypassGuard) return;
 		if (navigation.type === 'leave') {
 			navigation.cancel();
@@ -27,7 +26,7 @@
 	function confirmLeave() {
 		if (!leaveTarget) return;
 		bypassGuard = true;
-		goto(leaveTarget).finally(() => bypassGuard = false);
+		goto(leaveTarget).finally(() => (bypassGuard = false));
 	}
 </script>
 
@@ -35,7 +34,7 @@
 	onbeforeunload={(e) => {
 		if (isDirty()) e.preventDefault();
 	}}
-></svelte:window>
+/>
 
 <ConfirmDialog
 	bind:open={leaveOpen}
