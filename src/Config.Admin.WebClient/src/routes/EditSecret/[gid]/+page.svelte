@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import HeaderEditorPage from '$lib/components/HeaderEditorPage.svelte';
-	import { secretDescriptor } from '$lib/entities/descriptor';
+	import HeaderEditorPage from '#lib/components/HeaderEditorPage.svelte';
+	import { secretDescriptor } from '#lib/entities/descriptor.js';
 </script>
 
 <svelte:head><title>Edit secret</title></svelte:head>

@@ -3,7 +3,7 @@ import type {
 	ApiConfigurationHeader,
 	ApiSecret,
 	ApiSecretHeader
-} from '$lib/api/adminApi';
+} from '#lib/api/adminApi.js';
 import { newId, type Header, type NamedItem, type Section } from './types';
 
 /**

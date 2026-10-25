@@ -1,7 +1,7 @@
 <script lang="ts">
-	import HeaderEditorPage from '$lib/components/HeaderEditorPage.svelte';
-	import SectionTestPanel from '$lib/components/SectionTestPanel.svelte';
-	import { configurationDescriptor } from '$lib/entities/descriptor';
+	import HeaderEditorPage from '#lib/components/HeaderEditorPage.svelte';
+	import SectionTestPanel from '#lib/components/SectionTestPanel.svelte';
+	import { configurationDescriptor } from '#lib/entities/descriptor.js';
 </script>
 
 <svelte:head><title>New configuration</title></svelte:head>

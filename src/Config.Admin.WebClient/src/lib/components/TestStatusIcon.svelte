@@ -1,9 +1,9 @@
 <script lang="ts">
-	import * as Tooltip from '$lib/components/ui/tooltip';
+	import * as Tooltip from '#lib/components/ui/tooltip/index.js';
 	import CheckIcon from '@lucide/svelte/icons/check';
 	import CircleAlertIcon from '@lucide/svelte/icons/circle-alert';
 	import LoaderCircleIcon from '@lucide/svelte/icons/loader-circle';
-	import { getTestState } from '$lib/stores/testState.svelte';
+	import { getTestState } from '#lib/stores/testState.svelte.js';
 
 	let { headerId, onRun }: { headerId: string; onRun: () => void } = $props();
 

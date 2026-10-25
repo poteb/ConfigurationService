@@ -1,13 +1,13 @@
 <script lang="ts">
-	import type { ApiResult } from '$lib/api/client';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import * as Table from '$lib/components/ui/table';
-	import * as Tooltip from '$lib/components/ui/tooltip';
-	import UnsavedChangesGuard from '$lib/components/UnsavedChangesGuard.svelte';
-	import UsagesPanel from '$lib/components/UsagesPanel.svelte';
-	import { createDirtyTracker } from '$lib/dirty.svelte';
-	import { clearPageError, setPageError } from '$lib/stores/pageError.svelte';
+	import type { ApiResult } from '#lib/api/client.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import * as Table from '#lib/components/ui/table/index.js';
+	import * as Tooltip from '#lib/components/ui/tooltip/index.js';
+	import UnsavedChangesGuard from '#lib/components/UnsavedChangesGuard.svelte';
+	import UsagesPanel from '#lib/components/UsagesPanel.svelte';
+	import { createDirtyTracker } from '#lib/dirty.svelte.js';
+	import { clearPageError, setPageError } from '#lib/stores/pageError.svelte.js';
 	import PlusIcon from '@lucide/svelte/icons/plus';
 	import RefreshCwIcon from '@lucide/svelte/icons/refresh-cw';
 	import SaveIcon from '@lucide/svelte/icons/save';

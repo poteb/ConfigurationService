@@ -29,6 +29,29 @@ test('configurations list → open → edit → save round-trip', async ({ page 
 	expect(saved.name).toBe('Database2');
 });
 
+test('list search filter syncs to the URL without stealing focus or adding history', async ({
+	page
+}) => {
+	await page.goto('/');
+	await expect(page.getByRole('cell', { name: 'AppSettings' })).toBeVisible();
+	const historyLength = await page.evaluate(() => history.length);
+
+	const search = page.getByPlaceholder('Search');
+	await search.click();
+	await search.pressSequentially('Data');
+	await expect(page).toHaveURL(/[?&]search=Data/);
+	await expect(search).toBeFocused();
+	await expect(search).toHaveValue('Data');
+	await expect(page.getByRole('cell', { name: 'Database' })).toBeVisible();
+	await expect(page.getByRole('cell', { name: 'AppSettings' })).toBeHidden();
+	expect(await page.evaluate(() => history.length)).toBe(historyLength);
+
+	await page.getByRole('button', { name: 'Reset' }).click();
+	await expect(page).not.toHaveURL(/search=/);
+	await expect(search).toHaveValue('');
+	await expect(page.getByRole('cell', { name: 'AppSettings' })).toBeVisible();
+});
+
 test('save validation errors from the API are shown', async ({ page }) => {
 	fixtures.saveErrors = ['Name already in use'];
 	await page.goto('/EditConfiguration/cfg-database');
