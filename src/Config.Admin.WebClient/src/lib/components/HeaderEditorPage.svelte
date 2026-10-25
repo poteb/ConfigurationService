@@ -170,7 +170,7 @@
 				// Back must not return to the empty-new form; the gid prop updates
 				// via the route params after this navigation.
 				bypassGuard = true;
-				await goto(descriptor.editRoute(header.id), { replaceState: true });
+				await goto(descriptor.editRoute(header.id), { replace: true });
 				bypassGuard = false;
 			}
 			toast.success(`${descriptor.labels.singular} saved`);

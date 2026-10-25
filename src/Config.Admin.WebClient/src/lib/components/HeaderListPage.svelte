@@ -37,16 +37,16 @@
 	const searchFilter = $derived(page.url.searchParams.get('search') ?? '');
 
 	function setFilter(key: 'app' | 'env' | 'search', value: string) {
-		const url = new URL(page.url);
+		const url = new URL(page.url.href);
 		if (value) url.searchParams.set(key, value);
 		else url.searchParams.delete(key);
-		goto(url, { replaceState: true, keepFocus: true, noScroll: true });
+		goto(url, { replace: true, reset: false });
 	}
 
 	function resetFilters() {
-		const url = new URL(page.url);
+		const url = new URL(page.url.href);
 		url.search = '';
-		goto(url, { replaceState: true, keepFocus: true, noScroll: true });
+		goto(url, { replace: true, reset: false });
 	}
 
 	async function load() {
