@@ -1,16 +1,16 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { getApplications, getEnvironments } from '$lib/api/adminApi';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import * as Select from '$lib/components/ui/select';
-	import * as Table from '$lib/components/ui/table';
-	import * as Tooltip from '$lib/components/ui/tooltip';
-	import type { EntityDescriptor } from '$lib/entities/descriptor';
-	import type { Header } from '$lib/model/types';
-	import { setPageError, clearPageError } from '$lib/stores/pageError.svelte';
-	import { runAllHeaderTests, runHeaderTests } from '$lib/tests/testRunner';
+	import { getApplications, getEnvironments } from '#lib/api/adminApi.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import * as Select from '#lib/components/ui/select/index.js';
+	import * as Table from '#lib/components/ui/table/index.js';
+	import * as Tooltip from '#lib/components/ui/tooltip/index.js';
+	import type { EntityDescriptor } from '#lib/entities/descriptor.js';
+	import type { Header } from '#lib/model/types.js';
+	import { setPageError, clearPageError } from '#lib/stores/pageError.svelte.js';
+	import { runAllHeaderTests, runHeaderTests } from '#lib/tests/testRunner.js';
 	import BanIcon from '@lucide/svelte/icons/ban';
 	import CheckIcon from '@lucide/svelte/icons/check';
 	import PlusIcon from '@lucide/svelte/icons/plus';

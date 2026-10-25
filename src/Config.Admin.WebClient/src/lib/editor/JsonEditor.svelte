@@ -8,8 +8,8 @@
 	import { EditorView, keymap, lineNumbers } from '@codemirror/view';
 	import { untrack } from 'svelte';
 	import { oneDark } from '@codemirror/theme-one-dark';
-	import { Button } from '$lib/components/ui/button';
-	import type { ParsedRef } from '$lib/refs/refGrammar';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import type { ParsedRef } from '#lib/refs/refGrammar.js';
 	import { formatJson, validateJson, type JsonValidation } from './format';
 	import { refCompletionSource } from './refAutocomplete';
 	import { refLinks } from './refLinks';

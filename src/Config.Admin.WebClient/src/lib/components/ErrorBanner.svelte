@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { clearPageError, pageError } from '$lib/stores/pageError.svelte';
+	import { clearPageError, pageError } from '#lib/stores/pageError.svelte.js';
 	import CircleAlertIcon from '@lucide/svelte/icons/circle-alert';
 	import XIcon from '@lucide/svelte/icons/x';
 </script>

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { cn } from '$lib/utils';
+	import { cn } from '#lib/utils.js';
 	import FileJsonIcon from '@lucide/svelte/icons/file-json';
 	import KeyRoundIcon from '@lucide/svelte/icons/key-round';
 	import LockIcon from '@lucide/svelte/icons/lock';
@@ -8,7 +8,7 @@
 	import GlobeIcon from '@lucide/svelte/icons/globe';
 	import SettingsIcon from '@lucide/svelte/icons/settings';
 	import UsersIcon from '@lucide/svelte/icons/users';
-	import { isAdmin } from '$lib/auth/session.svelte';
+	import { isAdmin } from '#lib/auth/session.svelte.js';
 
 	let { onNavigate }: { onNavigate?: () => void } = $props();
 

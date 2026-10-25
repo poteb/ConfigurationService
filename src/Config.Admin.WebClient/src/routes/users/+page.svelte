@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { toast } from 'svelte-sonner';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { Badge } from '$lib/components/ui/badge';
-	import { Checkbox } from '$lib/components/ui/checkbox';
-	import * as Dialog from '$lib/components/ui/dialog';
-	import * as Table from '$lib/components/ui/table';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import { Badge } from '#lib/components/ui/badge/index.js';
+	import { Checkbox } from '#lib/components/ui/checkbox/index.js';
+	import * as Dialog from '#lib/components/ui/dialog/index.js';
+	import * as Table from '#lib/components/ui/table/index.js';
 	import {
 		changeRole,
 		createInvite,
@@ -17,9 +17,9 @@
 		revokeInvite,
 		type InviteInfo,
 		type UserInfo
-	} from '$lib/api/authApi';
-	import { getSession } from '$lib/auth/session.svelte';
-	import { setPageError } from '$lib/stores/pageError.svelte';
+	} from '#lib/api/authApi.js';
+	import { getSession } from '#lib/auth/session.svelte.js';
+	import { setPageError } from '#lib/stores/pageError.svelte.js';
 
 	let users = $state<UserInfo[]>([]);
 	let invites = $state<InviteInfo[]>([]);

@@ -7,15 +7,15 @@ import {
 	getSecrets,
 	saveConfiguration,
 	saveSecret
-} from '$lib/api/adminApi';
-import type { ApiResult } from '$lib/api/client';
+} from '#lib/api/adminApi.js';
+import type { ApiResult } from '#lib/api/client.js';
 import {
 	configurationHeaderToApi,
 	configurationHeaderToClient,
 	secretHeaderToApi,
 	secretHeaderToClient
-} from '$lib/model/mappers';
-import type { EntityKind, Header } from '$lib/model/types';
+} from '#lib/model/mappers.js';
+import type { EntityKind, Header } from '#lib/model/types.js';
 
 export type EntityDescriptor = {
 	kind: EntityKind;

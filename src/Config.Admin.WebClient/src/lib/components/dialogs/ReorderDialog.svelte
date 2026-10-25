@@ -1,6 +1,6 @@
 <script lang="ts">
-	import * as Dialog from '$lib/components/ui/dialog';
-	import { Button } from '$lib/components/ui/button';
+	import * as Dialog from '#lib/components/ui/dialog/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
 	import { dndzone } from 'svelte-dnd-action';
 	import GripVerticalIcon from '@lucide/svelte/icons/grip-vertical';
 

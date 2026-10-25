@@ -1,6 +1,6 @@
-import { parseConfiguration } from '$lib/api/adminApi';
-import type { Header, Section } from '$lib/model/types';
-import { setTestState } from '$lib/stores/testState.svelte';
+import { parseConfiguration } from '#lib/api/adminApi.js';
+import type { Header, Section } from '#lib/model/types.js';
+import { setTestState } from '#lib/stores/testState.svelte.js';
 
 /** The parse API carries JSON as base64 (byte[] on the .NET side). */
 export function encodeInputJson(json: string): string {

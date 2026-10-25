@@ -1,13 +1,13 @@
 <script lang="ts">
-	import * as Accordion from '$lib/components/ui/accordion';
-	import * as Select from '$lib/components/ui/select';
-	import * as Tooltip from '$lib/components/ui/tooltip';
-	import { Checkbox } from '$lib/components/ui/checkbox';
-	import JsonEditor from '$lib/editor/JsonEditor.svelte';
-	import { Input } from '$lib/components/ui/input';
-	import type { EntityDescriptor } from '$lib/entities/descriptor';
-	import type { NamedItem, Section } from '$lib/model/types';
-	import type { ParsedRef } from '$lib/refs/refGrammar';
+	import * as Accordion from '#lib/components/ui/accordion/index.js';
+	import * as Select from '#lib/components/ui/select/index.js';
+	import * as Tooltip from '#lib/components/ui/tooltip/index.js';
+	import { Checkbox } from '#lib/components/ui/checkbox/index.js';
+	import JsonEditor from '#lib/editor/JsonEditor.svelte';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import type { EntityDescriptor } from '#lib/entities/descriptor.js';
+	import type { NamedItem, Section } from '#lib/model/types.js';
+	import type { ParsedRef } from '#lib/refs/refGrammar.js';
 	import CopyIcon from '@lucide/svelte/icons/copy';
 	import Trash2Icon from '@lucide/svelte/icons/trash-2';
 	import Undo2Icon from '@lucide/svelte/icons/undo-2';

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { deleteEnvironment, getEnvironments, postEnvironment } from '$lib/api/adminApi';
-	import NameTablePage from '$lib/components/NameTablePage.svelte';
+	import { deleteEnvironment, getEnvironments, postEnvironment } from '#lib/api/adminApi.js';
+	import NameTablePage from '#lib/components/NameTablePage.svelte';
 
 	const fetchAll = async () => {
 		const result = await getEnvironments();

@@ -1,11 +1,11 @@
 <script lang="ts">
-	import * as Accordion from '$lib/components/ui/accordion';
-	import { Button } from '$lib/components/ui/button';
-	import { Progress } from '$lib/components/ui/progress';
-	import JsonEditor from '$lib/editor/JsonEditor.svelte';
-	import type { Section } from '$lib/model/types';
-	import { getSectionTestRunSignal } from '$lib/stores/testState.svelte';
-	import { runSectionTests, type SectionTestResult } from '$lib/tests/testRunner';
+	import * as Accordion from '#lib/components/ui/accordion/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Progress } from '#lib/components/ui/progress/index.js';
+	import JsonEditor from '#lib/editor/JsonEditor.svelte';
+	import type { Section } from '#lib/model/types.js';
+	import { getSectionTestRunSignal } from '#lib/stores/testState.svelte.js';
+	import { runSectionTests, type SectionTestResult } from '#lib/tests/testRunner.js';
 	import ThumbsDownIcon from '@lucide/svelte/icons/thumbs-down';
 	import ThumbsUpIcon from '@lucide/svelte/icons/thumbs-up';
 	import { onDestroy } from 'svelte';
