@@ -50,5 +50,10 @@
 	"imports": {
 		"#lib": "./src/lib/index.js",
 		"#lib/*": "./src/lib/*"
+	},
+	"overrides": {
+		"openapi-typescript": {
+			"typescript": "$typescript"
+		}
 	}
 }
