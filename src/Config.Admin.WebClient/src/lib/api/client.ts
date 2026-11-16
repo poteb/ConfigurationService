@@ -1,6 +1,6 @@
 import { goto } from '$app/navigation';
-import { getRuntimeConfig } from '$lib/runtime-config';
-import { clearSession, getSession } from '$lib/auth/session.svelte';
+import { getRuntimeConfig } from '#lib/runtime-config.js';
+import { clearSession, getSession } from '#lib/auth/session.svelte.js';
 
 export type ApiError = {
 	kind: 'network' | 'abort' | 'http' | 'invalid-json';

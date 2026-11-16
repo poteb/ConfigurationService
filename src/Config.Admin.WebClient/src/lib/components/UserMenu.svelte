@@ -1,17 +1,17 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import * as Dialog from '$lib/components/ui/dialog';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
+	import * as DropdownMenu from '#lib/components/ui/dropdown-menu/index.js';
+	import * as Dialog from '#lib/components/ui/dialog/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
 	import UserIcon from '@lucide/svelte/icons/user';
 	import KeyIcon from '@lucide/svelte/icons/key';
 	import LogOutIcon from '@lucide/svelte/icons/log-out';
-	import { changePassword, logout } from '$lib/api/authApi';
-	import { clearSession, getSession } from '$lib/auth/session.svelte';
-	import { validatePassword } from '$lib/auth/passwordPolicy';
+	import { changePassword, logout } from '#lib/api/authApi.js';
+	import { clearSession, getSession } from '#lib/auth/session.svelte.js';
+	import { validatePassword } from '#lib/auth/passwordPolicy.js';
 
 	const session = getSession();
 

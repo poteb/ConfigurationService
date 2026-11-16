@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { setRuntimeConfigForTests } from '$lib/runtime-config';
-import { clearSession, resetSessionForTests, setSession } from '$lib/auth/session.svelte';
+import { setRuntimeConfigForTests } from '#lib/runtime-config.js';
+import { clearSession, resetSessionForTests, setSession } from '#lib/auth/session.svelte.js';
 import { apiFetch } from './client';
 
 const { gotoMock } = vi.hoisted(() => ({ gotoMock: vi.fn() }));

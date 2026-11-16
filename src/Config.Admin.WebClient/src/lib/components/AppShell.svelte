@@ -1,17 +1,17 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { beforeNavigate } from '$app/navigation';
-	import * as Sheet from '$lib/components/ui/sheet';
-	import * as Tooltip from '$lib/components/ui/tooltip';
-	import { Button } from '$lib/components/ui/button';
-	import { Toaster } from '$lib/components/ui/sonner';
+	import * as Sheet from '#lib/components/ui/sheet/index.js';
+	import * as Tooltip from '#lib/components/ui/tooltip/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Toaster } from '#lib/components/ui/sonner/index.js';
 	import MenuIcon from '@lucide/svelte/icons/menu';
 	import NavMenu from './NavMenu.svelte';
 	import ThemeMenu from './ThemeMenu.svelte';
 	import UserMenu from './UserMenu.svelte';
 	import ErrorBanner from './ErrorBanner.svelte';
-	import { clearPageError } from '$lib/stores/pageError.svelte';
-	import { initTheme } from '$lib/theme';
+	import { clearPageError } from '#lib/stores/pageError.svelte.js';
+	import { initTheme } from '#lib/theme.js';
 
 	let { children }: { children: Snippet } = $props();
 	let mobileNavOpen = $state(false);

@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { redeem } from '$lib/api/authApi';
-	import { setSession } from '$lib/auth/session.svelte';
-	import { validatePassword } from '$lib/auth/passwordPolicy';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import { redeem } from '#lib/api/authApi.js';
+	import { setSession } from '#lib/auth/session.svelte.js';
+	import { validatePassword } from '#lib/auth/passwordPolicy.js';
 
 	// The token travels in the URL fragment (never the query string) so it stays
 	// out of server logs and Referer headers; strip it from the URL immediately.

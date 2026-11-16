@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { deleteApplication, getApplications, postApplication } from '$lib/api/adminApi';
-	import NameTablePage from '$lib/components/NameTablePage.svelte';
+	import { deleteApplication, getApplications, postApplication } from '#lib/api/adminApi.js';
+	import NameTablePage from '#lib/components/NameTablePage.svelte';
 
 	const fetchAll = async () => {
 		const result = await getApplications();

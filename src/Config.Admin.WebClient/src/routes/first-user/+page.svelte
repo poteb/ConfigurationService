@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { createFirstUser } from '$lib/api/authApi';
-	import { getSession, setSession } from '$lib/auth/session.svelte';
-	import { validatePassword } from '$lib/auth/passwordPolicy';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import { createFirstUser } from '#lib/api/authApi.js';
+	import { getSession, setSession } from '#lib/auth/session.svelte.js';
+	import { validatePassword } from '#lib/auth/passwordPolicy.js';
 
 	let username = $state('');
 	let password = $state('');

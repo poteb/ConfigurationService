@@ -1,9 +1,9 @@
 <script lang="ts">
 	import '../app.css';
-	import favicon from '$lib/assets/favicon.svg';
-	import AppShell from '$lib/components/AppShell.svelte';
-	import { loadRuntimeConfig } from '$lib/runtime-config';
-	import { getSession, loadSession } from '$lib/auth/session.svelte';
+	import favicon from '#lib/assets/favicon.svg';
+	import AppShell from '#lib/components/AppShell.svelte';
+	import { loadRuntimeConfig } from '#lib/runtime-config.js';
+	import { getSession, loadSession } from '#lib/auth/session.svelte.js';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 

@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { getSettings, saveSettings } from '$lib/api/adminApi';
-	import { Button } from '$lib/components/ui/button';
-	import { Checkbox } from '$lib/components/ui/checkbox';
-	import * as Tooltip from '$lib/components/ui/tooltip';
-	import { clearPageError, setPageError } from '$lib/stores/pageError.svelte';
+	import { getSettings, saveSettings } from '#lib/api/adminApi.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Checkbox } from '#lib/components/ui/checkbox/index.js';
+	import * as Tooltip from '#lib/components/ui/tooltip/index.js';
+	import { clearPageError, setPageError } from '#lib/stores/pageError.svelte.js';
 	import RefreshCwIcon from '@lucide/svelte/icons/refresh-cw';
 	import SaveIcon from '@lucide/svelte/icons/save';
 	import { toast } from 'svelte-sonner';

@@ -1,10 +1,10 @@
 <script lang="ts">
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import { Button } from '$lib/components/ui/button';
+	import * as DropdownMenu from '#lib/components/ui/dropdown-menu/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
 	import MoonIcon from '@lucide/svelte/icons/moon';
 	import SunIcon from '@lucide/svelte/icons/sun';
 	import MonitorIcon from '@lucide/svelte/icons/monitor';
-	import { getTheme, setTheme, type ThemePreference } from '$lib/theme';
+	import { getTheme, setTheme, type ThemePreference } from '#lib/theme.js';
 
 	let current = $state<ThemePreference>(getTheme());
 

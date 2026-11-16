@@ -1,4 +1,4 @@
-import { deepEqual } from '$lib/model/deepEqual';
+import { deepEqual } from '#lib/model/deepEqual.js';
 
 /**
  * Reactive dirty tracking: snapshot a baseline, compare deep-equal on demand.

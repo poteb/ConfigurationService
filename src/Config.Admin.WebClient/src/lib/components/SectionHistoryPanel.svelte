@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { getConfigurationHistory } from '$lib/api/adminApi';
-	import * as Accordion from '$lib/components/ui/accordion';
-	import { Button } from '$lib/components/ui/button';
-	import JsonEditor from '$lib/editor/JsonEditor.svelte';
-	import { namedItemsFromString } from '$lib/model/mappers';
-	import type { Section } from '$lib/model/types';
-	import { setPageError } from '$lib/stores/pageError.svelte';
+	import { getConfigurationHistory } from '#lib/api/adminApi.js';
+	import * as Accordion from '#lib/components/ui/accordion/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import JsonEditor from '#lib/editor/JsonEditor.svelte';
+	import { namedItemsFromString } from '#lib/model/mappers.js';
+	import type { Section } from '#lib/model/types.js';
+	import { setPageError } from '#lib/stores/pageError.svelte.js';
 
 	let { section }: { section: Section } = $props();
 

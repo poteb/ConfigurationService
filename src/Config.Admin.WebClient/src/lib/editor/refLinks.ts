@@ -1,7 +1,7 @@
 import { syntaxTree } from '@codemirror/language';
 import { RangeSetBuilder, StateField, type EditorState } from '@codemirror/state';
 import { Decoration, EditorView, type DecorationSet } from '@codemirror/view';
-import { findRefsInValue, type ParsedRef } from '$lib/refs/refGrammar';
+import { findRefsInValue, type ParsedRef } from '#lib/refs/refGrammar.js';
 
 export type DocRefRange = ParsedRef & { from: number; to: number };
 

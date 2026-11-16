@@ -1,5 +1,5 @@
 import type { CompletionContext, CompletionResult } from '@codemirror/autocomplete';
-import { filterSuggestions } from '$lib/refs/suggestions';
+import { filterSuggestions } from '#lib/refs/suggestions.js';
 
 export type SuggestionProviders = {
 	getNameSuggestions: (filter: string) => string[];

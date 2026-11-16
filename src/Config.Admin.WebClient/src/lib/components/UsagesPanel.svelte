@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { getDependencyGraph } from '$lib/api/adminApi';
-	import { Button } from '$lib/components/ui/button';
-	import { setPageError } from '$lib/stores/pageError.svelte';
+	import { getDependencyGraph } from '#lib/api/adminApi.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { setPageError } from '#lib/stores/pageError.svelte.js';
 
 	let {
 		headerId,
